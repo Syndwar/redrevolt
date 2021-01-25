@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+*.pyc
 
 # Precompiled Headers
 *.gch
@@ -30,3 +31,24 @@
 *.exe
 *.out
 *.app
+
+# Project
+*.db
+*.opendb
+.vs
+.output
+.temp
+
+LICENSE.FLAC.txt
+LICENSE.freetype.txt
+LICENSE.jpeg.txt
+LICENSE.modplug.txt
+LICENSE.mpg123.txt
+LICENSE.ogg-vorbis.txt
+LICENSE.png.txt
+LICENSE.tiff.txt
+LICENSE.webp.txt
+LICENSE.zlib.txt
+
+save/
+maps/.gitignore

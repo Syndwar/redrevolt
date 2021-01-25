@@ -1,0 +1,21 @@
+HotKeys = {
+    -- Map Editor
+    ScrollUp    = "W",
+    ScrollLeft  = "A",
+    ScrollRight = "D",
+    ScrollDown  = "S",
+    Panel1      = "1",
+    Panel2      = "2",
+    Panel3      = "3",
+    Panel4      = "4",
+    Save        = "F5",
+    Load        = "F8",
+    Grid        = "G",
+    Rotate      = "R",
+    Flip        = "F",
+    Edit        = "E",
+    Next        = "N",
+    Previous    = "P",
+    Inventory   = "I",
+    Cancel      = "Escape",
+}
