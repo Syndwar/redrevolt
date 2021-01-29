@@ -333,20 +333,16 @@ function MapEditorScreen:loadMap(file_name)
             -- clear current map
             self:clearMap()
             -- load map from file
-            local new_map = dofile(full_file_path)
-            -- create entities on the battlefield
-            for index, data in ipairs(new_map.content) do
-                if (not data.settings) then
-                    -- fixup if default settings for the entity are missing
-                    local default_settings = GameData.getDefaultSettings(data.id)
-                    if (default_settings) then
-                        data.settings = default_settings
-                    end
-                end
-                data.obj = self:createEntity(data)
-            end
+            local settings = dofile(full_file_path)
             -- remember new map
-            MapHandler.resetMap(new_map)
+            MapHandler.resetMap(settings)
+
+            for _, data in ipairs(settings.content) do
+                local entity = self.createMapContent(data.id, data.pos[1], data.pos[2], data.angle, data.flip, data.settings)
+                entity.obj = self:createEntity(entity)
+                MapHandler.addEntity(entity)
+            end
+
             self.current_map_file = file_name
             log("Map is loaded.")
             self.notification_dlg:setMessage("Map is loaded.")
@@ -493,13 +489,13 @@ function MapEditorScreen:selectItem(index)
     end
 end
 
-function MapEditorScreen.createMapContent(id, left, top, angle, flip)
+function MapEditorScreen.createMapContent(id, left, top, angle, flip, settings)
     local map_content = {
         id = id,
         pos = {left, top},
         angle = angle,
         flip = flip,
-        settings = GameData.getDefaultSettings(id)
+        settings = settings or table.deepcopy(GameData.getDefaultSettings(id))
     }
     return map_content
 end

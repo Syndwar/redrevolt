@@ -1,3 +1,13 @@
+--[[
+local MapEntity = {
+    id = "",
+    pos = {0, 0},
+    angle = 0,
+    flip = {false, false},
+    settings = {},
+}
+]]
+
 local Map = {
     size = {80, 50},
     cell_size = {32, 32},
@@ -24,8 +34,12 @@ function MapHandler.addEntity(entity)
     table.insert(Map.content, entity)
 end
 
-function MapHandler.resetMap(new_map)
-    Map = new_map
+function MapHandler.resetMap(settings)
+    Map = {
+        size = settings.size,
+        cell_size = settings.cell_size,
+        content = {},
+    }
 end
 
 function MapHandler.hasDuplicateInCell(id, i, j)

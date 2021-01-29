@@ -164,13 +164,13 @@ end
 
 function GameData.getDefaultSettings(id)
     if (ItemsSettings[id]) then
-        return table.deepcopy(ItemsSettings[id])
+        return ItemsSettings[id]
     elseif (UnitsSettings[id]) then
-        return table.deepcopy(UnitsSettings[id])
+        return UnitsSettings[id]
     elseif (ObjectsSettings[id]) then
-        return table.deepcopy(ObjectsSettings[id])
+        return ObjectsSettings[id]
     elseif (TerrainSettings[id]) then
-        return table.deepcopy(TerrainSettings[id])
+        return TerrainSettings[id]
     end
     return nil
 end
