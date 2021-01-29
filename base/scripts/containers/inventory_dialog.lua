@@ -116,10 +116,10 @@ function InventoryDialog:createFloorSlots(index, entity)
     slot_cnt:attach(icon_img)
 
     local name_lbl = Label("nameLbl")
-    name_lbl:setText(entity.name)
+    name_lbl:setText(entity.settings.name)
     name_lbl:setTextAlignment("LEFT|MIDDLE")
     name_lbl:setFont("system_15_fnt")
-    name_lbl:setColour("black")
+    name_lbl:setColour("white")
     name_lbl:setRect(x + 90, y, 150, 40)
     slot_cnt:attach(name_lbl)
 end

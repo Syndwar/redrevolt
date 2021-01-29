@@ -9,27 +9,6 @@ require("containers/edit_entity_dialog")
 require("containers/notification_dialog")
 require("containers/inventory_dialog")
 
-local function __getHotSpot(size, angle)
-    local w, h = size[1], size[2]
-    local midw = w / 2
-    local midh = h / 2
-    if (w == h) then
-        return midw, midh
-    elseif (90 == angle) then
-        return midh, midh
-    elseif (270 == angle) then
-        return midw, midw
-    end
-    return midw, midh
-end
-
-local function __calculateCell(x, y)
-    local cell_width, cell_height = MapHandler.getCellSize()
-    local i = math.floor(x / cell_width) + 1
-    local j = math.floor(y / cell_height) + 1
-    return i, j
-end
-
 class "MapEditorScreen" (Screen)
 
 function MapEditorScreen:init()
@@ -229,7 +208,7 @@ function MapEditorScreen:scrollToCell(i, j)
     local screen_height = Engine.getScreenHeight()
     x = x - screen_width / 2
     y = y - screen_height / 2
-    self.battlefield:scrollTo(x, y)
+    self.battlefield:jumpTo(x, y)
 end
 
 function MapEditorScreen:goToPrevEntity()
@@ -426,6 +405,13 @@ function MapEditorScreen:onFlipItem()
     end
 end
 
+local function __calculateCell(x, y)
+    local cell_width, cell_height = MapHandler.getCellSize()
+    local i = math.floor(x / cell_width) + 1
+    local j = math.floor(y / cell_height) + 1
+    return i, j
+end
+
 function MapEditorScreen:getCellPosForCursor()
     local x, y = Engine.getMousePos()
     local sx, sy = self.battlefield:screenToScrollPos(x, y)
@@ -598,6 +584,20 @@ function MapEditorScreen:calculateFieldPos(i, j)
     local x = left + (i - 1) * cell_width
     local y = top + (j - 1) * cell_height
     return x, y
+end
+
+local function __getHotSpot(size, angle)
+    local w, h = size[1], size[2]
+    local midw = w / 2
+    local midh = h / 2
+    if (w == h) then
+        return midw, midh
+    elseif (90 == angle) then
+        return midh, midh
+    elseif (270 == angle) then
+        return midw, midw
+    end
+    return midw, midh
 end
 
 function MapEditorScreen:createEntity(settings)
