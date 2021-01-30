@@ -77,3 +77,16 @@ function MapHandler.getEntitiesInPos(i, j)
     end
     return entities
 end
+
+MapEntityHandler = {}
+
+function MapEntityHandler.new(id, left, top, angle, flip, settings)
+    local map_content = {
+        id = id,
+        pos = {left, top},
+        angle = angle,
+        flip = flip,
+        settings = settings or table.deepcopy(GameData.getDefaultSettings(id))
+    }
+    return map_content
+end

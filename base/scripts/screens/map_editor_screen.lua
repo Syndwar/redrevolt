@@ -338,7 +338,7 @@ function MapEditorScreen:loadMap(file_name)
             MapHandler.resetMap(settings)
 
             for _, data in ipairs(settings.content) do
-                local entity = self.createMapContent(data.id, data.pos[1], data.pos[2], data.angle, data.flip, data.settings)
+                local entity =  MapEntityHandler.new(data.id, data.pos[1], data.pos[2], data.angle, data.flip, data.settings)
                 entity.obj = self:createEntity(entity)
                 MapHandler.addEntity(entity)
             end
@@ -489,17 +489,6 @@ function MapEditorScreen:selectItem(index)
     end
 end
 
-function MapEditorScreen.createMapContent(id, left, top, angle, flip, settings)
-    local map_content = {
-        id = id,
-        pos = {left, top},
-        angle = angle,
-        flip = flip,
-        settings = settings or table.deepcopy(GameData.getDefaultSettings(id))
-    }
-    return map_content
-end
-
 function MapEditorScreen:onBattleFieldLeftClicked()
     if (self.selected_item_id) then
         local x, y = Engine.getMousePos()
@@ -513,7 +502,7 @@ function MapEditorScreen:onBattleFieldLeftClicked()
             local found_duplicate = MapHandler.hasDuplicateInCell(id, i, j)
             if (not found_duplicate) then
                 -- create entity
-                local entity = self.createMapContent(id, i, j, self:getItemAngle(), self:getItemFlip())
+                local entity =  MapEntityHandler.new(id, i, j, self:getItemAngle(), self:getItemFlip())
                 entity.obj = self:createEntity(entity)
                 -- add it to the map
                 MapHandler.addEntity(entity)

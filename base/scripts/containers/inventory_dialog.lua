@@ -52,6 +52,7 @@ function InventoryDialog:init()
     self:attach(lbl)
 
     self.slots = {}
+    self.floor_slots = {}
 
     self:createUnitContainers()
     self:createFloorContainers()
@@ -74,16 +75,25 @@ function InventoryDialog:onOpening()
         slot.btn:enable(true)
         slot.frame:view(false)
     end
+    self:updateFloorSlots()
+end
+
+function InventoryDialog:updateFloorSlots()
+    self.floor_slots = {}
     self.floor_cnt:detachAll()
     if (self.entity) then
+        local entities_count = 0
         -- get list of the entities in units position on the map
         local entities_on_floor = MapHandler.getEntitiesInPos(unpack(self.entity.pos))
         -- remove from table all non item entities
         for i, v in ipairs(entities_on_floor) do
             if (GameData.isItem(v.id)) then
                 self:createFloorSlots(i, v)
+                entities_count = entities_count + 1
             end
         end
+        local content_width, content_height = 200, entities_count * 50
+        self.floor_cnt:setContentRect(0, 0, content_width, content_height)
     end
 end
 
@@ -122,6 +132,10 @@ function InventoryDialog:createFloorSlots(index, entity)
     name_lbl:setColour("white")
     name_lbl:setRect(x + 90, y, 150, 40)
     slot_cnt:attach(name_lbl)
+
+    self.floor_slots[index] = {
+        cnt = slot_cnt,
+    }
 end
 
 function InventoryDialog:createUnitContainers()
@@ -161,6 +175,7 @@ function InventoryDialog:createUnitContainers()
         self.slots[i] = {
             btn = select_btn,
             frame = frame_img,
+            cnt = slot_cnt,
         }
     end
 end
