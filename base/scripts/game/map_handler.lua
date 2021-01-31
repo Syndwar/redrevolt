@@ -5,6 +5,7 @@ local MapEntity = {
     angle = 0,
     flip = {false, false},
     settings = {},
+    inventory = {},
 }
 ]]
 
@@ -24,10 +25,19 @@ function MapHandler.getEntity(index)
     return Map.content[index]
 end
 
-function MapHandler.deleteEntity(index)
+function MapHandler.deleteEntityByIndex(index)
     if (index <= #Map.content) then
         table.remove(Map.content, index)
     end
+end
+
+function MapHandler.getEntityIndex(entity)
+    for index, value in ipairs(Map.content) do
+        if (value == entity) then
+            return index
+        end
+    end
+    return 0
 end
 
 function MapHandler.addEntity(entity)

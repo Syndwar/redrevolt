@@ -39,6 +39,7 @@ function MapEditorScreen:init()
     Observer:addListener("NextItem", self, self.goToNextEntity)
     Observer:addListener("PrevItem", self, self.goToPrevEntity)
     Observer:addListener("ShowInventory", self, self.showInventory)
+    Observer:addListener("DeleteEntity", self, self.onEntityDelete)
 
     local screen_width = Engine.getScreenWidth()
     local screen_height = Engine.getScreenHeight()
@@ -468,7 +469,7 @@ function MapEditorScreen:findEntityOnClick()
                     local obj_part_x = entity.pos[1] + (l - 1)
                     local obj_part_y = entity.pos[2] + (k - 1)
                     if (obj_part_x == i and obj_part_y == j) then
-                        return index
+                        return index, entity
                     end
                 end
             end
@@ -520,12 +521,16 @@ function MapEditorScreen:onBattleFieldRightClicked()
     if (self.selected_item_index) then
         self:onCancelItem()
     else
-        local index = self:findEntityOnClick()
-        if (index > 0) then
-            local entity = MapHandler.getEntity(index)
-            self.battlefield:detach(entity.obj)
-            MapHandler.deleteEntity(index)
-        end
+        local index, entity = self:findEntityOnClick()
+        self:onEntityDelete(index, entity)
+    end
+end
+
+function MapEditorScreen:onEntityDelete(index, entity)
+    local index = index or MapHandler.getEntityIndex(entity)
+    if (index > 0) then
+        self.battlefield:detach(entity.obj)
+        MapHandler.deleteEntityByIndex(index)
     end
 end
 

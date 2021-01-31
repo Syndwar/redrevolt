@@ -75,7 +75,15 @@ function InventoryDialog:onOpening()
         slot.btn:enable(true)
         slot.frame:view(false)
     end
+    self:updateUnitSlots()
     self:updateFloorSlots()
+end
+
+function InventoryDialog:updateUnitSlots()
+    local inventory = self.entity.inventory
+    for index, item in ipairs(inventory) do
+        
+    end
 end
 
 function InventoryDialog:updateFloorSlots()
@@ -135,6 +143,7 @@ function InventoryDialog:createFloorSlots(index, entity)
 
     self.floor_slots[index] = {
         cnt = slot_cnt,
+        entity = entity
     }
 end
 
@@ -199,4 +208,9 @@ end
 function InventoryDialog.onFloorItemBtnClick(params)
     local self = params[1]
     local index = params[2]
+    local slot = self.floor_slots[index]
+    if (slot and slot.entity) then
+        Observer:call("DeleteEntity", nil, slot.entity)
+        self:updateFloorSlots()
+    end
 end
