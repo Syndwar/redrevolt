@@ -1,3 +1,45 @@
+class "InventorySlot" (Container)
+
+function InventorySlot:init()
+    self:setRect(0, 0, 200, 40)
+
+    self.back_img = Image()
+    self.back_img:setSprite("up_btn_spr")
+    self.back_img:setRect(40, y, 200, 40)
+    self:attach(self.back_img)
+
+    self.select_btn = Button("selectBtn")
+    self.select_btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr", "up_btn_spr")
+    self.select_btn:setRect(0, y, 40, 40)
+    self.select_btn:addCallback("MouseUp_Left", self.onSelectItemsBtnClick, self)
+    self:attach(self.select_btn)
+
+    self.icon_img = Image()
+    self.icon_img:setRect(40, y, 40, 40)
+    self:attach(self.icon_img)
+
+    self.name_lbl = Label()
+    self.name_lbl:setTextAlignment("LEFT|MIDDLE")
+    self.name_lbl:setFont("system_15_fnt")
+    self.name_lbl:setColour("black")
+    self.name_lbl:setRect(90, y, 150, 40)
+    self:attach(self.name_lbl)
+end
+
+function InventorySlot:onSelectItemsBtnClick()
+end
+
+function InventorySlot:update(entity)
+    self.select_btn:enable(nil ~= entity)
+    self.name_lbl:view(nil ~= entity)
+    self.icon_img:view(nil ~= entity)
+
+    if (entity) then
+        self.icon_img:setSprite(GameData.getSprite(entity.id))
+        self.name_lbl:setText(entity.settings.name)
+    end
+end
+
 class "InventoryDialog" (Dialog)
 
 function InventoryDialog:init()
@@ -71,18 +113,16 @@ function InventoryDialog:tune(entity)
 end
 
 function InventoryDialog:onOpening()
-    for i, slot in ipairs(self.slots) do
-        slot.btn:enable(true)
-        slot.frame:view(false)
-    end
     self:updateUnitSlots()
     self:updateFloorSlots()
 end
 
 function InventoryDialog:updateUnitSlots()
-    local inventory = self.entity.inventory
-    for index, item in ipairs(inventory) do
-        
+    for i = #self.slots, 1, -1 do
+        local inventory = self.entity.inventory
+        local entity = inventory and inventory[i]
+        local slot = self.slots[i]
+        slot:update(entity)
     end
 end
 
@@ -150,42 +190,11 @@ end
 function InventoryDialog:createUnitContainers()
     for i = 1, self.number_of_slots do
         local y = 40 + (i - 1) * 50
-        local slot_cnt = Container()
-        slot_cnt:setRect(150, y, 200, 40)
+        local slot_cnt = InventorySlot()
+        slot_cnt:moveTo(110, y)
         self:attach(slot_cnt)
 
-        local slot_back_img = Image()
-        slot_back_img:setSprite("up_btn_spr")
-        slot_back_img:setRect(150, y, 200, 40)
-        slot_cnt:attach(slot_back_img)
-
-        local frame_img = Primitive()
-        frame_img:createRect(150, y, 200, 40, false)
-        frame_img:setColour("red")
-        slot_cnt:attach(frame_img)
-
-        local select_btn = Button("selectBtn")
-        select_btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-        select_btn:setRect(110, y, 40, 40)
-        select_btn:addCallback("MouseUp_Left", self.onSelectItemsBtnClick, {self, i})
-        slot_cnt:attach(select_btn)
-
-        local icon_img = Image()
-        icon_img:setRect(150, y, 40, 40)
-        slot_cnt:attach(icon_img)
-
-        local name_lbl = Label()
-        name_lbl:setTextAlignment("LEFT|MIDDLE")
-        name_lbl:setFont("system_15_fnt")
-        name_lbl:setColour("black")
-        name_lbl:setRect(200, y, 150, 40)
-        slot_cnt:attach(name_lbl)
-
-        self.slots[i] = {
-            btn = select_btn,
-            frame = frame_img,
-            cnt = slot_cnt,
-        }
+        self.slots[i] = slot_cnt
     end
 end
 
@@ -196,21 +205,19 @@ function InventoryDialog:createFloorContainers()
     self:attach(self.floor_cnt)
 end
 
-function InventoryDialog.onSelectItemsBtnClick(params)
-    local self = params[1]
-    local index = params[2]
-    for i, slot in ipairs(self.slots) do
-        slot.btn:enable(i ~= index)
-        slot.frame:view(i == index)
-    end
-end
-
 function InventoryDialog.onFloorItemBtnClick(params)
     local self = params[1]
     local index = params[2]
     local slot = self.floor_slots[index]
     if (slot and slot.entity) then
-        Observer:call("DeleteEntity", nil, slot.entity)
-        self:updateFloorSlots()
+        if (not self.entity.inventory) then
+            self.entity.inventory = {}
+        end
+        if (#self.entity.inventory < self.number_of_slots) then
+            table.insert(self.entity.inventory, slot.entity)
+            Observer:call("DeleteEntity", nil, slot.entity)
+            self:updateUnitSlots()
+            self:updateFloorSlots()
+        end
     end
 end
