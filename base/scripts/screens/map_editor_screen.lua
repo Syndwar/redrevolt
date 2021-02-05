@@ -40,6 +40,7 @@ function MapEditorScreen:init()
     Observer:addListener("PrevItem", self, self.goToPrevEntity)
     Observer:addListener("ShowInventory", self, self.showInventory)
     Observer:addListener("DeleteEntity", self, self.onEntityDelete)
+    Observer:addListener("AddEntity", self, self.onEntityAdd)
 
     local screen_width = Engine.getScreenWidth()
     local screen_height = Engine.getScreenHeight()
@@ -523,6 +524,14 @@ function MapEditorScreen:onBattleFieldRightClicked()
     else
         local index, entity = self:findEntityOnClick()
         self:onEntityDelete(index, entity)
+    end
+end
+
+function MapEditorScreen:onEntityAdd(entity, i, j)
+    if (entity) then
+        entity.pos = {i, j}
+        entity.obj = self:createEntity(entity)
+        MapHandler.addEntity(entity)
     end
 end
 

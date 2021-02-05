@@ -175,11 +175,13 @@ function InventoryDialog:updateFloorSlots()
         local entities_on_floor = MapHandler.getEntitiesInPos(unpack(self.entity.pos))
         -- remove from table all non item entities
         local x, y = self.floor_cnt:getRect()
+        local row = 0
         for i, entity in ipairs(entities_on_floor) do
             if (GameData.isItem(entity.id)) then
+                row = row + 1
                 local slot_cnt = FloorSlot()
                 slot_cnt:update(entity)
-                slot_cnt:moveTo(x, y + (i - 1) * 50)
+                slot_cnt:moveTo(x, y + (row - 1) * 50)
                 self.floor_cnt:attach(slot_cnt)
                 table.insert(self.floor_slots, slot_cnt)
             end
@@ -224,5 +226,17 @@ end
 
 function InventoryDialog:onRemoveEntity(entity)
     if (entity) then
+        local inventory = self.entity.inventory
+        if (inventory) then
+            for i, inventory_entity in ipairs(inventory) do
+                if (inventory_entity == entity) then
+                    table.remove(inventory, i)
+                    break
+                end
+            end
+            Observer:call("AddEntity", entity, self.entity.pos[1], self.entity.pos[2])
+            self:updateUnitSlots()
+            self:updateFloorSlots()
+        end
     end
 end
