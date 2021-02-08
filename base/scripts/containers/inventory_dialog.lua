@@ -240,3 +240,30 @@ function InventoryDialog:onRemoveEntity(entity)
         end
     end
 end
+
+
+
+--[[
+class "InventoryDialog" (Dialog)
+function InventoryDialog:init()
+end
+
+function InventoryDialog:pickupItem()
+end
+
+function InventoryDialog:dropItem()
+end
+
+function InventoryDialog:equipItem()
+end
+
+function InventoryDialog:setItems()
+end
+
+function InventoryDialog:setFloor()
+end
+
+function InventoryDialog:setUnit()
+end
+
+]]

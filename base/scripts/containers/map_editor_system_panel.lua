@@ -1,68 +1,79 @@
 class "MapEditorSystemPanel" (Container)
 
+local function __getUIDesc(self)
+    return 
+    {
+        {
+            widget = "Image",
+            rect = {0, 0, 64, 5 * 64},
+            sprite = "dark_img_spr",
+        },
+        {
+            id = "backBtn", widget = "Button",
+            rect = {0, 0, 64, 64},
+            callback = {"MouseUp_Left", self.onBackBtnClick, self},
+            text = "Exit", colour = "red", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
+        },
+        {
+            id = "saveBtn", widget = "Button",
+            rect = {0, 64, 64, 64},
+            callback = {"MouseUp_Left", self.onSaveBtnClick, self},
+            text = "Save", colour = "red", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
+        },
+        {
+            id = "loadBtn", widget = "Button",
+            rect = {0, 128, 64, 64},
+            callback = {"MouseUp_Left", self.onLoadBtnClick, self},
+            text = "Load", colour = "red", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
+        },
+        {
+            id = "gridBtn", widget = "Button", ui = "gridBtn",
+            rect = {0, 192, 64, 64},
+            callback = {"MouseUp_Left", self.onGridBtnClick, self},
+            text = "Load", colour = "red", font = "system_13_fnt", text_align = "CENTER|MIDDLE",
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
+        },
+        {
+            id = "newMapBtn", widget = "Button",
+            rect = {0, 256, 64, 64},
+            callback = {"MouseUp_Left", self.onNewMapBtnClick, self},
+            text = "New Map", colour = "red", font = "system_13_fnt", text_align = "CENTER|MIDDLE",
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
+        },
+    }
+   
+end
+
 function MapEditorSystemPanel:init()
-    self.is_grid_on = true
+    self._ui = {}
+    self._is_grid_on = true
     self:setRect(0, 0, 64, 320)
     self:setAlignment("LEFT|BOTTOM", 0, -64)
 
-    local img = Image()
-    img:setRect(0, 0, 64, 5 * 64)
-    img:setSprite("dark_img_spr")
-    self:attach(img)
+    Observer:addListener("SwitchGrid", self, self.onGridSwitched)
 
-    local btn = Button("backBtn")
-    btn:setText("Exit")
-    btn:setFont("system_15_fnt")
-    btn:setRect(0, 0, 64, 64)
-    btn:setTextAlignment("CENTER|MIDDLE")
-    btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-    btn:addCallback("MouseUp_Left", self.onBackBtnClick, self)
-    btn:setColour("red")
-    self:attach(btn)
+    UIBuilder.create(self, __getUIDesc(self))
+    self:update()
+end
 
-    btn = Button("saveBtn")
-    btn:setText("Save")
-    btn:setFont("system_15_fnt")
-    btn:setRect(0, 64, 64, 64)
-    btn:setTextAlignment("CENTER|MIDDLE")
-    btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-    btn:addCallback("MouseUp_Left", self.onSaveBtnClick, self)
-    btn:setColour("red")
-    self:attach(btn)
+function MapEditorSystemPanel:onGridSwitched()
+    self._is_grid_on = not self._is_grid_on
+    self:update()
+end
 
-    btn = Button("loadBtn")
-    btn:setText("Load")
-    btn:setFont("system_15_fnt")
-    btn:setRect(0, 128, 64, 64)
-    btn:setTextAlignment("CENTER|MIDDLE")
-    btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-    btn:addCallback("MouseUp_Left", self.onLoadBtnClick, self)
-    btn:setColour("red")
-    self:attach(btn)
-
-    btn = Button("gridBtn")
-    btn:setText(self.is_grid_on and "Grid On" or "Grid Off")
-    btn:setFont("system_13_fnt")
-    btn:setRect(0, 192, 64, 64)
-    btn:setTextAlignment("CENTER|MIDDLE")
-    btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-    btn:addCallback("MouseUp_Left", self.onGridBtnClick, self)
-    btn:setColour("green")
-    self:attach(btn)
-
-    btn = Button("newMapBtn")
-    btn:setText("New Map")
-    btn:setFont("system_13_fnt")
-    btn:setRect(0, 256, 64, 64)
-    btn:setTextAlignment("CENTER|MIDDLE")
-    btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-    btn:addCallback("MouseUp_Left", self.onNewMapBtnClick, self)
-    btn:setColour("red")
-    self:attach(btn)
+function MapEditorSystemPanel:update()
+    local btn = self._ui["gridBtn"]
+    if (btn) then
+        btn:setText(self._is_grid_on and "Grid On" or "Grid Off")
+        btn:setColour(self._is_grid_on and "green" or "red")
+    end
 end
 
 function MapEditorSystemPanel:onBackBtnClick()
-    Screens.load("LoadingScreen", "MainScreen")
+    Observer:call("ExitScreen")
 end
 
 function MapEditorSystemPanel:onSaveBtnClick()

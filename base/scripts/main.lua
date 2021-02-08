@@ -10,6 +10,7 @@ require("texts")
 require("sounds")
 require("music")
 require("hotkeys")
+require("ui_builder")
 
 require("usersave")
 

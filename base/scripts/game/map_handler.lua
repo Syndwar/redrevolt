@@ -1,14 +1,3 @@
---[[
-local MapEntity = {
-    id = "",
-    pos = {0, 0},
-    angle = 0,
-    flip = {false, false},
-    settings = {},
-    inventory = {},
-}
-]]
-
 local Map = {
     size = {80, 50},
     cell_size = {32, 32},
@@ -86,17 +75,4 @@ function MapHandler.getEntitiesInPos(i, j)
         end
     end
     return entities
-end
-
-MapEntityHandler = {}
-
-function MapEntityHandler.new(id, left, top, angle, flip, settings)
-    local map_content = {
-        id = id,
-        pos = {left, top},
-        angle = angle,
-        flip = flip,
-        settings = settings or table.deepcopy(GameData.getDefaultSettings(id))
-    }
-    return map_content
 end
