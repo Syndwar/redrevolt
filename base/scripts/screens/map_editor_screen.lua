@@ -38,8 +38,8 @@ function MapEditorScreen:init()
     self:addCallback("KeyUp_" .. HotKeys.Panel4, self.onChangeFilter, "terrain")
 
     Observer:addListener("ExitScreen", self, self.onExitScreen)
+    Observer:addListener("SelectItem", self, self.onSelectedItemChanged)
 
---     Observer:addListener("SelectItem", self, self.onSelectedItemChanged)
 --     Observer:addListener("SaveEditorMap", self, self.onSaveEditorMap)
 --     Observer:addListener("LoadEditorMap", self, self.onLoadEditorMap)
 --     Observer:addListener("RotateItem", self, self.onRotateItem)
@@ -80,13 +80,15 @@ function MapEditorScreen:init()
     self:attach(system_panel)
     self._ui["system_panel"] = system_panel
 
-    local items_panel = MapEditorItemsPanel()
-    self:attach(items_panel)
-    self._ui["items_panel"] = items_panel
+    local entities_panel = MapEditorItemsPanel()
+    entities_panel:addPage("items", Items)
+    entities_panel:addPage("units", Units)
+    entities_panel:addPage("objects", Objects)
+    entities_panel:addPage("terrain", Terrain)
+    self:attach(entities_panel)
 
     local filters_panel = MapEditorFiltersPanel("filtersPanel")
     self:attach(filters_panel)
-    self._ui["filters_panel"] = filters_panel
 
 --     self.edit_panel = MapEditorEditPanel()
 --     self:attach(self.edit_panel)
@@ -291,7 +293,7 @@ end
 --     end
 -- end
 
--- function MapEditorScreen:onSelectedItemChanged(id, angle, flip)
+function MapEditorScreen:onSelectedItemChanged(id, angle, flip)
 --     self.selected_item_id = id
 --     self.edit_panel:reset(angle, flip)
 
@@ -299,7 +301,7 @@ end
 --     self.info_panel:instantView(true)
 --     self.info_panel:update(data.sprite, self:getItemAngle(), self:getItemFlip(), id)
 --     self:resetCursor()
--- end
+end
 
 -- function MapEditorScreen:onRotateItem()
 --     if (self.info_panel:isOpened()) then
