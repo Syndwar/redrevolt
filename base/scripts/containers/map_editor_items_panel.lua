@@ -1,7 +1,6 @@
 class "MapEditorItemsPanel" (Container)
 
 function MapEditorItemsPanel:init()
-    self._ui = {}
     self._page_size = {}
     self._active_page = nil
 
@@ -15,7 +14,7 @@ function MapEditorItemsPanel:init()
     scroll_cnt:setRect(0, 0, 32, screen_height - 64)
     scroll_cnt:setScrollSpeed(500)
     self:attach(scroll_cnt)
-    self._ui["scroll_cnt"] = scroll_cnt
+    self:setUI("scroll_cnt", scroll_cnt)
 
     local scroll_up_area = Area("scrollUpArea")
     scroll_up_area:setRect(0, 0, 32, 32)
@@ -33,8 +32,8 @@ function MapEditorItemsPanel:init()
 end
 
 function MapEditorItemsPanel:addPage(id, entities)
-    local scroll_cnt = self._ui["scroll_cnt"]
-    if (scroll_cnt and not self._ui[id]) then
+    local scroll_cnt = self:getUI("scroll_cnt")
+    if (scroll_cnt) then
         local cnt = Container()
         cnt:view(false)
         scroll_cnt:attach(cnt)
@@ -43,17 +42,17 @@ function MapEditorItemsPanel:addPage(id, entities)
             local btn = Button(data.id)
             btn:setRect(0, (i - 1) * 32, 32, 32)
             btn:setSprites(data.sprite, data.sprite, data.sprite)
-            btn:addCallback("MouseUp_Left", self.onEntityClicked, data.id)
+            btn:addCallback("MouseUp_Left", self.__onEntitySelected, data.id)
             cnt:attach(btn)
         end
-        self._ui[id] = cnt
+        self:setUI(id, cnt)
         self._page_size[id] = #entities
     end
 end
 
 function MapEditorItemsPanel.scrollTo(params)
     local self = params[1]
-    local scroll_cnt = self._ui["scroll_cnt"]
+    local scroll_cnt = self:getUI("scroll_cnt")
     if (scroll_cnt) then
         local direction = params[2]
         local value = params[3]
@@ -61,19 +60,19 @@ function MapEditorItemsPanel.scrollTo(params)
     end
 end
 
-function MapEditorItemsPanel.onEntityClicked(id)
-    Observer:call("SelectItem", id)
+function MapEditorItemsPanel.__onEntitySelected(id)
+    Observer:call("SelectEntity", id)
 end
 
 function MapEditorItemsPanel:viewActivePage(value)
     if (self._active_page) then
-        local active_cnt = self._ui[self._active_page]
+        local active_cnt = self:getUI(self._active_page)
         active_cnt:view(value)
     end
 end
 
 function MapEditorItemsPanel:onFilterChanged(id)
-    local scroll_cnt = self._ui["scroll_cnt"]
+    local scroll_cnt = self:getUI("scroll_cnt")
     if (scroll_cnt) then
         scroll_cnt:jumpTo(0, 0)
 

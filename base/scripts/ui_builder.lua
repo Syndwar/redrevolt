@@ -1,12 +1,41 @@
 UIBuilder = {}
 
-function UIBuilder.createImage(data)
+local function __tuneWidget(widget, data)
+    if (widget and data) then
+        if (data.rect) then
+            widget:setRect(unpack(data.rect))
+        end
+        if (data.alignment) then
+            widget:setAlignment(unpack(data.alignment))
+        end
+    end
+end
+
+local function __createLabel(data)
+    local lbl = nil
+    if (data) then
+        lbl = Label(data.id or "")
+        __tuneWidget(lbl, data)
+
+        lbl:setText(data.text or "")
+        lbl:setFont(data.font or "")
+
+        if (data.text_align) then
+            lbl:setTextAlignment(data.text_align)
+        end
+        if (data.colour) then
+            lbl:setColour(data.colour)
+        end
+    end
+    return lbl
+end
+
+local function __createImage(data)
     local img = nil
     if (data) then
         img = Image(data.id or "")
-        if (data.rect) then
-            img:setRect(unpack(data.rect))
-        end
+        __tuneWidget(img, data)
+
         if (data.sprite) then
             img:setSprite(data.sprite or "")
         end
@@ -14,15 +43,15 @@ function UIBuilder.createImage(data)
     return img
 end
 
-function UIBuilder.createButton(data)
+local function __createButton(data)
     local btn = nil
     if (data) then
         btn = Button(data.id or "")
+        __tuneWidget(btn, data)
+
         btn:setText(data.text or "")
         btn:setFont(data.font or "")
-        if (data.rect) then
-            btn:setRect(unpack(data.rect))
-        end
+
         if (data.text_align) then
             btn:setTextAlignment(data.text_align)
         end
@@ -40,8 +69,9 @@ function UIBuilder.createButton(data)
 end
 
 UIBuilder._build_tools = {
-    ["Button"] = UIBuilder.createButton,
-    ["Image"] = UIBuilder.createImage,
+    ["Button"] = __createButton,
+    ["Image"] = __createImage,
+    ["Label"] = __createLabel,
 }
 
 function UIBuilder.create(cnt, desc)
@@ -51,7 +81,7 @@ function UIBuilder.create(cnt, desc)
             local widget = tool(data)
             if (widget) then
                 if (data.ui) then
-                    cnt._ui[data.ui] = widget
+                    cnt:setUI(data.ui, widget)
                 end
                 cnt:attach(widget)
             end

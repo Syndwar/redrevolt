@@ -6,42 +6,42 @@ local function __getUIDesc(self)
         {
             id = "prevBtn", widget = "Button",
             rect = {0, 0, 64, 64},
-            callback = {"MouseUp_Left", self.onPrevBtnClick, self},
+            callback = {"MouseUp_Left", self.__onPrevEntitySelected, self},
             text = "Prev", colour = "green", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
         {
             id = "nextBtn", widget = "Button",
             rect = {64, 0, 64, 64},
-            callback = {"MouseUp_Left", self.onNextBtnClick, self},
+            callback = {"MouseUp_Left", self.__onNextEntitySelected, self},
             text = "Next", colour = "green", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
         {
             id = "itemsBtn", widget = "Button",
             rect = {128, 0, 64, 64},
-            callback = {"MouseUp_Left", self.onFilterBtnClick, {self, "items"}},
+            callback = {"MouseUp_Left", self.__onFilterBtnClick, {self, "items"}},
             text = "Items", colour = "green", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
         {
             id = "unitsBtn", widget = "Button",
             rect = {192, 0, 64, 64},
-            callback = {"MouseUp_Left", self.onFilterBtnClick, {self, "units"}},
+            callback = {"MouseUp_Left", self.__onFilterBtnClick, {self, "units"}},
             text = "Units", colour = "green", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
         {
             id = "objectsBtn", widget = "Button",
             rect = {256, 0, 64, 64},
-            callback = {"MouseUp_Left", self.onFilterBtnClick, {self, "objects"}},
+            callback = {"MouseUp_Left", self.__onFilterBtnClick, {self, "objects"}},
             text = "Objects", colour = "green", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
         {
             id = "terrainBtn", widget = "Button",
             rect = {320, 0, 64, 64},
-            callback = {"MouseUp_Left", self.onFilterBtnClick, {self, "terrain"}},
+            callback = {"MouseUp_Left", self.__onFilterBtnClick, {self, "terrain"}},
             text = "Terrain", colour = "green", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
@@ -52,10 +52,13 @@ function MapEditorFiltersPanel:init()
     self:setRect(0, 0, 384, 64)
     self:setAlignment("CENTER|BOTTOM", 0, 0)
 
+    self:addCallback("KeyUp_" .. HotKeys.Next,     self.__onNextEntitySelected, self)
+    self:addCallback("KeyUp_" .. HotKeys.Previous, self.__onPrevEntitySelected, self)
+
     UIBuilder.create(self, __getUIDesc(self))
 end
 
-function MapEditorFiltersPanel.onFilterBtnClick(params)
+function MapEditorFiltersPanel.__onFilterBtnClick(params)
     local id = params[2]
     local self = params[1]
     if (id) then
@@ -63,10 +66,10 @@ function MapEditorFiltersPanel.onFilterBtnClick(params)
     end
 end
 
-function MapEditorFiltersPanel:onNextBtnClick()
-    Observer:call("NextItem")
+function MapEditorFiltersPanel:__onNextEntitySelected()
+    Observer:call("NextEntity")
 end
 
-function MapEditorFiltersPanel:onPrevBtnClick()
-    Observer:call("PrevItem")
+function MapEditorFiltersPanel:__onPrevEntitySelected()
+    Observer:call("PrevEntity")
 end

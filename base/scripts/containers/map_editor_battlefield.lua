@@ -1,7 +1,6 @@
 class "MapEditorBattlefield" (Battlefield)
 
 function MapEditorBattlefield:init()
-    self._ui = {}
     self._pos = {32, 32}
     self._offset = {-64, -96}
     self._cell_size = {0, 0}
@@ -90,14 +89,14 @@ function MapEditorBattlefield:update()
     grid:setColour("green")
     grid:createLines(self:createGridLines())
     self:attach(grid)
-    self._ui["fieldGrid"] = grid
+    self:setUI("fieldGrid", grid)
 
     local cursor = Primitive("cursorRect")
     cursor:setColour("yellow")
     cursor:createRects({{0, 0, cell_width, cell_height}}, false)
     cursor:instantView(false)
     self:attach(cursor)
-    self._ui["cursor"] = cursor
+    self:setUI("cursor", cursor)
 
     self:moveBy(unpack(self._pos))
 end
@@ -110,7 +109,7 @@ function MapEditorBattlefield:calculateCell(x, y)
 end
 
 function MapEditorBattlefield:onGridSwitched()
-    local grid = self._ui["fieldGrid"]
+    local grid = self:getUI("fieldGrid")
     if (grid) then
         grid:view(not grid:isOpened())
     end
@@ -134,7 +133,7 @@ end
 
 function MapEditorBattlefield:onMouseMove()
     if (self.selected_item_id) then
-        local cursor = self._ui["cursor"]
+        local cursor = self:getUI("cursor")
         local field_x, field_y = self:getCellPosForCursor()
         cursor:moveTo(field_x, field_y)
     end

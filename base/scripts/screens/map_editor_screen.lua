@@ -4,17 +4,16 @@ require("containers/map_editor_battlefield")
 require("containers/map_editor_items_panel")
 require("containers/map_editor_filters_panel")
 require("containers/map_editor_system_panel")
--- require("containers/map_editor_edit_panel")
+require("containers/map_editor_edit_panel")
 -- require("containers/map_editor_info_panel")
 -- require("containers/save_load_dialog")
 -- require("containers/edit_entity_dialog")
--- require("containers/notification_dialog")
+require("containers/notification_dialog")
 -- require("containers/inventory_dialog")
 
 class "MapEditorScreen" (Screen)
 
 function MapEditorScreen:init()
-    self._ui = {}
     self._filter = nil
 --     self.selected_item_id = nil
 --     self.selected_item_index = nil
@@ -38,18 +37,18 @@ function MapEditorScreen:init()
     self:addCallback("KeyUp_" .. HotKeys.Panel4, self.onChangeFilter, "terrain")
 
     Observer:addListener("ExitScreen", self, self.onExitScreen)
-    Observer:addListener("SelectItem", self, self.onSelectedItemChanged)
+    Observer:addListener("SelectEntity", self, self.onSelectedItemChanged)
+    Observer:addListener("CancelEntity", self, self.onCancelItem)
+    Observer:addListener("EditEntity", self, self.onEditItem)
+    Observer:addListener("ShowInventory", self, self.showInventory)
+    Observer:addListener("RotateEntity", self, self.onRotateItem)
+    Observer:addListener("FlipEntity", self, self.onFlipItem)
+    Observer:addListener("NextEntity", self, self.goToNextEntity)
+    Observer:addListener("PrevEntity", self, self.goToPrevEntity)
+    Observer:addListener("StartNewMap", self, self.onStartNewMap)
+    Observer:addListener("SaveEditorMap", self, self.onSaveEditorMap)
+    Observer:addListener("LoadEditorMap", self, self.onLoadEditorMap)
 
---     Observer:addListener("SaveEditorMap", self, self.onSaveEditorMap)
---     Observer:addListener("LoadEditorMap", self, self.onLoadEditorMap)
---     Observer:addListener("RotateItem", self, self.onRotateItem)
---     Observer:addListener("FlipItem", self, self.onFlipItem)
---     Observer:addListener("CancelItem", self, self.onCancelItem)
---     Observer:addListener("StartNewMap", self, self.onStartNewMap)
---     Observer:addListener("EditItem", self, self.onEditItem)
---     Observer:addListener("NextItem", self, self.goToNextEntity)
---     Observer:addListener("PrevItem", self, self.goToPrevEntity)
---     Observer:addListener("ShowInventory", self, self.showInventory)
 --     Observer:addListener("DeleteEntity", self, self.onEntityDelete)
 --     Observer:addListener("AddEntity", self, self.onEntityAdd)
 
@@ -61,26 +60,21 @@ function MapEditorScreen:init()
     battlefield:setCellSize(cell_width, cell_height)
     battlefield:update()
     self:attach(battlefield)
-    self._ui["battlefield"] = battlefield
+    self:setUI("battlefield", battlefield)
 
 --     self.battlefield:addCallback("MouseDown_Left", self.onBattleFieldLeftClicked, self)
 --     self.battlefield:addCallback("MouseDown_Right", self.onBattleFieldRightClicked, self)
 --     self.battlefield:addCallback("MouseDown_Middle", self.onBattleFieldMiddleClicked, self)
 
---     self.battlefield:addCallback("KeyUp_" .. HotKeys.Next, self.goToNextEntity, self)
---     self.battlefield:addCallback("KeyUp_" .. HotKeys.Previous, self.goToPrevEntity, self)
 --     self.battlefield:addCallback("KeyUp_" .. HotKeys.Save, self.onQuickSaveEditorMap, self)
 --     self.battlefield:addCallback("KeyUp_" .. HotKeys.Load, self.onLoadEditorMap, self)
---     self.battlefield:addCallback("KeyUp_" .. HotKeys.Cancel, self.onCancelItem, self)
---     self.battlefield:addCallback("KeyUp_" .. HotKeys.Edit, self.onEditItem, self)
---     self.battlefield:addCallback("KeyUp_" .. HotKeys.Inventory, self.showInventory, self)
 
     local system_panel = MapEditorSystemPanel("systemPanel")
     system_panel:instantView(false)
     self:attach(system_panel)
-    self._ui["system_panel"] = system_panel
+    self:setUI("system_panel", system_panel)
 
-    local entities_panel = MapEditorItemsPanel()
+    local entities_panel = MapEditorItemsPanel("itemsPanel")
     entities_panel:addPage("items", Items)
     entities_panel:addPage("units", Units)
     entities_panel:addPage("objects", Objects)
@@ -90,8 +84,10 @@ function MapEditorScreen:init()
     local filters_panel = MapEditorFiltersPanel("filtersPanel")
     self:attach(filters_panel)
 
---     self.edit_panel = MapEditorEditPanel()
---     self:attach(self.edit_panel)
+    local edit_panel = MapEditorEditPanel("editPanel")
+    edit_panel:setAngles({0, 90, 180, 270})
+    edit_panel:setFlips({{false, false, "   "}, {true, false, " | "}, {false, true, "- -"}, {true, true, "-|-"}})
+    self:attach(edit_panel)
 
 --     self.info_panel = MapEditorInfoPanel()
 --     self:attach(self.info_panel)
@@ -102,8 +98,9 @@ function MapEditorScreen:init()
 --     self.edit_entity_dlg = EditEntityDialog()
 --     self:attach(self.edit_entity_dlg)
 
---     self.notification_dlg = NotificationDialog()
---     self:attach(self.notification_dlg)
+    local notification_dlg = NotificationDialog("notificationDialog")
+    self:attach(notification_dlg)
+    self:setUI("notification_dlg", notification_dlg)
 
 --     self.inventory_dlg = InventoryDialog()
 --     self:attach(self.inventory_dlg)
@@ -118,7 +115,7 @@ function MapEditorScreen:onGridSwitched()
 end
 
 function MapEditorScreen:onMenuBtnClick()
-    local panel = self._ui["system_panel"]
+    local panel = self:getUI("system_panel")
     if (panel) then
         panel:instantView(not panel:isOpened())
     end
@@ -146,7 +143,7 @@ end
 --     self.battlefield:jumpTo(x, y)
 -- end
 
--- function MapEditorScreen:goToPrevEntity()
+function MapEditorScreen:goToPrevEntity()
 --     local id = self._filter
 --     if (id) then
 --         local entities = GameData.getEntities(id)
@@ -168,9 +165,9 @@ end
 --             end
 --         end
 --     end
--- end
+end
 
--- function MapEditorScreen:goToNextEntity()
+function MapEditorScreen:goToNextEntity()
 --     local id = self._filter
 --     if (id) then
 --         local entities = GameData.getEntities(id)
@@ -193,7 +190,7 @@ end
 --             end
 --         end
 --     end
--- end
+end
 
 -- function MapEditorScreen:getMapFilePath(file_name)
 --     return string.format("%s/%s.map", Config.map_folder, file_name)
@@ -224,7 +221,7 @@ end
 --     end
 -- end
 
--- function MapEditorScreen:onSaveEditorMap(file_name)
+function MapEditorScreen:onSaveEditorMap(file_name)
 --     if (file_name) then
 --         self.current_map_file = file_name
 --         self:saveMap(file_name)
@@ -234,7 +231,7 @@ end
 --             self.save_load_dlg:view(true)
 --         end
 --     end
--- end
+end
 
 -- function MapEditorScreen:clearMap()
 --     self.current_map_file = nil
@@ -281,7 +278,7 @@ end
 --     end
 -- end
 
--- function MapEditorScreen:onLoadEditorMap(sender, file_name)
+function MapEditorScreen:onLoadEditorMap(sender, file_name)
 --     if (file_name) then
 --         self.current_map_file = file_name
 --         self:loadMap(file_name)
@@ -291,11 +288,10 @@ end
 --             self.save_load_dlg:view(true)
 --         end
 --     end
--- end
+end
 
 function MapEditorScreen:onSelectedItemChanged(id, angle, flip)
 --     self.selected_item_id = id
---     self.edit_panel:reset(angle, flip)
 
 --     local data = GameData.find(id)
 --     self.info_panel:instantView(true)
@@ -303,7 +299,7 @@ function MapEditorScreen:onSelectedItemChanged(id, angle, flip)
 --     self:resetCursor()
 end
 
--- function MapEditorScreen:onRotateItem()
+function MapEditorScreen:onRotateItem()
 --     if (self.info_panel:isOpened()) then
 --         self.info_panel:update(nil, self:getItemAngle(), nil, nil)
 --         self:resetCursor()
@@ -315,9 +311,9 @@ end
 --             entity.obj:setAngle(entity.angle)
 --         end
 --     end
--- end
+end
 
--- function MapEditorScreen:onFlipItem()
+function MapEditorScreen:onFlipItem()
 --     if (self.info_panel:isOpened()) then
 --         self.info_panel:update(nil, nil, self:getItemFlip(), nil)
 --         self:resetCursor()
@@ -329,7 +325,7 @@ end
 --             entity.obj:setFlip(unpack(entity.flip))
 --         end
 --     end
--- end
+end
 
 -- function MapEditorScreen:resetCursor(x, y)
 --     local is_opened = self.cursor:isOpened()
@@ -517,7 +513,7 @@ end
 --     return img
 -- end
 
--- function MapEditorScreen:onCancelItem()
+function MapEditorScreen:onCancelItem()
 --     if (self.selected_item_id) then
 --         self.selected_item_id = nil
 --         self:resetCursor()
@@ -527,21 +523,21 @@ end
 --         self.selected_item_index = nil
 --         self.info_panel:instantView(false)
 --     end
--- end
+end
 
--- function MapEditorScreen:onStartNewMap()
+function MapEditorScreen:onStartNewMap()
 --     self:clearMap()
--- end
+end
 
--- function MapEditorScreen:onEditItem()
+function MapEditorScreen:onEditItem()
 --     if (self.selected_item_index) then
 --         local entity = MapHandler.getEntity(self.selected_item_index)
 --         self.edit_entity_dlg:tune(entity)
 --         self.edit_entity_dlg:view(true)
 --     end
--- end
+end
 
--- function MapEditorScreen:showInventory()
+function MapEditorScreen:showInventory()
 --     if (self.selected_item_index) then
 --         local entity = MapHandler.getEntity(self.selected_item_index)
 --         if (entity) then
@@ -552,4 +548,4 @@ end
 --             end
 --         end
 --     end
--- end
+end

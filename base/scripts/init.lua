@@ -29,6 +29,21 @@ class "Primitive" (Widget)
 
 class "Container" (Widget)
 
+function Container:getUI(id)
+    if (self._ui) then
+        return self._ui[id]
+    end
+    return nil
+end
+
+function Container:setUI(id, widget)
+    if (not self._ui) then
+        self._ui = {}
+    end
+    assert(not self._ui[id], string.format("Duplicate found in UI: %s", id))
+    self._ui[id] = widget
+end
+
 class "ProgressBar" (Widget)
 
 class "Dialog" (Container)
@@ -36,8 +51,6 @@ class "Dialog" (Container)
 class "ScrollContainer" (Container)
 
 class "Screen" (Container)
-
-class "Battlefield" (ScrollContainer)
 
 function Screen:load()
     if (SystemToolsPanel) then
@@ -53,3 +66,6 @@ function Screen:unload()
     end
     Observer:clear()
 end
+
+class "Battlefield" (ScrollContainer)
+
