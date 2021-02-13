@@ -12,66 +12,96 @@ local function __tuneWidget(widget, data)
 end
 
 local function __createLabel(data)
-    local lbl = nil
+    local widget = nil
     if (data) then
-        lbl = Label(data.id or "")
-        __tuneWidget(lbl, data)
+        widget = Label(data.id or "")
+        __tuneWidget(widget, data)
 
-        lbl:setText(data.text or "")
-        lbl:setFont(data.font or "")
+        widget:setText(data.text or "")
+        widget:setFont(data.font or "")
 
         if (data.text_align) then
-            lbl:setTextAlignment(data.text_align)
+            widget:setTextAlignment(data.text_align)
         end
         if (data.colour) then
-            lbl:setColour(data.colour)
+            widget:setColour(data.colour)
         end
     end
-    return lbl
+    return widget
 end
 
 local function __createImage(data)
-    local img = nil
+    local widget = nil
     if (data) then
-        img = Image(data.id or "")
-        __tuneWidget(img, data)
+        widget = Image(data.id or "")
+        __tuneWidget(widget, data)
 
         if (data.sprite) then
-            img:setSprite(data.sprite or "")
+            widget:setSprite(data.sprite or "")
         end
     end
-    return img
+    return widget
 end
 
 local function __createButton(data)
-    local btn = nil
+    local widget = nil
     if (data) then
-        btn = Button(data.id or "")
-        __tuneWidget(btn, data)
+        widget = Button(data.id or "")
+        __tuneWidget(widget, data)
 
-        btn:setText(data.text or "")
-        btn:setFont(data.font or "")
+        widget:setText(data.text or "")
+        widget:setFont(data.font or "")
 
         if (data.text_align) then
-            btn:setTextAlignment(data.text_align)
+            widget:setTextAlignment(data.text_align)
         end
         if (data.sprites) then
-            btn:setSprites(unpack(data.sprites))
+            widget:setSprites(unpack(data.sprites))
         end
         if (data.callback) then
-            btn:addCallback(unpack(data.callback))
+            widget:addCallback(unpack(data.callback))
         end
         if (data.colour) then
-            btn:setColour(data.colour)
+            widget:setColour(data.colour)
         end
     end
-    return btn
+    return widget
+end
+
+local function __createTextEdit(data)
+    local widget = nil
+    if (data) then
+        widget = TextEdit(data.id or "")
+        __tuneWidget(widget, data)
+
+        widget:setText(data.text or "")
+        widget:setFont(data.font or "")
+
+        if (data.text_align) then
+            widget:setTextAlignment(data.text_align)
+        end
+        if (data.colour) then
+            widget:setColour(data.colour)
+        end
+    end
+    return widget
+end
+
+local function __createScrollContainer(data)
+    local widget = nil
+    if (data) then
+        widget = ScrollContainer(data.id or "")
+        __tuneWidget(widget, data)
+    end
+    return widget
 end
 
 UIBuilder._build_tools = {
     ["Button"] = __createButton,
     ["Image"] = __createImage,
     ["Label"] = __createLabel,
+    ["TextEdit"] = __createTextEdit,
+    ["ScrollContainer"] = __createScrollContainer,
 }
 
 function UIBuilder.create(cnt, desc)

@@ -6,7 +6,7 @@ require("containers/map_editor_filters_panel")
 require("containers/map_editor_system_panel")
 require("containers/map_editor_edit_panel")
 -- require("containers/map_editor_info_panel")
--- require("containers/save_load_dialog")
+require("containers/save_load_dialog")
 -- require("containers/edit_entity_dialog")
 require("containers/notification_dialog")
 -- require("containers/inventory_dialog")
@@ -35,6 +35,8 @@ function MapEditorScreen:init()
     self:addCallback("KeyUp_" .. HotKeys.Panel2, self.onChangeFilter, "units")
     self:addCallback("KeyUp_" .. HotKeys.Panel3, self.onChangeFilter, "objects")
     self:addCallback("KeyUp_" .. HotKeys.Panel4, self.onChangeFilter, "terrain")
+    self:addCallback("KeyUp_" .. HotKeys.Save, self.__onQuickSaveEditorMap, self)
+    self:addCallback("KeyUp_" .. HotKeys.Load, self.__onLoadEditorMap, self)
 
     Observer:addListener("ExitScreen", self, self.onExitScreen)
     Observer:addListener("SelectEntity", self, self.onSelectedItemChanged)
@@ -46,8 +48,8 @@ function MapEditorScreen:init()
     Observer:addListener("NextEntity", self, self.goToNextEntity)
     Observer:addListener("PrevEntity", self, self.goToPrevEntity)
     Observer:addListener("StartNewMap", self, self.onStartNewMap)
-    Observer:addListener("SaveEditorMap", self, self.onSaveEditorMap)
-    Observer:addListener("LoadEditorMap", self, self.onLoadEditorMap)
+    Observer:addListener("SaveEditorMap", self, self.__onSaveEditorMap)
+    Observer:addListener("LoadEditorMap", self, self.__onLoadEditorMap)
 
 --     Observer:addListener("DeleteEntity", self, self.onEntityDelete)
 --     Observer:addListener("AddEntity", self, self.onEntityAdd)
@@ -66,8 +68,6 @@ function MapEditorScreen:init()
 --     self.battlefield:addCallback("MouseDown_Right", self.onBattleFieldRightClicked, self)
 --     self.battlefield:addCallback("MouseDown_Middle", self.onBattleFieldMiddleClicked, self)
 
---     self.battlefield:addCallback("KeyUp_" .. HotKeys.Save, self.onQuickSaveEditorMap, self)
---     self.battlefield:addCallback("KeyUp_" .. HotKeys.Load, self.onLoadEditorMap, self)
 
     local system_panel = MapEditorSystemPanel("systemPanel")
     system_panel:instantView(false)
@@ -92,8 +92,9 @@ function MapEditorScreen:init()
 --     self.info_panel = MapEditorInfoPanel()
 --     self:attach(self.info_panel)
 
---     self.save_load_dlg = SaveLoadDialog()
---     self:attach(self.save_load_dlg)
+    local save_load_dlg = SaveLoadDialog("save_load_dlg")
+    self:attach(save_load_dlg)
+    self:setUI("save_load_dlg", save_load_dlg)
 
 --     self.edit_entity_dlg = EditEntityDialog()
 --     self:attach(self.edit_entity_dlg)
@@ -196,17 +197,6 @@ end
 --     return string.format("%s/%s.map", Config.map_folder, file_name)
 -- end
 
--- function MapEditorScreen:onQuickSaveEditorMap()
---     if (self.current_map_file) then
---         self:saveMap(self.current_map_file)
---     else
---         if (not self.save_load_dlg:isOpened()) then
---             self.save_load_dlg:switchToSave()
---             self.save_load_dlg:view(true)
---         end
---     end
--- end
-
 -- function MapEditorScreen:saveMap(file_name)
 --     if (file_name) then
 --         -- clean up map from cpp entities
@@ -220,18 +210,6 @@ end
 --         self.notification_dlg:view(true)
 --     end
 -- end
-
-function MapEditorScreen:onSaveEditorMap(file_name)
---     if (file_name) then
---         self.current_map_file = file_name
---         self:saveMap(file_name)
---     else
---         if (not self.save_load_dlg:isOpened()) then
---             self.save_load_dlg:switchToSave()
---             self.save_load_dlg:view(true)
---         end
---     end
-end
 
 -- function MapEditorScreen:clearMap()
 --     self.current_map_file = nil
@@ -278,16 +256,50 @@ end
 --     end
 -- end
 
-function MapEditorScreen:onLoadEditorMap(sender, file_name)
---     if (file_name) then
---         self.current_map_file = file_name
---         self:loadMap(file_name)
---     else
---         if (not self.save_load_dlg:isOpened()) then
---             self.save_load_dlg:switchToLoad()
---             self.save_load_dlg:view(true)
---         end
---     end
+function MapEditorScreen:__openSaveDialog()
+    local save_load_dlg = self:getUI("save_load_dlg")
+    if (save_load_dlg) then
+        if (not save_load_dlg:isOpened()) then
+            save_load_dlg:switchToSave()
+            save_load_dlg:view(true)
+        end
+    end
+end
+
+function MapEditorScreen:__openLoadDialog()
+    local save_load_dlg = self:getUI("save_load_dlg")
+    if (save_load_dlg) then
+        if (not save_load_dlg:isOpened()) then
+            save_load_dlg:switchToLoad()
+            save_load_dlg:view(true)
+        end
+    end
+end
+
+function MapEditorScreen:__onQuickSaveEditorMap()
+    if (self.current_map_file) then
+        self:saveMap(self.current_map_file)
+    else
+        self:__openSaveDialog()
+    end
+end
+
+function MapEditorScreen:__onSaveEditorMap(file_name)
+    if (file_name) then
+        self.current_map_file = file_name
+        self:saveMap(file_name)
+    else
+        self:__openSaveDialog()
+    end
+end
+
+function MapEditorScreen:__onLoadEditorMap(sender, file_name)
+    if (file_name) then
+        self.current_map_file = file_name
+        self:loadMap(file_name)
+    else
+        self:__openLoadDialog()
+    end
 end
 
 function MapEditorScreen:onSelectedItemChanged(id, angle, flip)
