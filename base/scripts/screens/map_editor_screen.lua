@@ -48,7 +48,7 @@ function MapEditorScreen:init()
     Observer:addListener("NextEntity", self, self.goToNextEntity)
     Observer:addListener("PrevEntity", self, self.goToPrevEntity)
     Observer:addListener("StartNewMap", self, self.onStartNewMap)
-    Observer:addListener("SaveEditorMap", self, self.__onSaveEditorMap)
+    Observer:addListener("SaveFile", self, self.__onSaveEditorMap)
     Observer:addListener("LoadEditorMap", self, self.__onLoadEditorMap)
 
 --     Observer:addListener("DeleteEntity", self, self.onEntityDelete)
@@ -260,6 +260,7 @@ function MapEditorScreen:__openSaveDialog()
     local save_load_dlg = self:getUI("save_load_dlg")
     if (save_load_dlg) then
         if (not save_load_dlg:isOpened()) then
+            save_load_dlg:setFiles(FileSystem.getFilesInFolder(Config.map_folder))
             save_load_dlg:switchToSave()
             save_load_dlg:view(true)
         end
@@ -270,6 +271,7 @@ function MapEditorScreen:__openLoadDialog()
     local save_load_dlg = self:getUI("save_load_dlg")
     if (save_load_dlg) then
         if (not save_load_dlg:isOpened()) then
+            save_load_dlg:setFiles(FileSystem.getFilesInFolder(Config.map_folder))
             save_load_dlg:switchToLoad()
             save_load_dlg:view(true)
         end

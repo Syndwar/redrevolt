@@ -76,7 +76,7 @@ function MapEditorSystemPanel:__onBackBtnClick()
 end
 
 function MapEditorSystemPanel:__onSaveBtnClick()
-    Observer:call("SaveEditorMap")
+    Observer:call("SaveFile")
 end
 
 function MapEditorSystemPanel:__onLoadBtnClick()

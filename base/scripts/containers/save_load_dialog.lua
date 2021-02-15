@@ -41,6 +41,7 @@ end
 
 function SaveLoadDialog:init()
     self._is_save = true
+    self._files = nil
 
     local open_transform = Transform()
     open_transform:add(0, 255, 500)
@@ -63,14 +64,14 @@ function SaveLoadDialog:__onOpening()
     -- Config.map_folder
     local folder_cnt = self:getUI("folder_cnt")
     if (folder_cnt) then
-        local command = string.format("dir \"%s\" /b", Config.map_folder)
         local x, y = folder_cnt:getRect()
         local i = 0
         folder_cnt:detachAll()
-        for dir in io.popen(command):lines() do
-            if (0 ~= string.find(dir, "%.map")) then
+        local files = self._files or {}
+        for file in files do
+            if (0 ~= string.find(file, "%.map")) then
                 local btn = Button()
-                btn:setText(string.gsub(dir, "%.map", ""))
+                btn:setText(string.gsub(file, "%.map", ""))
                 btn:setFont("system_15_fnt")
                 btn:setRect(x, y + i * 30, 400, 30)
                 btn:setTextAlignment("CENTER|MIDDLE")
@@ -86,9 +87,9 @@ end
 function SaveLoadDialog:__onOkBtnClick()
     self:view(false)
     if (self._is_save) then
-        Observer:call("SaveEditorMap", self:__getMapFile())
+        Observer:call("SaveFile", self:__getMapFile())
     else
-        Observer:call("LoadEditorMap", nil, self:__getMapFile())
+        Observer:call("LoadFile", nil, self:__getMapFile())
     end
 end
 
@@ -120,4 +121,8 @@ end
 
 function SaveLoadDialog:switchToSave()
     self._is_save = true
+end
+
+function SaveLoadDialog:setFiles(files)
+    self._files = files
 end

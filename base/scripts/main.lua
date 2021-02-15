@@ -1,6 +1,7 @@
 package.path = package.path .. ";./base/scripts/?.lua;./base/res/?.lua"
 
 require("init")
+require("file_system")
 require("observer")
 require("config")
 require("fonts")
