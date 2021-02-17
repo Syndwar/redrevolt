@@ -37,7 +37,13 @@ local function __createImage(data)
         __tuneWidget(widget, data)
 
         if (data.sprite) then
-            widget:setSprite(data.sprite or "")
+            widget:setSprite(data.sprite)
+        end
+        if (data.angle) then
+            widget:setAngle(data.angle)
+        end
+        if (data.center) then
+            widget:setCenter(unpack(data.center))
         end
     end
     return widget

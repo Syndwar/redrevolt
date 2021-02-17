@@ -48,7 +48,7 @@ function MapEditorEditPanel:init()
     self._angle_index = 1
     self._flip_index = 1
 
-    Observer:addListener("SelectEntity", self, self.__onEntitySelected)
+    Observer:addListener("EntityChanged", self, self.__onEntityChanged)
 
     self:addCallback("KeyUp_" .. HotKeys.Flip,      self.__onFlipEntity,      self)
     self:addCallback("KeyUp_" .. HotKeys.Rotate,    self.__onRotateEntity,    self)
@@ -112,8 +112,8 @@ function MapEditorEditPanel:__update()
     self:__updateFlipBtn()
 end
 
-function MapEditorEditPanel:__onEntityCancelled()
-    Observer:call("CancelEntity")
+function MapEditorEditPanel:__onCancelEntity()
+    Observer:call("EntityChanged", nil)
 end
 
 function MapEditorEditPanel:__onEditEntity()
@@ -136,7 +136,7 @@ function MapEditorEditPanel:__onFlipEntity()
     Observer:call("FlipEntity")
 end
 
-function MapEditorEditPanel:__onEntitySelected()
+function MapEditorEditPanel:__onEntityChanged(entity)
     self:__reset()
     self:__update()
 end
