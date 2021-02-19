@@ -162,3 +162,28 @@ function EntityHandler:getGeometry()
     end
     return result
 end
+
+function EntityHandler:getInfo()
+    local info = {}
+    local settings = self._settings or self._default_settings
+
+    local slots = {
+        {"HP:", "health_max"},
+        {"MO:", "morale_max"},
+        {"ST:", "stamina_max"},
+        {"AR:", "armour"},
+        {"AP:", "action_points_max"},
+        {"WS:", "weapon_skill"},
+        {"DG:", "damage"},
+        {"AC:", "accuracy"},
+        {"CP:", "capacity"},
+    }
+    for _, slot in ipairs(slots) do
+        local shortcut = slot[1]
+        local value = settings[slot[2]]
+        if (value) then
+            table.insert(info, {shortcut, value})
+        end
+    end
+    return info
+end

@@ -56,13 +56,10 @@ function MapEditorScreen:init()
     btn:setColour("red")
     self:attach(btn)
 
-    local cell_width, cell_height = MapHandler.getCellSize()
     local cells_in_row, cells_in_col = MapHandler.getMapSize()
+    local cell_width, cell_height = MapHandler.getCellSize()
 
-    local battlefield = MapEditorBattlefield("battlefield")
-    battlefield:setMapSize(cells_in_row, cells_in_col)
-    battlefield:setCellSize(cell_width, cell_height)
-    battlefield:update()
+    local battlefield = MapEditorBattlefield("battlefield", cells_in_row, cells_in_col, cell_width, cell_height)
     self:attach(battlefield)
     self:setUI("battlefield", battlefield)
 
@@ -307,10 +304,6 @@ end
 -- end
 
 function MapEditorScreen:__onRotateItem(angle)
---     if (self.info_panel:isOpened()) then
---         self.info_panel:update(nil, self:getItemAngle(), nil, nil)
---         self:__resetCursor()
---     end
 --     if (self.selected_item_index) then
 --         local entity = MapHandler.getEntity(self.selected_item_index)
 --         entity.angle = self:getItemAngle()
@@ -321,10 +314,6 @@ function MapEditorScreen:__onRotateItem(angle)
 end
 
 function MapEditorScreen:__onFlipItem(flip)
---     if (self.info_panel:isOpened()) then
---         self.info_panel:update(nil, nil, self:getItemFlip(), nil)
---         self:__resetCursor()
---     end
 --     if (self.selected_item_index) then
 --         local entity = MapHandler.getEntity(self.selected_item_index)
 --         entity.flip = self:getItemFlip()

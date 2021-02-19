@@ -1,10 +1,10 @@
 class "MapEditorBattlefield" (Battlefield)
 
-function MapEditorBattlefield:init()
+function MapEditorBattlefield:init(id, cells_in_row, cells_in_col, cell_width, cell_height)
     self._pos = {32, 32}
     self._offset = {-64, -96}
-    self._cell_size = {0, 0}
-    self._map_size = {0, 0}
+    self._map_size = {cells_in_row, cells_in_col}
+    self._cell_size = {cell_width, cell_height}
     self._default_cursor_geometry = nil
     
     Observer:addListener("SwitchGrid", self, self.__onGridSwitched)
@@ -22,21 +22,35 @@ function MapEditorBattlefield:init()
     self:addCallback("KeyUp_" .. HotKeys.ScrollRight,   self.__scrollToDirection, {self, "Right", false})
     self:addCallback("KeyUp_" .. HotKeys.ScrollDown,    self.__scrollToDirection, {self, "Down", false})
 
+    local scroll_speed = 500
+    self:setScrollSpeed(scroll_speed)
 
-    self:setScrollSpeed(500)
+    local screen_width = Engine.getScreenWidth()
+    local screen_height = Engine.getScreenHeight()
+
+    local map_width = cells_in_row * cell_width
+    local map_height = cells_in_col * cell_height
+
+    self:setRect(0, 0, screen_width + self._offset[1], screen_height + self._offset[2])
+    self:setContentRect(0, 0, map_width, map_height)
+
+    local grid = Primitive("fieldGrid")
+    grid:setColour("green")
+    grid:createLines(self:__createGridLines())
+    self:attach(grid)
+    self:setUI("fieldGrid", grid)
+
+    local cursor = Primitive("cursorRect")
+    cursor:setColour("yellow")
+    cursor:createRects({{0, 0, cell_width, cell_height}}, false)
+    cursor:instantView(false)
+    self:attach(cursor)
+    self:setUI("cursor", cursor)
+
+    self:moveBy(unpack(self._pos))
 end
 
-function MapEditorBattlefield:setMapSize(i, j)
-    self._map_size[1] = i
-    self._map_size[2] = j
-end
-
-function MapEditorBattlefield:setCellSize(width, height)
-    self._cell_size[1] = width
-    self._cell_size[2] = height
-end
-
-function MapEditorBattlefield:createGridLines()
+function MapEditorBattlefield:__createGridLines()
     local grid_lines = {}
 
     local cells_in_row, cells_in_col = unpack(self._map_size)
@@ -78,34 +92,7 @@ function MapEditorBattlefield:createGridLines()
     return grid_lines
 end
 
-function MapEditorBattlefield:update()
-    local screen_width = Engine.getScreenWidth()
-    local screen_height = Engine.getScreenHeight()
-    local cell_width, cell_height = unpack(self._cell_size)
-
-    local map_width = self._map_size[1] * cell_width
-    local map_height = self._map_size[2] * cell_height
-
-    self:setRect(0, 0, screen_width + self._offset[1], screen_height + self._offset[2])
-    self:setContentRect(0, 0, map_width, map_height)
-
-    local grid = Primitive("fieldGrid")
-    grid:setColour("green")
-    grid:createLines(self:createGridLines())
-    self:attach(grid)
-    self:setUI("fieldGrid", grid)
-
-    local cursor = Primitive("cursorRect")
-    cursor:setColour("yellow")
-    cursor:createRects({{0, 0, cell_width, cell_height}}, false)
-    cursor:instantView(false)
-    self:attach(cursor)
-    self:setUI("cursor", cursor)
-
-    self:moveBy(unpack(self._pos))
-end
-
-function MapEditorBattlefield:calculateCell(x, y)
+function MapEditorBattlefield:__calculateCell(x, y)
     local cell_width, cell_height = unpack(self._cell_size)
     local i = math.floor(x / cell_width) + 1
     local j = math.floor(y / cell_height) + 1
@@ -119,7 +106,7 @@ function MapEditorBattlefield:__onGridSwitched()
     end
 end
 
-function MapEditorBattlefield:calculateFieldPos(i, j)
+function MapEditorBattlefield:__calculateFieldPos(i, j)
     local left, top, _, _ = self:getRect()
     local cell_width, cell_height = unpack(self._cell_size)
     local x = left + (i - 1) * cell_width
@@ -131,8 +118,8 @@ function MapEditorBattlefield:__getCellPosForCursor()
     local x, y = Engine.getMousePos()
     local sx, sy = self:screenToScrollPos(x, y)
     local bx, by, _, _ = self:getRect()
-    local i, j = self:calculateCell(sx - bx, sy - by)
-    return self:calculateFieldPos(i, j)
+    local i, j = self:__calculateCell(sx - bx, sy - by)
+    return self:__calculateFieldPos(i, j)
 end
 
 function MapEditorBattlefield:__onMouseMove()
