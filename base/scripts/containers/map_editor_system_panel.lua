@@ -76,11 +76,11 @@ function MapEditorSystemPanel:__onBackBtnClick()
 end
 
 function MapEditorSystemPanel:__onSaveBtnClick()
-    Observer:call("SaveFile")
+    Observer:call("SaveMapFile")
 end
 
 function MapEditorSystemPanel:__onLoadBtnClick()
-    Observer:call("LoadEditorMap")
+    Observer:call("LoadMapFile")
 end
 
 function MapEditorSystemPanel:__onGridBtnClick()

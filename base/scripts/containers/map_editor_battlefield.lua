@@ -5,9 +5,12 @@ function MapEditorBattlefield:init()
     self._offset = {-64, -96}
     self._cell_size = {0, 0}
     self._map_size = {0, 0}
+    self._default_cursor_geometry = nil
     
     Observer:addListener("SwitchGrid", self, self.__onGridSwitched)
     Observer:addListener("EntityChanged", self, self.__onEntityChanged)
+    Observer:addListener("EntityRotated", self, self.__onEntityRotated)
+    Observer:addListener("EntityFlipped", self, self.__onEntityFlipped)
     
     self:addCallback("MouseMove", self.__onMouseMove, self)
     self:addCallback("KeyDown_" .. HotKeys.ScrollUp,    self.__scrollToDirection, {self, "Up", true})
@@ -133,8 +136,9 @@ function MapEditorBattlefield:__getCellPosForCursor()
 end
 
 function MapEditorBattlefield:__onMouseMove()
-    if (self.selected_item_id) then
-        local cursor = self:getUI("cursor")
+    local cursor = self:getUI("cursor")
+    local is_opened = cursor and cursor:isOpened()
+    if (is_opened) then
         local field_x, field_y = self:__getCellPosForCursor()
         cursor:moveTo(field_x, field_y)
     end
@@ -149,15 +153,32 @@ function MapEditorBattlefield.__scrollToDirection(params)
     end
 end
 
-function MapEditorBattlefield:__onEntityChanged(entity)
-    self:__resetCursor(entity and entity:isValid())
+function MapEditorBattlefield:__onEntityFlipped(flip)
+    if (self._default_cursor_geometry and flip) then
+        local new_geometry = EntityHandler.flipGeometry(self._default_cursor_geometry, flip[1], flip[2])
+        self:__resetCursor(new_geometry)
+    end
 end
 
-function MapEditorBattlefield:__resetCursor(show)
+function MapEditorBattlefield:__onEntityRotated(angle)
+    if (self._default_cursor_geometry and angle) then
+        local new_geometry = EntityHandler.rotateGeometry(self._default_cursor_geometry, angle)
+        self:__resetCursor(new_geometry)
+    end
+end
+
+function MapEditorBattlefield:__onEntityChanged(entity)
+    self._default_cursor_geometry = entity and entity:isValid() and entity:geDefaultGeometry()
+    local new_geometry = entity and entity:isValid() and entity:getGeometry()
+    self:__resetCursor(new_geometry)
+end
+
+function MapEditorBattlefield:__resetCursor(geometry)
     local cursor = self:getUI("cursor")
     if (cursor) then
+        local show = nil ~= geometry
         local is_opened = cursor:isOpened()
-        if (show and not is_opened) then
+        if (geometry and not is_opened) then
             cursor:instantView(true)
         elseif (not show and is_opened) then
             cursor:instantView(false)
@@ -165,23 +186,20 @@ function MapEditorBattlefield:__resetCursor(show)
 
         if (show) then
             local field_x, field_y = self:__getCellPosForCursor()
-            -- local data = GameData.find(self.selected_item_id)
-            -- local geometry = GameData.getGeometry(data, self:getItemAngle(), self:getItemFlip())
+            local cell_width, cell_height = unpack(self._cell_size)
 
-            -- local cell_width, cell_height = MapHandler.getCellSize()
-            
-            -- local rects = {}
-            -- for row_index, row in ipairs(geometry) do
-            --     for col_index, value in ipairs(row) do
-            --         if (0 ~= value) then
-            --             local cell_top = field_x + (col_index - 1) * cell_width
-            --             local cell_left = field_y + (row_index - 1) * cell_height
-            --             local rect = {cell_top, cell_left, cell_width, cell_height}
-            --             table.insert(rects, rect)
-            --         end
-            --     end
-            -- end
-            -- cursor:reset(rects, false)
+            local rects = {}
+            for row_index, row in ipairs(geometry) do
+                for col_index, value in ipairs(row) do
+                    if (0 ~= value) then
+                        local cell_top = field_x + (col_index - 1) * cell_width
+                        local cell_left = field_y + (row_index - 1) * cell_height
+                        local rect = {cell_top, cell_left, cell_width, cell_height}
+                        table.insert(rects, rect)
+                    end
+                end
+            end
+            cursor:reset(rects, false)
         end
     end
 end

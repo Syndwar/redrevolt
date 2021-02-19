@@ -19,6 +19,32 @@ function MapEditorScreen:init()
 --     self.selected_item_index = nil
 --     self.current_map_file = nil
 
+    self:addCallback("KeyUp_" .. HotKeys.Grid, self.onGridSwitched, self)
+    self:addCallback("KeyUp_" .. HotKeys.Panel1, self.__onChangeFilter, 1)
+    self:addCallback("KeyUp_" .. HotKeys.Panel2, self.__onChangeFilter, 2)
+    self:addCallback("KeyUp_" .. HotKeys.Panel3, self.__onChangeFilter, 3)
+    self:addCallback("KeyUp_" .. HotKeys.Panel4, self.__onChangeFilter, 4)
+    self:addCallback("KeyUp_" .. HotKeys.Save, self.__onQuickSaveEditorMap, self)
+    self:addCallback("KeyUp_" .. HotKeys.Load, self.__onLoadEditorMap, self)
+
+    Observer:addListener("ExitScreen", self, self.__onExitScreen)
+
+    Observer:addListener("ShowInventory", self, self.__showInventory)
+    
+    Observer:addListener("EntityRotated", self, self.__onRotateItem)
+    Observer:addListener("EntityFlipped", self, self.__onFlipItem)
+    
+    Observer:addListener("EditEntity", self, self.__onEditItem)
+    Observer:addListener("NextEntity", self, self.__goToNextEntity)
+    Observer:addListener("PrevEntity", self, self.__goToPrevEntity)
+
+    Observer:addListener("StartNewMap", self, self.__onStartNewMap)
+    Observer:addListener("SaveMapFile", self, self.__onSaveEditorMap)
+    Observer:addListener("LoadMapFile", self, self.__onLoadEditorMap)
+
+--     Observer:addListener("DeleteEntity", self, self.onEntityDelete)
+--     Observer:addListener("AddEntity", self, self.onEntityAdd)
+
     local btn = Button("menuBtn")
     btn:setText("Menu")
     btn:setFont("system_15_fnt")
@@ -29,28 +55,6 @@ function MapEditorScreen:init()
     btn:addCallback("MouseUp_Left", self.onMenuBtnClick, self)
     btn:setColour("red")
     self:attach(btn)
-
-    self:addCallback("KeyUp_" .. HotKeys.Grid, self.onGridSwitched, self)
-    self:addCallback("KeyUp_" .. HotKeys.Panel1, self.__onChangeFilter, 1)
-    self:addCallback("KeyUp_" .. HotKeys.Panel2, self.__onChangeFilter, 2)
-    self:addCallback("KeyUp_" .. HotKeys.Panel3, self.__onChangeFilter, 3)
-    self:addCallback("KeyUp_" .. HotKeys.Panel4, self.__onChangeFilter, 4)
-    self:addCallback("KeyUp_" .. HotKeys.Save, self.__onQuickSaveEditorMap, self)
-    self:addCallback("KeyUp_" .. HotKeys.Load, self.__onLoadEditorMap, self)
-
-    Observer:addListener("ExitScreen", self, self.onExitScreen)
-    Observer:addListener("EditEntity", self, self.onEditItem)
-    Observer:addListener("ShowInventory", self, self.showInventory)
-    Observer:addListener("RotateEntity", self, self.onRotateItem)
-    Observer:addListener("FlipEntity", self, self.onFlipItem)
-    Observer:addListener("NextEntity", self, self.__goToNextEntity)
-    Observer:addListener("PrevEntity", self, self.__goToPrevEntity)
-    Observer:addListener("StartNewMap", self, self.__onStartNewMap)
-    Observer:addListener("SaveFile", self, self.__onSaveEditorMap)
-    Observer:addListener("LoadEditorMap", self, self.__onLoadEditorMap)
-
---     Observer:addListener("DeleteEntity", self, self.onEntityDelete)
---     Observer:addListener("AddEntity", self, self.onEntityAdd)
 
     local cell_width, cell_height = MapHandler.getCellSize()
     local cells_in_row, cells_in_col = MapHandler.getMapSize()
@@ -65,7 +69,6 @@ function MapEditorScreen:init()
 --     self.battlefield:addCallback("MouseDown_Left", self.onBattleFieldLeftClicked, self)
 --     self.battlefield:addCallback("MouseDown_Right", self.onBattleFieldRightClicked, self)
 --     self.battlefield:addCallback("MouseDown_Middle", self.onBattleFieldMiddleClicked, self)
-
 
     local system_panel = MapEditorSystemPanel("systemPanel")
     system_panel:instantView(false)
@@ -106,7 +109,7 @@ function MapEditorScreen:init()
 --     self:attach(self.inventory_dlg)
 end
 
-function MapEditorScreen:onExitScreen()
+function MapEditorScreen:__onExitScreen()
     Screens.load("LoadingScreen", "MainScreen")
 end
 
@@ -154,7 +157,6 @@ function MapEditorScreen:__goToPrevEntity()
 --                 if (entity) then
 --                     for _, data in ipairs(entities) do
 --                         if (data.id == entity.id) then
---                             log(data.id)
 --                             self:selectItem(i)
 --                             self:scrollToCell(entity.pos[1], entity.pos[2])
 --                             return
@@ -178,7 +180,6 @@ function MapEditorScreen:__goToNextEntity()
 --                 if (entity) then
 --                     for _, data in ipairs(entities) do
 --                         if (data.id == entity.id) then
---                             log(data.id)
 --                             self:selectItem(i)
 --                             self:scrollToCell(entity.pos[1], entity.pos[2])
 --                             return
@@ -301,11 +302,11 @@ function MapEditorScreen:__onLoadEditorMap(sender, file_name)
     end
 end
 
-function MapEditorScreen:__onEntityChanged(id)
-    self.selected_item_id = id
-end
+-- function MapEditorScreen:__onEntityChanged(id)
+    -- self.selected_item_id = id
+-- end
 
-function MapEditorScreen:onRotateItem()
+function MapEditorScreen:__onRotateItem(angle)
 --     if (self.info_panel:isOpened()) then
 --         self.info_panel:update(nil, self:getItemAngle(), nil, nil)
 --         self:__resetCursor()
@@ -319,7 +320,7 @@ function MapEditorScreen:onRotateItem()
 --     end
 end
 
-function MapEditorScreen:onFlipItem()
+function MapEditorScreen:__onFlipItem(flip)
 --     if (self.info_panel:isOpened()) then
 --         self.info_panel:update(nil, nil, self:getItemFlip(), nil)
 --         self:__resetCursor()
@@ -487,7 +488,7 @@ function MapEditorScreen:__onStartNewMap()
     self:__clearMap()
 end
 
-function MapEditorScreen:onEditItem()
+function MapEditorScreen:__onEditItem()
 --     if (self.selected_item_index) then
 --         local entity = MapHandler.getEntity(self.selected_item_index)
 --         self.edit_entity_dlg:tune(entity)
@@ -495,7 +496,7 @@ function MapEditorScreen:onEditItem()
 --     end
 end
 
-function MapEditorScreen:showInventory()
+function MapEditorScreen:__showInventory()
 --     if (self.selected_item_index) then
 --         local entity = MapHandler.getEntity(self.selected_item_index)
 --         if (entity) then

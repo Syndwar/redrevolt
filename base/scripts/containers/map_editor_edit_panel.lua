@@ -71,12 +71,20 @@ function MapEditorEditPanel:setFlips(flips)
     self._flips = flips
 end
 
+function MapEditorEditPanel:__getFlip()
+    return self._flips and self._flips[self._flip_index]
+end
+
+function MapEditorEditPanel:__getAngle()
+    return self._angles and self._angles[self._angle_index] or 0
+end
+
 function MapEditorEditPanel:__reset(angle, flip)
     self._angle_index = 1
     self._flip_index = 1
 end
 
-function MapEditorEditPanel:s__switchAngle()
+function MapEditorEditPanel:__switchAngle()
     self._angle_index = self._angle_index + 1
     if (self._angle_index > #self._angles) then
         self._angle_index = 1
@@ -125,15 +133,15 @@ function MapEditorEditPanel:__onShowInventory()
 end
 
 function MapEditorEditPanel:__onRotateEntity()
-    self:s__switchAngle()
+    self:__switchAngle()
     self:__update()
-    Observer:call("RotateEntity")
+    Observer:call("EntityRotated", self:__getAngle())
 end
 
 function MapEditorEditPanel:__onFlipEntity()
     self:__switchFlip()
     self:__update()
-    Observer:call("FlipEntity")
+    Observer:call("EntityFlipped", self:__getFlip())
 end
 
 function MapEditorEditPanel:__onEntityChanged(entity)

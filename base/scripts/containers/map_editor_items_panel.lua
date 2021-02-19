@@ -79,7 +79,6 @@ function MapEditorItemsPanel:__onFilterChanged(id)
     if (scroll_cnt) then
         scroll_cnt:jumpTo(0, 0)
 
-        log(id)
         self:__viewActivePage(false)
         self._active_page = id
         self:__viewActivePage(true)

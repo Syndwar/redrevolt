@@ -87,9 +87,9 @@ end
 function SaveLoadDialog:__onOkBtnClick()
     self:view(false)
     if (self._is_save) then
-        Observer:call("SaveFile", self:__getMapFile())
+        Observer:call("SaveMapFile", self:__getMapFile())
     else
-        Observer:call("LoadFile", nil, self:__getMapFile())
+        Observer:call("LoadMapFile", nil, self:__getMapFile())
     end
 end
 

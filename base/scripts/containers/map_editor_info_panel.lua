@@ -19,6 +19,8 @@ end
 
 function MapEditorInfoPanel:init()
     Observer:addListener("EntityChanged", self, self.__onEntityChanged)
+    Observer:addListener("EntityRotated", self, self.__onEntityRotated)
+    Observer:addListener("EntityFlipped", self, self.__onEntityFlipped)
 --     self.current_map = nil
 --     self.maps = {}
 --     self.containers = {}
@@ -49,29 +51,41 @@ function MapEditorInfoPanel:__onEntityChanged(entity)
     self:__update(entity)
 end
 
+function MapEditorInfoPanel:__onEntityFlipped(flip)
+    if (flip) then
+        local selected_img = self:getUI("selected_img")
+        if (selected_img) then
+            selected_img:setFlip(unpack(flip))
+        end
+    end
+end
+
+function MapEditorInfoPanel:__onEntityRotated(angle)
+    if (angle) then
+        local selected_img = self:getUI("selected_img")
+        if (selected_img) then
+            selected_img:setAngle(angle)
+        end
+    end
+end
+
 function MapEditorInfoPanel:__update(entity)
     local selected_img = self:getUI("selected_img")
     if (selected_img) then
-        local sprite = entity and entity:getSprite()
-        selected_img:instantView(nil ~= sprite)
-        if (sprite) then
-            selected_img:setSprite(sprite)
+        selected_img:instantView(nil ~= entity)
+        if (entity) then
+            selected_img:setSprite(entity:getSprite())
+            selected_img:setAngle(entity:getAngle())
+            selected_img:setFlip(unpack(entity:getFlip()))
         end
     end
     local selected_lbl = self:getUI("selected_lbl")
     if (selected_lbl) then
-        local id = entity and entity:getId()
-        selected_lbl:instantView(nil ~= id)
-        if (id) then
-            selected_lbl:setText(id)
+        selected_lbl:instantView(nil ~= entity)
+        if (entity) then
+            selected_lbl:setText(entity:getId())
         end
     end
---     if (angle) then
---         self.selected_item_img:setAngle(angle)
---     end
---     if (flip) then
---         self.selected_item_img:setFlip(unpack(flip))
---     end
 
 --     local entity_type = entity and GameData.getEntityType(entity.id)
 --     for _, cnt_id in ipairs(self.cnt_list) do
