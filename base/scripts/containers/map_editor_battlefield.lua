@@ -1,11 +1,10 @@
 class "MapEditorBattlefield" (Battlefield)
 
-function MapEditorBattlefield:init(id, cells_in_row, cells_in_col, cell_width, cell_height)
+function MapEditorBattlefield:init(id)
     self._pos = {32, 32}
     self._offset = {-64, -96}
-    self._map_size = {cells_in_row, cells_in_col}
-    self._cell_size = {cell_width, cell_height}
-    self._default_cursor_geometry = nil
+    self._map = nil
+    self._selected_entity = nil
     
     Observer:addListener("SwitchGrid", self, self.__onGridSwitched)
     Observer:addListener("EntityChanged", self, self.__onEntityChanged)
@@ -21,12 +20,22 @@ function MapEditorBattlefield:init(id, cells_in_row, cells_in_col, cell_width, c
     self:addCallback("KeyUp_" .. HotKeys.ScrollLeft,    self.__scrollToDirection, {self, "Left", false})
     self:addCallback("KeyUp_" .. HotKeys.ScrollRight,   self.__scrollToDirection, {self, "Right", false})
     self:addCallback("KeyUp_" .. HotKeys.ScrollDown,    self.__scrollToDirection, {self, "Down", false})
+    self:addCallback("MouseDown_Left", self.__onFieldLeftClicked, self)
+    self:addCallback("MouseDown_Right", self.__onFieldRightClicked, self)
+    self:addCallback("MouseDown_Middle", self.__onFieldMiddleClicked, self)
 
     local scroll_speed = 500
     self:setScrollSpeed(scroll_speed)
+    self:__createMapContent()
+end
+
+function MapEditorBattlefield:__createMapContent()
+    self._map = MapHandler.new()
 
     local screen_width = Engine.getScreenWidth()
     local screen_height = Engine.getScreenHeight()
+    local cells_in_row, cells_in_col = self._map:getSize()
+    local cell_width, cell_height = self._map:getCellSize()
 
     local map_width = cells_in_row * cell_width
     local map_height = cells_in_col * cell_height
@@ -53,8 +62,8 @@ end
 function MapEditorBattlefield:__createGridLines()
     local grid_lines = {}
 
-    local cells_in_row, cells_in_col = unpack(self._map_size)
-    local cell_width, cell_height = unpack(self._cell_size)
+    local cells_in_row, cells_in_col = self._map:getSize()
+    local cell_width, cell_height = self._map:getCellSize()
     local map_width = cells_in_row * cell_width
     local map_height = cells_in_col * cell_height
 
@@ -93,7 +102,7 @@ function MapEditorBattlefield:__createGridLines()
 end
 
 function MapEditorBattlefield:__calculateCell(x, y)
-    local cell_width, cell_height = unpack(self._cell_size)
+    local cell_width, cell_height = self._map:getCellSize()
     local i = math.floor(x / cell_width) + 1
     local j = math.floor(y / cell_height) + 1
     return i, j
@@ -108,7 +117,7 @@ end
 
 function MapEditorBattlefield:__calculateFieldPos(i, j)
     local left, top, _, _ = self:getRect()
-    local cell_width, cell_height = unpack(self._cell_size)
+    local cell_width, cell_height = self._map:getCellSize()
     local x = left + (i - 1) * cell_width
     local y = top + (j - 1) * cell_height
     return x, y
@@ -141,23 +150,23 @@ function MapEditorBattlefield.__scrollToDirection(params)
 end
 
 function MapEditorBattlefield:__onEntityFlipped(flip)
-    if (self._default_cursor_geometry and flip) then
-        local new_geometry = EntityHandler.flipGeometry(self._default_cursor_geometry, flip[1], flip[2])
-        self:__resetCursor(new_geometry)
+    if (self._selected_entity and flip) then
+        self._selected_entity:setFlip(flip[1], flip[2])
+        self:__resetCursor(self._selected_entity:getGeometry())
     end
 end
 
 function MapEditorBattlefield:__onEntityRotated(angle)
-    if (self._default_cursor_geometry and angle) then
-        local new_geometry = EntityHandler.rotateGeometry(self._default_cursor_geometry, angle)
-        self:__resetCursor(new_geometry)
+    if (self._selected_entity and angle) then
+        self._selected_entity:setAngle(angle)
+        self:__resetCursor(self._selected_entity:getGeometry())
     end
 end
 
 function MapEditorBattlefield:__onEntityChanged(entity)
-    self._default_cursor_geometry = entity and entity:isValid() and entity:geDefaultGeometry()
-    local new_geometry = entity and entity:isValid() and entity:getGeometry()
-    self:__resetCursor(new_geometry)
+    -- saves new entity
+    self._selected_entity = entity
+    self:__resetCursor(entity and self._selected_entity:getGeometry())
 end
 
 function MapEditorBattlefield:__resetCursor(geometry)
@@ -173,7 +182,7 @@ function MapEditorBattlefield:__resetCursor(geometry)
 
         if (show) then
             local field_x, field_y = self:__getCellPosForCursor()
-            local cell_width, cell_height = unpack(self._cell_size)
+            local cell_width, cell_height = self._map:getCellSize()
 
             local rects = {}
             for row_index, row in ipairs(geometry) do
@@ -189,4 +198,112 @@ function MapEditorBattlefield:__resetCursor(geometry)
             cursor:reset(rects, false)
         end
     end
+end
+
+function MapEditorBattlefield:__onFieldLeftClicked()
+    if (self._selected_entity) then
+        local x, y = Engine.getMousePos()
+        local sx, sy = self:screenToScrollPos(x, y)
+        local bx, by, _, _ = self:getRect()
+        local i, j = self:__calculateCell(sx - bx, sy - by)
+
+        -- local found_duplicate = MapHandler.hasDuplicateInCell(id, i, j) -- check for duplicates
+        -- if (not found_duplicate) then
+            local entity = self._selected_entity:copy()
+            entity:setPos(i, j)
+            local obj = self:__createEntityOnField(entity)
+            -- entity.obj = self:createEntity(entity) -- create entity
+            self._map:addEntity(entity) -- add it to the map
+        -- end
+
+    else
+--         local index = self:findEntityOnClick()
+--         if (index > 0) then
+--             self:selectItem(index)
+--         end
+    end
+end
+
+function MapEditorBattlefield:__createEntityOnField(entity)
+    local pos = entity:getPos()
+    local x, y = self:__calculateFieldPos(pos[1], pos[2])
+    local size = entity:getSize()
+    local angle = entity:getAngle()
+    local img = Image()
+    img:setSprite(entity:getSprite())
+    img:ignoreMouse(true)
+    img:setRect(x, y, size[1], size[2])
+    img:setCenter(entity:getHotSpot())
+    img:setAngle(angle)
+    img:setFlip(unpack(entity:getFlip()))
+    self:attach(img)
+    return img
+end
+
+function MapEditorBattlefield:__onFieldRightClicked()
+    if (self._selected_entity) then
+        Observer:call("EntityChanged", nil)
+    else
+        -- local index, entity = self:findEntityOnClick()
+        -- self:onEntityDelete(index, entity)
+    end
+end
+
+function MapEditorBattlefield:__onFieldMiddleClicked()
+--     local x, y = Engine.getMousePos()
+--     local sx, sy = self.battlefield:screenToScrollPos(x, y)
+--     local bx, by, _, _ = self.battlefield:getRect()
+--     local i, j = __calculateCell(sx - bx, sy - by)
+
+--     for index = MapHandler.getContentSize(), 1, -1 do
+--         local entity = MapHandler.getEntity(index)
+--         if (entity) then
+--             local obj_data = GameData.find(entity.id)
+--             local geometry = GameData.getGeometry(obj_data, entity.angle, entity.flip)
+--             for k, row in ipairs(geometry) do
+--                 for l, value in ipairs(row) do
+--                     if (1 == value) then
+--                         local obj_part_x = entity.pos[1] + (l - 1)
+--                         local obj_part_y = entity.pos[2] + (k - 1)
+--                         if (obj_part_x == i and obj_part_y == j) then
+--                             self:__onEntityChanged(entity.id, entity.angle, entity.flip)
+--                             break
+--                         end
+--                     end
+--                 end
+--             end
+--         end
+--     end
+end
+
+function MapEditorBattlefield:loadMap(filename)
+--     if (file_name) then
+--         local full_file_path = self:getMapFilePath(file_name)
+--         local f = io.open(full_file_path, "r")
+--         -- check if file exists
+--         if (f) then
+--             io.close(f)
+--             -- clear current map
+--             self:clearMap()
+--             -- load map from file
+--             local settings = dofile(full_file_path)
+--             -- remember new map
+--             MapHandler.resetMap(settings)
+
+--             for _, data in ipairs(settings.content) do
+--                 local entity = EntityHandler.new(data.id)
+--                 entity:setPos(data.pos[1], data.pos[2])
+--                 entity:setAngle(data.angle)
+--                 entity:setFlip(data.flip[1], data.flip[2])
+--                 entity:setSettings(data.settings)
+--                 entity.obj = self:createEntity(entity)
+--                 MapHandler.addEntity(entity)
+--             end
+
+--             self.current_map_file = file_name
+--             log("Map is loaded.")
+--             self.notification_dlg:setMessage("Map is loaded.")
+--             self.notification_dlg:view(true)
+--         end
+--     end
 end

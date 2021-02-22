@@ -33,8 +33,14 @@ function ConsolePanel:init()
     end
 end
 
-function ConsolePanel:log(msg)
-    local new_value = msg
+function ConsolePanel:log(...)
+    local args = {...}
+    local format = ""
+    for i = 1, #args do
+        args[i] = tostring(args[i])
+        format = format .. "%s "
+    end
+    local new_value = string.format(format, unpack(args))
     for i = #self.stack, 1, -1 do
         local old_value = self.stack[i]
         self.stack[i] = new_value

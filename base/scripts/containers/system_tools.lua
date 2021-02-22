@@ -56,12 +56,12 @@ function SystemTools:viewWidgetsTree()
     end
 end
 
-function SystemTools:log(msg)
+function SystemTools:log(...)
     if (not self.console) then
         self.console = ConsolePanel()
         self:attach(self.console)
     end
     if (self.console) then
-        self.console:log(msg)
+        self.console:log(...)
     end
 end

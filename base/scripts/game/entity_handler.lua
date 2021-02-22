@@ -72,6 +72,11 @@ function EntityHandler:getSprite()
     return desc and desc.sprite or ""
 end
 
+function EntityHandler:getSize()
+    local desc = self._default_desc
+    return desc and desc.size or {0, 0}
+end
+
 function EntityHandler:getName()
     local settings = self._settings or self._default_settings
     return settings and settings.name or ""
@@ -164,7 +169,7 @@ function EntityHandler:getGeometry()
 end
 
 function EntityHandler:getInfo()
-    local info = {}
+    local info = nil
     local settings = self._settings or self._default_settings
 
     local slots = {
@@ -180,10 +185,34 @@ function EntityHandler:getInfo()
     }
     for _, slot in ipairs(slots) do
         local shortcut = slot[1]
-        local value = settings[slot[2]]
+        local value = settings and settings[slot[2]]
         if (value) then
+            if (not info) then
+                info = {}
+            end
             table.insert(info, {shortcut, value})
         end
     end
     return info
+end
+
+function EntityHandler:getHotSpot()
+    local desc = self._default_desc
+    local size = desc.size or {0, 0}
+    local angle = self._angle
+    local w, h = size[1], size[2]
+    local midw = w / 2
+    local midh = h / 2
+    if (w == h) then
+        return midw, midh
+    elseif (90 == angle) then
+        return midh, midh
+    elseif (270 == angle) then
+        return midw, midw
+    end
+    return midw, midh
+end
+
+function EntityHandler:copy()
+    return table.deepcopy(self)
 end
