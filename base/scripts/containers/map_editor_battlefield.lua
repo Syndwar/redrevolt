@@ -1,16 +1,27 @@
 class "MapEditorBattlefield" (Battlefield)
 
 function MapEditorBattlefield:init(id)
+    local default_map_size = {80, 50}
+    local default_cell_size = {32, 32}
+
     self._pos = {32, 32}
     self._offset = {-64, -96}
-    self._map = nil
     self._selected_entity = nil
+
+    local function entity_creator(entity)
+        return self:__createEntityOnField(entity)
+    end
+
+    self._map = MapHandler.new(entity_creator)
+    self._map:setSize(unpack(default_map_size))
+    self._map:setCellSize(unpack(default_cell_size))
     
     Observer:addListener("SwitchGrid", self, self.__onGridSwitched)
     Observer:addListener("EntityChanged", self, self.__onEntityChanged)
     Observer:addListener("EntityRotated", self, self.__onEntityRotated)
     Observer:addListener("EntityFlipped", self, self.__onEntityFlipped)
     
+    self:addCallback("KeyUp_" .. HotKeys.Grid, self.__onGridSwitched, self)
     self:addCallback("MouseMove", self.__onMouseMove, self)
     self:addCallback("KeyDown_" .. HotKeys.ScrollUp,    self.__scrollToDirection, {self, "Up", true})
     self:addCallback("KeyDown_" .. HotKeys.ScrollLeft,  self.__scrollToDirection, {self, "Left", true})
@@ -30,8 +41,6 @@ function MapEditorBattlefield:init(id)
 end
 
 function MapEditorBattlefield:__createMapContent()
-    self._map = MapHandler.new()
-
     local screen_width = Engine.getScreenWidth()
     local screen_height = Engine.getScreenHeight()
     local cells_in_row, cells_in_col = self._map:getSize()
@@ -124,10 +133,7 @@ function MapEditorBattlefield:__calculateFieldPos(i, j)
 end
 
 function MapEditorBattlefield:__getCellPosForCursor()
-    local x, y = Engine.getMousePos()
-    local sx, sy = self:screenToScrollPos(x, y)
-    local bx, by, _, _ = self:getRect()
-    local i, j = self:__calculateCell(sx - bx, sy - by)
+    local i, j = self:__getMouseTargetedCell()
     return self:__calculateFieldPos(i, j)
 end
 
@@ -200,31 +206,29 @@ function MapEditorBattlefield:__resetCursor(geometry)
     end
 end
 
+function MapEditorBattlefield:__getMouseTargetedCell()
+    local x, y = Engine.getMousePos()
+    local sx, sy = self:screenToScrollPos(x, y)
+    local bx, by, _, _ = self:getRect()
+    return self:__calculateCell(sx - bx, sy - by)
+end
+
 function MapEditorBattlefield:__onFieldLeftClicked()
     if (self._selected_entity) then
-        local x, y = Engine.getMousePos()
-        local sx, sy = self:screenToScrollPos(x, y)
-        local bx, by, _, _ = self:getRect()
-        local i, j = self:__calculateCell(sx - bx, sy - by)
-
-        -- local found_duplicate = MapHandler.hasDuplicateInCell(id, i, j) -- check for duplicates
-        -- if (not found_duplicate) then
-            local entity = self._selected_entity:copy()
-            entity:setPos(i, j)
-            local obj = self:__createEntityOnField(entity)
-            -- entity.obj = self:createEntity(entity) -- create entity
-            self._map:addEntity(entity) -- add it to the map
-        -- end
-
+        if (self._map) then
+            local i, j = self:__getMouseTargetedCell()
+            self._map:addEntity(self._selected_entity, i, j) -- add it to the map
+        end
     else
---         local index = self:findEntityOnClick()
---         if (index > 0) then
---             self:selectItem(index)
---         end
+        local i, j = self:__getMouseTargetedCell()
+        local entity = self._map:getEntity(i, j) -- get an item from the map
+        -- Observer:call("EntityChanged", entity)
     end
 end
 
 function MapEditorBattlefield:__createEntityOnField(entity)
+    if (not entity) then return nil end
+
     local pos = entity:getPos()
     local x, y = self:__calculateFieldPos(pos[1], pos[2])
     local size = entity:getSize()
@@ -244,66 +248,41 @@ function MapEditorBattlefield:__onFieldRightClicked()
     if (self._selected_entity) then
         Observer:call("EntityChanged", nil)
     else
-        -- local index, entity = self:findEntityOnClick()
-        -- self:onEntityDelete(index, entity)
+        if (self._map) then
+            local i, j = self:__getMouseTargetedCell()
+            self._map:removeEntity(i, j) -- remote it from the map
+            local entity = self._map:getEntity(i, j) -- get an item from the map
+            -- Observer:call("EntityChanged", entity)
+        end
     end
 end
 
 function MapEditorBattlefield:__onFieldMiddleClicked()
---     local x, y = Engine.getMousePos()
---     local sx, sy = self.battlefield:screenToScrollPos(x, y)
---     local bx, by, _, _ = self.battlefield:getRect()
---     local i, j = __calculateCell(sx - bx, sy - by)
-
---     for index = MapHandler.getContentSize(), 1, -1 do
---         local entity = MapHandler.getEntity(index)
---         if (entity) then
---             local obj_data = GameData.find(entity.id)
---             local geometry = GameData.getGeometry(obj_data, entity.angle, entity.flip)
---             for k, row in ipairs(geometry) do
---                 for l, value in ipairs(row) do
---                     if (1 == value) then
---                         local obj_part_x = entity.pos[1] + (l - 1)
---                         local obj_part_y = entity.pos[2] + (k - 1)
---                         if (obj_part_x == i and obj_part_y == j) then
---                             self:__onEntityChanged(entity.id, entity.angle, entity.flip)
---                             break
---                         end
---                     end
---                 end
---             end
---         end
---     end
+    local i, j = self:__getMouseTargetedCell()
+    local entity = self._map:getEntity(i, j) -- get an item from the map
+    if (entity) then
+        local new_entity = entity:copy()
+        Observer:call("EntityChanged", new_entity)
+    end
 end
 
 function MapEditorBattlefield:loadMap(filename)
---     if (file_name) then
---         local full_file_path = self:getMapFilePath(file_name)
---         local f = io.open(full_file_path, "r")
---         -- check if file exists
---         if (f) then
---             io.close(f)
---             -- clear current map
---             self:clearMap()
---             -- load map from file
---             local settings = dofile(full_file_path)
---             -- remember new map
---             MapHandler.resetMap(settings)
+    if (self._map) then
+        Observer:call("EntityChanged", nil)
+        self._map:load(filename)
+    end
+end
 
---             for _, data in ipairs(settings.content) do
---                 local entity = EntityHandler.new(data.id)
---                 entity:setPos(data.pos[1], data.pos[2])
---                 entity:setAngle(data.angle)
---                 entity:setFlip(data.flip[1], data.flip[2])
---                 entity:setSettings(data.settings)
---                 entity.obj = self:createEntity(entity)
---                 MapHandler.addEntity(entity)
---             end
+function MapEditorBattlefield:saveMap(filename)
+    if (self._map) then
+        Observer:call("EntityChanged", nil)
+        self._map:save(filename)
+    end
+end
 
---             self.current_map_file = file_name
---             log("Map is loaded.")
---             self.notification_dlg:setMessage("Map is loaded.")
---             self.notification_dlg:view(true)
---         end
---     end
+function MapEditorBattlefield:clear()
+    if (self._map) then
+        Observer:call("EntityChanged", nil)
+        self._map:clear()
+    end
 end

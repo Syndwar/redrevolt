@@ -6,35 +6,35 @@ local function __getUIDesc(self)
         {
             id = "rotateBtn", widget = "Button", ui = "rotate_btn",
             rect = {0, 0, 32, 32},
-            callback = {"MouseUp_Left", self.__onRotateEntity, self},
+            callback = {"MouseUp_Left", self.__rotateEntity, self},
             text = 0, colour = "green", font = "system_10_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
         {
             id = "flipBtn", widget = "Button", ui = "flip_btn",
             rect = {0, 32, 32, 32},
-            callback = {"MouseUp_Left", self.__onFlipEntity, self},
+            callback = {"MouseUp_Left", self.__flipEntity, self},
             text = "", colour = "green", font = "system_10_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
         {
             id = "cancelBtn", widget = "Button",
             rect = {0, 64, 32, 32},
-            callback = {"MouseUp_Left", self.__onCancelEntity, self},
+            callback = {"MouseUp_Left", self.__cancelEntity, self},
             text = "X", colour = "green", font = "system_10_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
         {
             id = "editBtn", widget = "Button",
             rect = {0, 96, 32, 32},
-            callback = {"MouseUp_Left", self.__onEditEntity, self},
+            callback = {"MouseUp_Left", self.__editEntity, self},
             text = "E", colour = "green", font = "system_10_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
         {
             id = "inventoryBtn", widget = "Button",
             rect = {0, 128, 32, 32},
-            callback = {"MouseUp_Left", self.__onShowInventory, self},
+            callback = {"MouseUp_Left", self.__showInventory, self},
             text = "I", colour = "green", font = "system_10_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
@@ -48,13 +48,13 @@ function MapEditorEditPanel:init()
     self._angle_index = 1
     self._flip_index = 1
 
-    Observer:addListener("EntityChanged", self, self.__onEntityChanged)
+    Observer:addListener("EntityChanged", self, self.__changeEntity)
 
-    self:addCallback("KeyUp_" .. HotKeys.Flip,      self.__onFlipEntity,      self)
-    self:addCallback("KeyUp_" .. HotKeys.Rotate,    self.__onRotateEntity,    self)
-    self:addCallback("KeyUp_" .. HotKeys.Cancel,    self.__onCancelEntity,    self)
-    self:addCallback("KeyUp_" .. HotKeys.Edit,      self.__onEditEntity,      self)
-    self:addCallback("KeyUp_" .. HotKeys.Inventory, self.__onShowInventory,   self)
+    self:addCallback("KeyUp_" .. HotKeys.Flip,      self.__flipEntity,      self)
+    self:addCallback("KeyUp_" .. HotKeys.Rotate,    self.__rotateEntity,    self)
+    self:addCallback("KeyUp_" .. HotKeys.Cancel,    self.__cancelEntity,    self)
+    self:addCallback("KeyUp_" .. HotKeys.Edit,      self.__editEntity,      self)
+    self:addCallback("KeyUp_" .. HotKeys.Inventory, self.__showInventory,   self)
 
     self:setRect(0, 0, 32, 32)
     self:setAlignment("LEFT|TOP", 0, 32)
@@ -81,7 +81,23 @@ end
 
 function MapEditorEditPanel:__reset(angle, flip)
     self._angle_index = 1
+    if (angle) then
+        for i, v in ipairs(self._angles) do
+            if (angle == v) then
+                log("hi", v, angle)
+                self._angle_index = i
+            end
+        end
+    end
+
     self._flip_index = 1
+    if (flip) then
+        for i, v in ipairs(self._flips) do
+            if (flip[1] == v[1] and flip[2] == v[2]) then
+             self._flip_index = i
+            end
+        end
+    end
 end
 
 function MapEditorEditPanel:__switchAngle()
@@ -120,31 +136,31 @@ function MapEditorEditPanel:__update()
     self:__updateFlipBtn()
 end
 
-function MapEditorEditPanel:__onCancelEntity()
+function MapEditorEditPanel:__cancelEntity()
     Observer:call("EntityChanged", nil)
 end
 
-function MapEditorEditPanel:__onEditEntity()
+function MapEditorEditPanel:__editEntity()
     Observer:call("EditEntity")
 end
 
-function MapEditorEditPanel:__onShowInventory()
+function MapEditorEditPanel:__showInventory()
     Observer:call("ShowInventory")
 end
 
-function MapEditorEditPanel:__onRotateEntity()
+function MapEditorEditPanel:__rotateEntity()
     self:__switchAngle()
     self:__update()
     Observer:call("EntityRotated", self:__getAngle())
 end
 
-function MapEditorEditPanel:__onFlipEntity()
+function MapEditorEditPanel:__flipEntity()
     self:__switchFlip()
     self:__update()
     Observer:call("EntityFlipped", self:__getFlip())
 end
 
-function MapEditorEditPanel:__onEntityChanged(entity)
-    self:__reset()
+function MapEditorEditPanel:__changeEntity(entity)
+    self:__reset(entity and entity:getAngle(), entity and entity:getFlip())
     self:__update()
 end

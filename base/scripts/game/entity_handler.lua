@@ -7,6 +7,7 @@ EntityHandler = {
     _default_desc = nil,
     _settings = nil,
     _inventory = nil,
+    _obj = nil,
 }
 
 function EntityHandler.new(id)
@@ -15,6 +16,30 @@ function EntityHandler.new(id)
     entity._default_settings = GameData.getDefaultSettings(id)
     entity._default_desc = GameData.find(id)
     return entity
+end
+
+function EntityHandler.load(data)
+    local entity = table.deepcopy(EntityHandler)
+    entity._id = data.id
+    entity._angle = data.angle
+    entity._pos = data.pos
+    entity._flip = data.flip
+    entity._inventory = data.inventory
+    entity._settings = data.settings
+    entity._default_settings = GameData.getDefaultSettings(data.id)
+    entity._default_desc = GameData.find(data.id)
+    return entity
+end
+
+function EntityHandler:save(data)
+    local data = {}
+    data["id"] = self._id
+    data["angle"] = self._angle
+    data["pos"] = self._pos
+    data["flip"] = self._flip
+    data["inventory"] = self._inventory
+    data["settings"] = self._settings
+    return data
 end
 
 function EntityHandler:isValid()
@@ -50,6 +75,12 @@ function EntityHandler:setPos(i, j)
     end
 end
 
+function EntityHandler:setObj(obj)
+    if (not self._obj) then
+        self._obj = obj
+    end
+end
+
 function EntityHandler:setAngle(angle)
     self._angle = angle
 end
@@ -63,22 +94,26 @@ function EntityHandler:setFlip(fliph, flipv)
     end
 end
 
-function EntityHandler:setSettings(settings)
-    self._settings = settings
+function EntityHandler:__getSettings()
+    return self._settings or self._default_settings
+end
+
+function EntityHandler:__getDescription()
+    return self._default_desc
 end
 
 function EntityHandler:getSprite()
-    local desc = self._default_desc
+    local desc = self:__getDescription()
     return desc and desc.sprite or ""
 end
 
 function EntityHandler:getSize()
-    local desc = self._default_desc
+    local desc = self:__getDescription()
     return desc and desc.size or {0, 0}
 end
 
 function EntityHandler:getName()
-    local settings = self._settings or self._default_settings
+    local settings = self:__getSettings()
     return settings and settings.name or ""
 end
 
@@ -150,7 +185,7 @@ function EntityHandler.rotateGeometry(geometry, angle)
 end
 
 function EntityHandler:geDefaultGeometry()
-    local desc = self._default_desc
+    local desc = self:__getDescription()
     return desc and desc.geometry
 end
 
@@ -170,7 +205,7 @@ end
 
 function EntityHandler:getInfo()
     local info = nil
-    local settings = self._settings or self._default_settings
+    local settings = self:__getSettings()
 
     local slots = {
         {"HP:", "health_max"},
@@ -197,7 +232,8 @@ function EntityHandler:getInfo()
 end
 
 function EntityHandler:getHotSpot()
-    local desc = self._default_desc
+    local desc = self:__getDescription()
+    assert(desc, self._default_desc)
     local size = desc.size or {0, 0}
     local angle = self._angle
     local w, h = size[1], size[2]
@@ -215,4 +251,27 @@ end
 
 function EntityHandler:copy()
     return table.deepcopy(self)
+end
+
+function EntityHandler:destroy()
+    if (self._obj) then
+        self._obj:detach()
+    end
+end
+
+function EntityHandler:isHit(i, j)
+    local geometry = self:getGeometry()
+    local pos = self:getPos()
+    for k, row in ipairs(geometry) do
+        for l, value in ipairs(row) do
+            if (1 == value) then
+                local obj_part_x = pos[1] + (l - 1)
+                local obj_part_y = pos[2] + (k - 1)
+                if (obj_part_x == i and obj_part_y == j) then
+                    return true
+                end
+            end
+        end
+    end
+    return false
 end

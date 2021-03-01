@@ -4,7 +4,7 @@ function MapEditorItemsPanel:init()
     self._page_size = {}
     self._active_page = nil
 
-    Observer:addListener("ChangeFilter", self, self.__onFilterChanged)
+    Observer:addListener("ChangeFilter", self, self.__changeFilter)
 
     local screen_width = Engine.getScreenWidth()
     local screen_height = Engine.getScreenHeight()
@@ -42,7 +42,7 @@ function MapEditorItemsPanel:addPage(id, entities)
             local btn = Button(data.id)
             btn:setRect(0, (i - 1) * 32, 32, 32)
             btn:setSprites(data.sprite, data.sprite, data.sprite)
-            btn:addCallback("MouseUp_Left", self.__onEntityChanged, data.id)
+            btn:addCallback("MouseUp_Left", self.__changeEntity, data.id)
             cnt:attach(btn)
         end
         self:setUI(id, cnt)
@@ -60,7 +60,7 @@ function MapEditorItemsPanel.__scrollTo(params)
     end
 end
 
-function MapEditorItemsPanel.__onEntityChanged(id)
+function MapEditorItemsPanel.__changeEntity(id)
     local entity = EntityHandler.new(id)
     Observer:call("EntityChanged", entity)
 end
@@ -74,7 +74,7 @@ function MapEditorItemsPanel:__viewActivePage(value)
     end
 end
 
-function MapEditorItemsPanel:__onFilterChanged(id)
+function MapEditorItemsPanel:__changeFilter(id)
     local scroll_cnt = self:getUI("scroll_cnt")
     if (scroll_cnt) then
         scroll_cnt:jumpTo(0, 0)
