@@ -125,18 +125,18 @@ function GameData.getEntityType(id)
     return entity and entity.type
 end
 
-function GameData.getEntities(id)
-    if (id == "objects") then
-        return Objects
-    elseif (id == "units") then
-        return Units
-    elseif (id == "items") then
-        return Items
-    elseif (id == "terrain") then
-        return Terrain
-    end
-    return nil
-end
+-- function GameData.getEntities(id)
+--     if (id == "objects") then
+--         return Objects
+--     elseif (id == "units") then
+--         return Units
+--     elseif (id == "items") then
+--         return Items
+--     elseif (id == "terrain") then
+--         return Terrain
+--     end
+--     return nil
+-- end
 
 function GameData.find(id)
     for _, data in ipairs(Items) do

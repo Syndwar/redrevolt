@@ -97,7 +97,22 @@ local function __createScrollContainer(data)
     local widget = nil
     if (data) then
         widget = ScrollContainer(data.id or "")
+        widget:setScrollSpeed(data.scroll_speed or 1)
         __tuneWidget(widget, data)
+    end
+    return widget
+end
+
+local function __createArea(data)
+    local widget = nil
+    if (data) then
+        widget = Area(data.id or "")
+        __tuneWidget(widget, data)
+        if (data.callbacks) then
+            for _, callback in ipairs(data.callbacks) do
+                widget:addCallback(unpack(callback))
+            end
+        end
     end
     return widget
 end
@@ -108,6 +123,7 @@ UIBuilder._build_tools = {
     ["Label"] = __createLabel,
     ["TextEdit"] = __createTextEdit,
     ["ScrollContainer"] = __createScrollContainer,
+    ["Area"] = __createArea,
 }
 
 function UIBuilder.create(cnt, desc)

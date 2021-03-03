@@ -10,6 +10,53 @@ EntityHandler = {
     _obj = nil,
 }
 
+--[[ Private ]]
+local function __mirror_line(tbl)
+    local result = {}
+    for i = 1, #tbl do
+        local last = #tbl - i + 1
+        if (i <= last) then
+            result[i] = tbl[last]
+            result[last] = tbl[i]
+        end
+    end
+    return result
+end
+
+local function __mirror_col(tbl)
+    return __mirror_line(tbl)
+end
+
+local function __mirror_all(tbl)
+    local result = {}
+    for i, row in ipairs(tbl) do
+        result[#tbl - i + 1] = __mirror_line(row)
+    end
+    return result
+end
+
+local function __transpose(tbl)
+    local result = {}
+    for i, row in ipairs(tbl) do
+        for j, value in ipairs(row) do
+            if (not result[j]) then
+                result[j] = {}
+            end
+            result[j][#tbl - i + 1] = value    
+        end
+    end
+    return result
+end
+
+function EntityHandler:__getSettings()
+    return self._settings or self._default_settings
+end
+
+function EntityHandler:__getDescription()
+    return self._default_desc
+end
+
+--[[ Public ]]
 function EntityHandler.new(id)
     local entity = table.deepcopy(EntityHandler)
     entity._id = id
@@ -83,6 +130,9 @@ end
 
 function EntityHandler:setAngle(angle)
     self._angle = angle
+    if (self._obj) then
+        self._obj:setAngle(angle)
+    end
 end
 
 function EntityHandler:setFlip(fliph, flipv)
@@ -92,14 +142,9 @@ function EntityHandler:setFlip(fliph, flipv)
         self._flip[1] = fliph
         self._flip[2] = flipv
     end
-end
-
-function EntityHandler:__getSettings()
-    return self._settings or self._default_settings
-end
-
-function EntityHandler:__getDescription()
-    return self._default_desc
+    if (self._obj) then
+        self._obj:setFlip(fliph, flipv)
+    end
 end
 
 function EntityHandler:getSprite()
@@ -115,43 +160,6 @@ end
 function EntityHandler:getName()
     local settings = self:__getSettings()
     return settings and settings.name or ""
-end
-
-local function __mirror_line(tbl)
-    local result = {}
-    for i = 1, #tbl do
-        local last = #tbl - i + 1
-        if (i <= last) then
-            result[i] = tbl[last]
-            result[last] = tbl[i]
-        end
-    end
-    return result
-end
-
-local function __mirror_col(tbl)
-    return __mirror_line(tbl)
-end
-
-local function __mirror_all(tbl)
-    local result = {}
-    for i, row in ipairs(tbl) do
-        result[#tbl - i + 1] = __mirror_line(row)
-    end
-    return result
-end
-
-local function __transpose(tbl)
-    local result = {}
-    for i, row in ipairs(tbl) do
-        for j, value in ipairs(row) do
-            if (not result[j]) then
-                result[j] = {}
-            end
-            result[j][#tbl - i + 1] = value    
-        end
-    end
-    return result
 end
 
 function EntityHandler.flipGeometry(geometry, horizontal, vertical)
@@ -274,4 +282,8 @@ function EntityHandler:isHit(i, j)
         end
     end
     return false
+end
+
+function EntityHandler:hasObj()
+    return nil ~= self._obj
 end

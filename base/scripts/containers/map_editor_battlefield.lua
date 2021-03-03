@@ -16,12 +16,14 @@ function MapEditorBattlefield:init(id)
     self._map:setSize(unpack(default_map_size))
     self._map:setCellSize(unpack(default_cell_size))
     
-    Observer:addListener("SwitchGrid", self, self.__onGridSwitched)
-    Observer:addListener("EntityChanged", self, self.__onEntityChanged)
-    Observer:addListener("EntityRotated", self, self.__onEntityRotated)
-    Observer:addListener("EntityFlipped", self, self.__onEntityFlipped)
+    Observer:addListener("SwitchGrid", self, self.__switchGrid)
+    Observer:addListener("EntityChanged", self, self.__changeEntity)
+    Observer:addListener("EntityRotated", self, self.__rotateEntity)
+    Observer:addListener("EntityFlipped", self, self.__flipEntity)
+    Observer:addListener("NextEntity", self, self.__goToNextEntity)
+    Observer:addListener("PrevEntity", self, self.__goToPrevEntity)
     
-    self:addCallback("KeyUp_" .. HotKeys.Grid, self.__onGridSwitched, self)
+    self:addCallback("KeyUp_" .. HotKeys.Grid, self.__switchGrid, self)
     self:addCallback("MouseMove", self.__onMouseMove, self)
     self:addCallback("KeyDown_" .. HotKeys.ScrollUp,    self.__scrollToDirection, {self, "Up", true})
     self:addCallback("KeyDown_" .. HotKeys.ScrollLeft,  self.__scrollToDirection, {self, "Left", true})
@@ -39,6 +41,8 @@ function MapEditorBattlefield:init(id)
     self:setScrollSpeed(scroll_speed)
     self:__createMapContent()
 end
+
+--[[ Private ]]
 
 function MapEditorBattlefield:__createMapContent()
     local screen_width = Engine.getScreenWidth()
@@ -117,7 +121,7 @@ function MapEditorBattlefield:__calculateCell(x, y)
     return i, j
 end
 
-function MapEditorBattlefield:__onGridSwitched()
+function MapEditorBattlefield:__switchGrid()
     local grid = self:getUI("fieldGrid")
     if (grid) then
         grid:view(not grid:isOpened())
@@ -155,24 +159,29 @@ function MapEditorBattlefield.__scrollToDirection(params)
     end
 end
 
-function MapEditorBattlefield:__onEntityFlipped(flip)
+function MapEditorBattlefield:__flipEntity(flip)
     if (self._selected_entity and flip) then
         self._selected_entity:setFlip(flip[1], flip[2])
         self:__resetCursor(self._selected_entity:getGeometry())
     end
 end
 
-function MapEditorBattlefield:__onEntityRotated(angle)
+function MapEditorBattlefield:__rotateEntity(angle)
     if (self._selected_entity and angle) then
         self._selected_entity:setAngle(angle)
         self:__resetCursor(self._selected_entity:getGeometry())
     end
 end
 
-function MapEditorBattlefield:__onEntityChanged(entity)
+function MapEditorBattlefield:__changeEntity(entity)
     -- saves new entity
     self._selected_entity = entity
-    self:__resetCursor(entity and self._selected_entity:getGeometry())
+
+    local geometry = nil
+    if (entity and not entity:hasObj()) then
+        geometry = entity:getGeometry()
+    end
+    self:__resetCursor(geometry)
 end
 
 function MapEditorBattlefield:__resetCursor(geometry)
@@ -215,14 +224,14 @@ end
 
 function MapEditorBattlefield:__onFieldLeftClicked()
     if (self._selected_entity) then
-        if (self._map) then
+        if (self._map and not self._selected_entity:hasObj()) then
             local i, j = self:__getMouseTargetedCell()
             self._map:addEntity(self._selected_entity, i, j) -- add it to the map
         end
     else
         local i, j = self:__getMouseTargetedCell()
         local entity = self._map:getEntity(i, j) -- get an item from the map
-        -- Observer:call("EntityChanged", entity)
+        Observer:call("EntityChanged", entity)
     end
 end
 
@@ -251,8 +260,6 @@ function MapEditorBattlefield:__onFieldRightClicked()
         if (self._map) then
             local i, j = self:__getMouseTargetedCell()
             self._map:removeEntity(i, j) -- remote it from the map
-            local entity = self._map:getEntity(i, j) -- get an item from the map
-            -- Observer:call("EntityChanged", entity)
         end
     end
 end
@@ -265,6 +272,34 @@ function MapEditorBattlefield:__onFieldMiddleClicked()
         Observer:call("EntityChanged", new_entity)
     end
 end
+
+function MapEditorBattlefield:__goToPrevEntity()
+    if (not self._map) then return end
+
+    local entity = self._map:getPrevEntity(self._selected_entity)
+    
+    Observer:call("EntityChanged", entity)
+
+    if (entity) then
+        local pos = entity:getPos()
+        self:jumpToCell(pos[1], pos[2])
+    end
+end
+
+function MapEditorBattlefield:__goToNextEntity()
+    if (not self._map) then return end
+
+    local entity = self._map:getNextEntity(self._selected_entity)
+    
+    Observer:call("EntityChanged", entity)
+
+    if (entity) then
+        local pos = entity:getPos()
+        self:jumpToCell(pos[1], pos[2])
+    end
+end
+
+--[[ Public ]]
 
 function MapEditorBattlefield:loadMap(filename)
     if (self._map) then
@@ -285,4 +320,14 @@ function MapEditorBattlefield:clear()
         Observer:call("EntityChanged", nil)
         self._map:clear()
     end
+end
+
+function MapEditorBattlefield:jumpToCell(i, j)
+    local x, y = self:__calculateFieldPos(i, j)
+    
+    local screen_width = Engine.getScreenWidth()
+    local screen_height = Engine.getScreenHeight()
+    x = x - screen_width / 2
+    y = y - screen_height / 2
+    self:jumpTo(x, y)
 end

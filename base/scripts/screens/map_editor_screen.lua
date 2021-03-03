@@ -21,8 +21,6 @@ function MapEditorScreen:init()
 
     -- Observer:addListener("ShowInventory", self, self.__showInventory)
     -- Observer:addListener("EditEntity", self, self.__onEditItem)
-    -- Observer:addListener("NextEntity", self, self.__goToNextEntity)
-    -- Observer:addListener("PrevEntity", self, self.__goToPrevEntity)
     -- Observer:addListener("DeleteEntity", self, self.onEntityDelete)
     -- Observer:addListener("AddEntity", self, self.onEntityAdd)
 
@@ -176,64 +174,6 @@ function MapEditorScreen:__load(sender, filename)
         self:__openLoadDialog()
     end
 end
-
--- function MapEditorScreen:__scrollToCell(i, j)
---     local battlefield = self:getUI("battlefield")
---     if (battlefield) then
---         local x, y = self:calculateFieldPos(i, j)
-    
---         local screen_width = Engine.getScreenWidth()
---         local screen_height = Engine.getScreenHeight()
---         x = x - screen_width / 2
---         y = y - screen_height / 2
---         battlefield:jumpTo(x, y)
---     end
--- end
-
--- function MapEditorScreen:__goToPrevEntity()
---     local id = self._filter
---     if (id) then
---         local entities = GameData.getEntities(id)
---         if (entities) then
---             local selected_item_index = self.selected_item_index or (MapHandler.getContentSize() + 1)
---             for i = selected_item_index - 1, 1, -1 do
---                 local entity = MapHandler.getEntity(i)
---                 if (entity) then
---                     for _, data in ipairs(entities) do
---                         if (data.id == entity.id) then
---                             self:selectItem(i)
---                             self:__scrollToCell(entity.pos[1], entity.pos[2])
---                             return
---                         end
---                     end
---                 end
---             end
---         end
---     end
--- end
-
--- function MapEditorScreen:__goToNextEntity()
---     local id = self._filter
---     if (id) then
---         local entities = GameData.getEntities(id)
---         if (entities) then
---             local selected_item_index = self.selected_item_index or 0
---             local map_content_size = MapHandler.getContentSize()
---             for i = selected_item_index + 1, map_content_size do
---                 local entity = MapHandler.getEntity(i)
---                 if (entity) then
---                     for _, data in ipairs(entities) do
---                         if (data.id == entity.id) then
---                             self:selectItem(i)
---                             self:__scrollToCell(entity.pos[1], entity.pos[2])
---                             return
---                         end
---                     end
---                 end
---             end
---         end
---     end
--- end
 
 -- function MapEditorScreen:selectItem(index)
 --     if (index > 0) then

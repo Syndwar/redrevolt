@@ -1,34 +1,42 @@
 class "MapEditorItemsPanel" (Container)
 
+local function __getUIDesc(self)
+    return 
+    {
+        {
+            id = "scrollCnt", widget = "ScrollContainer", ui = "scroll_cnt",
+            rect = {0, 0, 32,  Engine.getScreenHeight() - 64},
+            alignment = {"RIGHT|TOP", 0, 32},
+            scroll_speed = 500,
+        },
+        {
+            id = "scrollUpArea", widget = "Area",
+            rect = {0, 0, 32, 32},
+            alignment = {"RIGHT|TOP", 0, 0},
+            callbacks = {
+                {"MouseOver", self.__scrollTo, {self, "Up", true}},
+                {"MouseLeft", self.__scrollTo, {self, "Up", false}},
+            }
+        },
+        {
+            id = "scrollDownArea", widget = "Area",
+            rect = {0, 0, 32, 32},
+            alignment = {"RIGHT|BOTTOM", 0, 0},
+            callbacks = {
+                {"MouseOver", self.__scrollTo, {self, "Down", true}},
+                {"MouseLeft", self.__scrollTo, {self, "Down", false}},
+            }
+        },
+    }
+end
+
 function MapEditorItemsPanel:init()
     self._page_size = {}
     self._active_page = nil
 
     Observer:addListener("ChangeFilter", self, self.__changeFilter)
 
-    local screen_width = Engine.getScreenWidth()
-    local screen_height = Engine.getScreenHeight()
-
-    local scroll_cnt = ScrollContainer("scrollCnt")
-    scroll_cnt:setAlignment("RIGHT|TOP", 0, 32)
-    scroll_cnt:setRect(0, 0, 32, screen_height - 64)
-    scroll_cnt:setScrollSpeed(500)
-    self:attach(scroll_cnt)
-    self:setUI("scroll_cnt", scroll_cnt)
-
-    local scroll_up_area = Area("scrollUpArea")
-    scroll_up_area:setRect(0, 0, 32, 32)
-    scroll_up_area:setAlignment("RIGHT|TOP", 0, 0)
-    scroll_up_area:addCallback("MouseOver", self.__scrollTo, {self, "Up", true})
-    scroll_up_area:addCallback("MouseLeft", self.__scrollTo, {self, "Up", false})
-    self:attach(scroll_up_area)
-
-    local scroll_down_area = Area("scrollDownArea")
-    scroll_down_area:setRect(0, 0, 32, 32)
-    scroll_down_area:setAlignment("RIGHT|BOTTOM", 0, 0)
-    scroll_down_area:addCallback("MouseOver", self.__scrollTo, {self, "Down", true})
-    scroll_down_area:addCallback("MouseLeft", self.__scrollTo, {self, "Down", false})
-    self:attach(scroll_down_area)
+    UIBuilder.create(self, __getUIDesc(self))
 end
 
 function MapEditorItemsPanel:addPage(id, entities)

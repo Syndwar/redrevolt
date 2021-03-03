@@ -161,6 +161,8 @@ function MapEditorEditPanel:__flipEntity()
 end
 
 function MapEditorEditPanel:__changeEntity(entity)
-    self:__reset(entity and entity:getAngle(), entity and entity:getFlip())
+    local angle = entity and entity:getAngle()
+    local flip = entity and entity:getFlip()
+    self:__reset(angle, flip)
     self:__update()
 end

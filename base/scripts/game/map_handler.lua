@@ -6,6 +6,35 @@ MapHandler = {
     _entity_creator = nil
 }
 
+--[[ Private ]]
+
+function MapHandler.__getMapFilePath(filename)
+    return string.format("%s/%s.map", Config.map_folder, filename)
+end
+
+function MapHandler:__getContent()
+    return self._content
+end
+
+-- returns map copy that can be serialized
+function MapHandler:__getSaveMap()
+    local save_map = {}
+    save_map["size"] = {self:getSize()}
+    save_map["cell_size"] = {self:getCellSize()}
+    save_map["content"] = {}
+
+    local content = self:__getContent()
+    for _, entity in ipairs(content) do
+        if (entity) then
+            local save_data = entity:save()
+            table.insert(save_map["content"], save_data)
+        end
+    end
+
+    return save_map
+end
+
+--[[ Public ]]
 function MapHandler.new(entity_creator)
     local new_map = table.deepcopy(MapHandler)
     new_map._entity_creator = entity_creator
@@ -30,8 +59,78 @@ function MapHandler:setCellSize(width, height)
     self._cell_size[2] = height
 end
 
-function MapHandler.__getMapFilePath(filename)
-    return string.format("%s/%s.map", Config.map_folder, filename)
+function MapHandler:removeEntity(i, j)
+    for index, entity in ipairs(self._content) do
+        if (entity:isHit(i, j)) then
+            entity:destroy()
+            table.remove(self._content, index)
+            break
+        end
+    end
+end
+
+function MapHandler:getEntity(i, j)
+    for index, entity in ipairs(self._content) do
+        if (entity:isHit(i, j)) then
+            return entity
+        end
+    end
+    return nil
+end
+
+function MapHandler:getPrevEntity(entity)
+    local index = 1
+    for i, v in ipairs(self._content) do
+        if (entity == v) then
+            index = i - 1
+            if (index < 1) then
+                index = #self._content
+            end
+            break
+        end
+    end
+    return self._content[index]
+end
+
+function MapHandler:getNextEntity(entity)
+    local index = 1
+    for i, v in ipairs(self._content) do
+        if (entity == v) then
+            index = i + 1
+            if (index > #self._content) then
+                index = 1
+            end
+            break
+        end
+    end
+    return self._content[index]
+end
+
+function MapHandler:clear()
+    for _, entity in ipairs(self._content) do
+        if (entity) then
+            entity:destroy()
+        end
+    end
+    self._content = {}
+    -- collect garbage
+    Engine.collectGarbage()
+end
+
+function MapHandler:addEntity(entity, i, j)
+    local found_duplicate = false -- MapHandler.hasDuplicateInCell(id, i, j) -- check for duplicates
+    if (not found_duplicate) then
+        local new_entity = entity:copy()
+        if (i and j) then
+            new_entity:setPos(i, j)
+        end
+        if (self._entity_creator) then
+            local obj = self._entity_creator(new_entity) -- create ui object
+            new_entity:setObj(obj) -- link entity with ui object
+        end
+
+        table.insert(self._content, new_entity)
+    end
 end
 
 function MapHandler:load(filename)
@@ -71,73 +170,6 @@ function MapHandler:save(filename)
     end
 end
 
-function MapHandler:__getContent()
-    return self._content
-end
-
-function MapHandler:addEntity(entity, i, j)
-    local found_duplicate = false -- MapHandler.hasDuplicateInCell(id, i, j) -- check for duplicates
-    if (not found_duplicate) then
-        local new_entity = entity:copy()
-        if (i and j) then
-            new_entity:setPos(i, j)
-        end
-        if (self._entity_creator) then
-            local obj = self._entity_creator(new_entity) -- create ui object
-            new_entity:setObj(obj) -- link entity with ui object
-        end
-
-        table.insert(self._content, new_entity)
-    end
-end
-
-function MapHandler:removeEntity(i, j)
-    for index, entity in ipairs(self._content) do
-        if (entity:isHit(i, j)) then
-            entity:destroy()
-            table.remove(self._content, index)
-            break
-        end
-    end
-end
-
-function MapHandler:getEntity(i, j)
-    for index, entity in ipairs(self._content) do
-        if (entity:isHit(i, j)) then
-            return entity
-        end
-    end
-    return nil
-end
-
-function MapHandler:clear()
-    for _, entity in ipairs(self._content) do
-        if (entity) then
-            entity:destroy()
-        end
-    end
-    self._content = {}
-    -- collect garbage
-    Engine.collectGarbage()
-end
-
--- returns map copy that can be serialized
-function MapHandler:__getSaveMap()
-    local save_map = {}
-    save_map["size"] = {self:getSize()}
-    save_map["cell_size"] = {self:getCellSize()}
-    save_map["content"] = {}
-
-    local content = self:__getContent()
-    for _, entity in ipairs(content) do
-        if (entity) then
-            local save_data = entity:save()
-            table.insert(save_map["content"], save_data)
-        end
-    end
-
-    return save_map
-end
 
 -- function MapHandler.getEntitiesInPos(i, j)
 --     local entities = {}
