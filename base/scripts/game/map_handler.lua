@@ -3,7 +3,8 @@ MapHandler = {
     _cell_size = {32, 32},
     _content = {},
     _obj = nil,
-    _entity_creator = nil
+    _entity_creator = nil,
+    _selected_entity = nil,
 }
 
 --[[ Private ]]
@@ -39,6 +40,18 @@ function MapHandler.new(entity_creator)
     local new_map = table.deepcopy(MapHandler)
     new_map._entity_creator = entity_creator
     return new_map
+end
+
+function MapHandler:selectEntity(entity)
+    self._selected_entity = entity
+end
+
+function MapHandler:getSelectedEntity()
+    return self._selected_entity
+end
+
+function MapHandler:isEntitySelected()
+    return nil ~= self._selected_entity
 end
 
 function MapHandler:getSize()
@@ -78,7 +91,8 @@ function MapHandler:getEntity(i, j)
     return nil
 end
 
-function MapHandler:getPrevEntity(entity)
+function MapHandler:getPrevEntity()
+    local entity = self._selected_entity
     local index = 1
     for i, v in ipairs(self._content) do
         if (entity == v) then
@@ -92,7 +106,8 @@ function MapHandler:getPrevEntity(entity)
     return self._content[index]
 end
 
-function MapHandler:getNextEntity(entity)
+function MapHandler:getNextEntity()
+    local entity = self._selected_entity
     local index = 1
     for i, v in ipairs(self._content) do
         if (entity == v) then

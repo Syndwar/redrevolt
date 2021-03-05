@@ -6,7 +6,6 @@ function MapEditorBattlefield:init(id)
 
     self._pos = {32, 32}
     self._offset = {-64, -96}
-    self._selected_entity = nil
 
     local function entity_creator(entity)
         return self:__createEntityOnField(entity)
@@ -160,22 +159,24 @@ function MapEditorBattlefield.__scrollToDirection(params)
 end
 
 function MapEditorBattlefield:__flipEntity(flip)
-    if (self._selected_entity and flip) then
-        self._selected_entity:setFlip(flip[1], flip[2])
-        self:__resetCursor(self._selected_entity:getGeometry())
+    local entity = self._map and self._map:getSelectedEntity()
+    if (entity and flip) then
+        entity:setFlip(flip[1], flip[2])
+        self:__resetCursor(entity:getGeometry())
     end
 end
 
 function MapEditorBattlefield:__rotateEntity(angle)
-    if (self._selected_entity and angle) then
-        self._selected_entity:setAngle(angle)
-        self:__resetCursor(self._selected_entity:getGeometry())
+    local entity = self._map and self._map:getSelectedEntity()
+    if (entity and angle) then
+        entity:setAngle(angle)
+        self:__resetCursor(entity:getGeometry())
     end
 end
 
 function MapEditorBattlefield:__changeEntity(entity)
     -- saves new entity
-    self._selected_entity = entity
+    self._map:selectEntity(entity)
 
     local geometry = nil
     if (entity and not entity:hasObj()) then
@@ -223,10 +224,11 @@ function MapEditorBattlefield:__getMouseTargetedCell()
 end
 
 function MapEditorBattlefield:__onFieldLeftClicked()
-    if (self._selected_entity) then
-        if (self._map and not self._selected_entity:hasObj()) then
+    local entity = self._map and self._map:getSelectedEntity()
+    if (entity) then
+        if (self._map and not entity:hasObj()) then
             local i, j = self:__getMouseTargetedCell()
-            self._map:addEntity(self._selected_entity, i, j) -- add it to the map
+            self._map:addEntity(entity, i, j) -- add it to the map
         end
     else
         local i, j = self:__getMouseTargetedCell()
@@ -254,7 +256,7 @@ function MapEditorBattlefield:__createEntityOnField(entity)
 end
 
 function MapEditorBattlefield:__onFieldRightClicked()
-    if (self._selected_entity) then
+    if (self._map and self._map:isEntitySelected()) then
         Observer:call("EntityChanged", nil)
     else
         if (self._map) then
@@ -276,7 +278,7 @@ end
 function MapEditorBattlefield:__goToPrevEntity()
     if (not self._map) then return end
 
-    local entity = self._map:getPrevEntity(self._selected_entity)
+    local entity = self._map:getPrevEntity()
     
     Observer:call("EntityChanged", entity)
 
@@ -289,7 +291,7 @@ end
 function MapEditorBattlefield:__goToNextEntity()
     if (not self._map) then return end
 
-    local entity = self._map:getNextEntity(self._selected_entity)
+    local entity = self._map:getNextEntity()
     
     Observer:call("EntityChanged", entity)
 

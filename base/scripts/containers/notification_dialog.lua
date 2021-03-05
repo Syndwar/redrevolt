@@ -22,7 +22,6 @@ local function __getUIDesc(self)
             callback = {"MouseUp_Left", self.__onCloseBtnClick, self},
         },
     }
-   
 end
 
 function NotificationDialog:init()

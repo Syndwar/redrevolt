@@ -7,7 +7,7 @@ require("containers/map_editor_system_panel")
 require("containers/map_editor_edit_panel")
 require("containers/map_editor_info_panel")
 require("containers/save_load_dialog")
--- require("containers/edit_entity_dialog")
+require("containers/edit_entity_dialog")
 require("containers/notification_dialog")
 -- require("containers/inventory_dialog")
 
@@ -20,10 +20,10 @@ function MapEditorScreen:init()
     self:addCallback("KeyUp_" .. HotKeys.Load, self.__quickLoad, self)
 
     -- Observer:addListener("ShowInventory", self, self.__showInventory)
-    -- Observer:addListener("EditEntity", self, self.__onEditItem)
     -- Observer:addListener("DeleteEntity", self, self.onEntityDelete)
     -- Observer:addListener("AddEntity", self, self.onEntityAdd)
 
+    Observer:addListener("EditEntity", self, self.__onEditItem)
     Observer:addListener("ExitScreen", self, self.__exitScreen)
     Observer:addListener("ShowNotification", self, self.__showNotification)
     Observer:addListener("StartNewMap", self, self.__startNewMap)
@@ -77,12 +77,15 @@ function MapEditorScreen:init()
     self:attach(notification_dlg)
     self:setUI("notification_dlg", notification_dlg)
 
---     self.edit_entity_dlg = EditEntityDialog()
---     self:attach(self.edit_entity_dlg)
+    local edit_entity_dlg = EditEntityDialog()
+    self:attach(edit_entity_dlg)
+    self:setUI("edit_entity_dlg", edit_entity_dlg)
 
 --     self.inventory_dlg = InventoryDialog()
 --     self:attach(self.inventory_dlg)
 end
+
+--[[ Private ]]
 
 function MapEditorScreen:__exitScreen()
     Screens.load("LoadingScreen", "MainScreen")
@@ -175,6 +178,16 @@ function MapEditorScreen:__load(sender, filename)
     end
 end
 
+function MapEditorScreen:__onEditItem()
+    local edit_entity_dlg = self:getUI("edit_entity_dlg")
+    if (edit_entity_dlg and not edit_entity_dlg:isOpened()) then
+        edit_entity_dlg:tune()
+        edit_entity_dlg:view(true)
+    end
+end
+
+--[[ Public ]]
+
 -- function MapEditorScreen:selectItem(index)
 --     if (index > 0) then
 --         self.selected_item_index = index
@@ -200,16 +213,6 @@ end
 --     if (index > 0) then
 --         self.battlefield:detach(entity.obj)
 --         MapHandler.deleteEntityByIndex(index)
---     end
--- end
-
-
-
--- function MapEditorScreen:__onEditItem()
---     if (self.selected_item_index) then
---         local entity = MapHandler.getEntity(self.selected_item_index)
---         self.edit_entity_dlg:tune(entity)
---         self.edit_entity_dlg:view(true)
 --     end
 -- end
 

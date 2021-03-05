@@ -1,5 +1,35 @@
 class "EditEntityDialog" (Dialog)
 
+local function __getUIDesc(self)
+    return 
+    {
+        {
+            widget = "Image",
+            rect = {0, 0, 500, 700},
+            sprite = "dark_img_spr",
+        },
+        {
+            id = "okBtn", widget = "Button",
+            rect = {100, 636, 64, 64},
+            text = "Ok", colour = "white", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
+            callback = {"MouseUp_Left", self.__onOkBtnClick, self},
+        },
+        {
+            id = "cancelBtn", widget = "Button",
+            rect = {336, 636, 64, 64},
+            text = "Cancel", colour = "white", font = "system_15_fnt", text_align = "CENTER|MIDDLE",
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
+            callback = {"MouseUp_Left", self.__onCancelBtnClick, self},
+        },
+        {
+            widget = "Label",
+            rect = {0, 10, 500, 15},
+            text = "Edit Settings", colour = "red", font = "system_15_fnt", 
+        },
+    }
+end
+
 function EditEntityDialog:init()
     local open_transform = Transform()
     open_transform:add(0, 255, 500)
@@ -13,69 +43,39 @@ function EditEntityDialog:init()
     self:setRect(0, 0, 500, 700)
     self:setAlignment("CENTER|MIDDLE", 0, 0)
 
-    self:addCallback("WidgetOpening", self.onOpening, self)
+    self:addCallback("WidgetOpening", self.__onOpening, self)
 
-    self.type = nil
+    -- self.type = nil
 
-    img = Image()
-    img:setRect(0, 0, 500, 700)
-    img:setSprite("dark_img_spr")
-    self:attach(img)
+    -- self.current_map = nil
+    -- self.maps = {}
 
-    local btn = Button("okBtn")
-    btn:setText("Ok")
-    btn:setFont("system_15_fnt")
-    btn:setRect(100, 636, 64, 64)
-    btn:setTextAlignment("CENTER|MIDDLE")
-    btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-    btn:addCallback("MouseUp_Left", self.onOkBtnClick, self)
-    btn:setColour("white")
-    self:attach(btn)
+    -- self.cnt_list = {
+    --     EntityType.Unit,
+    --     EntityType.WeaponMelee,
+    --     EntityType.WeaponRanged,
+    --     EntityType.ItemUseSelf,
+    --     EntityType.ItemUseThem,
+    --     EntityType.ItemAmmo,
+    -- }
+    -- self.containers = {}
 
-    btn = Button("cancelBtn")
-    btn:setText("Cancel")
-    btn:setFont("system_15_fnt")
-    btn:setRect(336, 636, 64, 64)
-    btn:setTextAlignment("CENTER|MIDDLE")
-    btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-    btn:addCallback("MouseUp_Left", self.onCancelBtnClick, self)
-    btn:setColour("white")
-    self:attach(btn)
+    -- self.generators = {
+    --     [EntityType.Unit]         = self.__generateUnitCnt,
+    --     [EntityType.WeaponMelee]  = self.__generateWeaponMeleeCnt,
+    --     [EntityType.WeaponRanged] = self.__generateWeaponRangedCnt,
+    --     [EntityType.ItemUseSelf]  = self.__generateItemUseSelfCnt,
+    --     [EntityType.ItemUseThem]  = self.__generateItemUseThemCnt,
+    --     [EntityType.ItemAmmo]     = self.__generateItemAmmoCnt,
+    -- }
 
-    local lbl = Label()
-    lbl:setRect(0, 10, 500, 15)
-    lbl:setText("Edit Settings")
-    lbl:setFont("system_15_fnt")
-    lbl:setColour("red")
-    lbl:setTextAlignment("CENTER|MIDDLE")
-    self:attach(lbl)
+    UIBuilder.create(self, __getUIDesc(self))
 
-    self.current_map = nil
-    self.maps = {}
-
-    self.cnt_list = {
-        EntityType.Unit,
-        EntityType.WeaponMelee,
-        EntityType.WeaponRanged,
-        EntityType.ItemUseSelf,
-        EntityType.ItemUseThem,
-        EntityType.ItemAmmo,
-    }
-    self.containers = {}
-
-    self.generators = {
-        [EntityType.Unit]         = self.generateUnitCnt,
-        [EntityType.WeaponMelee]  = self.generateWeaponMeleeCnt,
-        [EntityType.WeaponRanged] = self.generateWeaponRangedCnt,
-        [EntityType.ItemUseSelf]  = self.generateItemUseSelfCnt,
-        [EntityType.ItemUseThem]  = self.generateItemUseThemCnt,
-        [EntityType.ItemAmmo]     = self.generateItemAmmoCnt,
-    }
-
-    self:createContainers()
+    -- self:__createContainers()
 end
 
-function EditEntityDialog:createContainers()
+--[[ Private ]]
+function EditEntityDialog:__createContainers()
     for _, cnt_id in ipairs(self.cnt_list) do
         local cnt = Container()
         self.containers[cnt_id] = cnt
@@ -89,7 +89,7 @@ function EditEntityDialog:createContainers()
     end
 end
 
-function EditEntityDialog:generateEditFields(cnt, map, params)
+function EditEntityDialog:__generateEditFields(cnt, map, params)
     local params_bottom = 0
     for i, data in ipairs(params) do
         local lbl = Label()
@@ -127,7 +127,7 @@ function EditEntityDialog:generateEditFields(cnt, map, params)
     return params_bottom
 end
 
-function EditEntityDialog:generateUnitCnt(cnt, map)
+function EditEntityDialog:__generateUnitCnt(cnt, map)
     local faction_lbl = Label()
     faction_lbl:setRect(10, 30, 100, 15)
     faction_lbl:setText("Faction:")
@@ -155,7 +155,7 @@ function EditEntityDialog:generateUnitCnt(cnt, map)
         {text = "Weapon Skill:", slots = {"weapon_skill"}},
     }
 
-    local params_bottom = self:generateEditFields(cnt, map, params)
+    local params_bottom = self:__generateEditFields(cnt, map, params)
 
     for i, value in ipairs(Factions) do
         local faction_btn = Button()
@@ -164,13 +164,13 @@ function EditEntityDialog:generateUnitCnt(cnt, map)
         faction_btn:setRect(10 + (i - 1) * 120 , params_bottom, 120, 20)
         faction_btn:setTextAlignment("CENTER|MIDDLE")
         faction_btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-        faction_btn:addCallback("MouseUp_Left", self.onFactionBtnClick, {self, value})
+        faction_btn:addCallback("MouseUp_Left", self.__onFactionBtnClick, {self, value})
         faction_btn:setColour("white")
         cnt:attach(faction_btn)
     end
 end
 
-function EditEntityDialog:generateWeaponRangedCnt(cnt, map)
+function EditEntityDialog:__generateWeaponRangedCnt(cnt, map)
     local params = {
         {text = "Name:", slots = {"name"}},
         {text = "Damage:", slots = {"damage"}},
@@ -178,48 +178,48 @@ function EditEntityDialog:generateWeaponRangedCnt(cnt, map)
         {text = "Capacity:", slots = {"capacity"}},
     }
 
-    self:generateEditFields(cnt, map, params)
+    self:__generateEditFields(cnt, map, params)
 end
 
-function EditEntityDialog:generateWeaponMeleeCnt(cnt, map)
+function EditEntityDialog:__generateWeaponMeleeCnt(cnt, map)
     local params = {
         {text = "Name:", slots = {"name"}},
         {text = "Damage:", slots = {"damage"}},
     }
 
-    self:generateEditFields(cnt, map, params)
+    self:__generateEditFields(cnt, map, params)
 end
 
-function EditEntityDialog:generateItemUseSelfCnt(cnt, map)
+function EditEntityDialog:__generateItemUseSelfCnt(cnt, map)
     local params = {
         {text = "Name:", slots = {"name"}},
         {text = "Capacity:", slots = {"capacity"}},
         {text = "Damage:", slots = {"damage"}},
     }
 
-    self:generateEditFields(cnt, map, params)
+    self:__generateEditFields(cnt, map, params)
 end
 
-function EditEntityDialog:generateItemUseThemCnt(cnt, map)
+function EditEntityDialog:__generateItemUseThemCnt(cnt, map)
     local params = {
         {text = "Name:", slots = {"name"}},
         {text = "Capacity:", slots = {"capacity"}},
         {text = "Damage:", slots = {"damage"}},
     }
 
-    self:generateEditFields(cnt, map, params)
+    self:__generateEditFields(cnt, map, params)
 end
 
-function EditEntityDialog:generateItemAmmoCnt(cnt, map)
+function EditEntityDialog:__generateItemAmmoCnt(cnt, map)
     local params = {
         {text = "Name:", slots = {"name"}},
         {text = "Capacity:", slots = {"capacity"}},
     }
 
-    self:generateEditFields(cnt, map, params)
+    self:__generateEditFields(cnt, map, params)
 end
 
-function EditEntityDialog:onOkBtnClick()
+function EditEntityDialog:__onOkBtnClick()
     self:view(false)
     local settings = self.entity.settings
     if (settings) then
@@ -230,11 +230,11 @@ function EditEntityDialog:onOkBtnClick()
     end
 end
 
-function EditEntityDialog:onCancelBtnClick()
+function EditEntityDialog:__onCancelBtnClick()
     self:view(false)
 end
 
-function EditEntityDialog:onOpening()
+function EditEntityDialog:__onOpening()
     if (self.entity) then
         local settings = self.entity.settings
         if (settings) then
@@ -246,6 +246,17 @@ function EditEntityDialog:onOpening()
         end
     end
 end
+
+function EditEntityDialog.__onFactionBtnClick(params)
+    local self = params[1]
+    local value = params[2]
+    local widget = self.current_map["faction"]
+    if (widget) then
+        widget:setText(value)
+    end
+end
+
+--[[ Public ]]
 
 function EditEntityDialog:tune(entity)
     self.entity = entity
@@ -259,13 +270,4 @@ function EditEntityDialog:tune(entity)
     end
 
     self.current_map = self.maps[self.type]
-end
-
-function EditEntityDialog.onFactionBtnClick(params)
-    local self = params[1]
-    local value = params[2]
-    local widget = self.current_map["faction"]
-    if (widget) then
-        widget:setText(value)
-    end
 end
