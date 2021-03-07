@@ -84,7 +84,6 @@ function MapEditorEditPanel:__reset(angle, flip)
     if (angle) then
         for i, v in ipairs(self._angles) do
             if (angle == v) then
-                log("hi", v, angle)
                 self._angle_index = i
             end
         end

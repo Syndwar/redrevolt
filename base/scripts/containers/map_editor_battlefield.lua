@@ -159,7 +159,7 @@ function MapEditorBattlefield.__scrollToDirection(params)
 end
 
 function MapEditorBattlefield:__flipEntity(flip)
-    local entity = self._map and self._map:getSelectedEntity()
+    local entity = self:getSelectedEntity()
     if (entity and flip) then
         entity:setFlip(flip[1], flip[2])
         self:__resetCursor(entity:getGeometry())
@@ -167,7 +167,7 @@ function MapEditorBattlefield:__flipEntity(flip)
 end
 
 function MapEditorBattlefield:__rotateEntity(angle)
-    local entity = self._map and self._map:getSelectedEntity()
+    local entity = self:getSelectedEntity()
     if (entity and angle) then
         entity:setAngle(angle)
         self:__resetCursor(entity:getGeometry())
@@ -224,7 +224,7 @@ function MapEditorBattlefield:__getMouseTargetedCell()
 end
 
 function MapEditorBattlefield:__onFieldLeftClicked()
-    local entity = self._map and self._map:getSelectedEntity()
+    local entity = self:getSelectedEntity()
     if (entity) then
         if (self._map and not entity:hasObj()) then
             local i, j = self:__getMouseTargetedCell()
@@ -332,4 +332,8 @@ function MapEditorBattlefield:jumpToCell(i, j)
     x = x - screen_width / 2
     y = y - screen_height / 2
     self:jumpTo(x, y)
+end
+
+function MapEditorBattlefield:getSelectedEntity()
+    return self._map and self._map:getSelectedEntity()
 end

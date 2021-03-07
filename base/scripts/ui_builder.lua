@@ -117,6 +117,17 @@ local function __createArea(data)
     return widget
 end
 
+local function __createContainer(data)
+    local widget = nil
+    if (data) then
+        widget = Container(data.id or "")
+        if (data.attached) then
+            UIBuilder.create(widget, data.attached)
+        end
+    end
+    return widget
+end
+
 UIBuilder._build_tools = {
     ["Button"] = __createButton,
     ["Image"] = __createImage,
@@ -124,6 +135,7 @@ UIBuilder._build_tools = {
     ["TextEdit"] = __createTextEdit,
     ["ScrollContainer"] = __createScrollContainer,
     ["Area"] = __createArea,
+    ["Container"] = __createContainer,
 }
 
 function UIBuilder.create(cnt, desc)

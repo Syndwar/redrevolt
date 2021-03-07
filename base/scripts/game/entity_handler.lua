@@ -211,32 +211,84 @@ function EntityHandler:getGeometry()
     return result
 end
 
-function EntityHandler:getInfo()
-    local info = nil
-    local settings = self:__getSettings()
+local _info_params = {
+    {"HP:", "health_max"},
+    {"MO:", "morale_max"},
+    {"ST:", "stamina_max"},
+    {"AR:", "armour"},
+    {"AP:", "action_points_max"},
+    {"WS:", "weapon_skill"},
+    {"DG:", "damage"},
+    {"AC:", "accuracy"},
+    {"CP:", "capacity"},
+}
 
-    local slots = {
-        {"HP:", "health_max"},
-        {"MO:", "morale_max"},
-        {"ST:", "stamina_max"},
-        {"AR:", "armour"},
-        {"AP:", "action_points_max"},
-        {"WS:", "weapon_skill"},
-        {"DG:", "damage"},
-        {"AC:", "accuracy"},
-        {"CP:", "capacity"},
-    }
-    for _, slot in ipairs(slots) do
-        local shortcut = slot[1]
-        local value = settings and settings[slot[2]]
+function EntityHandler:getInfo()
+    local result = nil
+    local settings = self:__getSettings()
+    for _, param in ipairs(_info_params) do
+        local shortcut = param[1]
+        local value = settings and settings[param[2]]
         if (value) then
-            if (not info) then
-                info = {}
+            if (not result) then
+                result = {}
             end
-            table.insert(info, {shortcut, value})
+            table.insert(result, {shortcut, value})
         end
     end
-    return info
+    return result
+end
+
+local _edit_params = {
+    {"Name:",           "name"},
+    {"Morale:",         "morale_cur", "morale_max"},
+    {"Stamina:",        "stamina_cur", "stamina_max"},
+    {"Health:",         "health_cur", "health_max"},
+    {"Armour:",         "armour"},
+    {"Action Points:",  "action_points_cur", "action_points_max"},
+    {"Weapon Skill:",   "weapon_skill"},
+    {"Damage:",         "damage"},
+    {"Accuracy:",       "accuracy"},
+    {"Capacity:",       "capacity"},
+}
+
+function EntityHandler:__findParamsInSettings(params)
+    local result = nil
+    if (not params) then return result end
+
+    local settings = self:__getSettings()
+    if (not settings) then return result end
+
+    for i = 2, #params do
+        local value = settings[params[i]]
+        if (value) then
+            -- if there is at least 1 param found - create result
+            if (not result) then
+                result = {params[1]}
+            end
+            table.insert(result, value)
+        end
+    end
+    if (result) then log(result[1], result[2], result[3]) end
+    return result
+end
+
+function EntityHandler:__fillTemplateParams(templates)
+    local result = nil
+    for _, params in ipairs(templates) do
+        local settings_params = self:__findParamsInSettings(params)
+        if (settings_params) then
+            if (not result) then
+                result = {}
+            end
+            table.insert(result, settings_params)
+        end
+    end
+    return result
+end
+
+function EntityHandler:getEditParams()
+    return self:__fillTemplateParams(_edit_params)
 end
 
 function EntityHandler:getHotSpot()
