@@ -1,7 +1,10 @@
 class "EditEntityDialog" (Dialog)
 
+local kSlotIdTemplate = "slot_%d_cnt"
+local kMaxSlotsCount = 12
+
 local function __getUIDesc(self)
-    return 
+    local tbl = 
     {
         {
             widget = "Image",
@@ -27,17 +30,42 @@ local function __getUIDesc(self)
             rect = {0, 10, 500, 15},
             text = "Edit Settings", colour = "red", font = "system_15_fnt", 
         },
+    }
+
+    for i = 1, kMaxSlotsCount do
+        local slot_cnt = 
         {
-            id = "slot1Cnt", widget = "Container", ui = "slot_1_cnt",
+            id = string.format("slot%dCnt", i), widget = "Container", ui = string.format(kSlotIdTemplate, i),
             attached = {
                 {
                     id = "slotNameLbl", widget = "Label", ui = "slot_name_lbl",
-                    rect = {10, 50, 100, 15},
+                    text = "ID",
+                    rect = {10, 50 + (i - 1) * 20, 100, 15},
                     font = "system_15_fnt", colour = "blue", text_align = "LEFT|MIDDLE",
-                }
+                },
+                {
+                    id = "curValueInput", widget = "TextEdit", ui = "cur_value_input",
+                    text = "VALUE1",
+                    rect = {115, 50 + (i - 1) * 20, 50, 15},
+                    font = "system_15_fnt", colour = "white", text_align = "LEFT|MIDDLE",
+                },
+                {
+                    id = "dividerLbl", widget = "Label", ui = "divider_lbl",
+                    text = "/",
+                    rect = {165, 50 + (i - 1) * 20, 50, 15},
+                    font = "system_15_fnt", colour = "white", text_align = "CENTER|MIDDLE",
+                },
+                {
+                    id = "maxValueInput", widget = "TextEdit", ui = "max_value_input",
+                    text = "VALUE2",
+                    rect = {215, 50 + (i - 1) * 20, 50, 15},
+                    font = "system_15_fnt", colour = "white", text_align = "LEFT|MIDDLE",
+                },
             }
         }
-    }
+        table.insert(tbl, slot_cnt)
+    end
+    return tbl
 end
 
 function EditEntityDialog:init()
@@ -53,134 +81,51 @@ function EditEntityDialog:init()
     self:setRect(0, 0, 500, 700)
     self:setAlignment("CENTER|MIDDLE", 0, 0)
 
-    self:addCallback("WidgetOpening", self.__onOpening, self)
-
     UIBuilder.create(self, __getUIDesc(self))
-
-    -- local cnt = self
-
-    -- local faction_lbl = Label()
-    -- faction_lbl:setRect(10, 30, 100, 15)
-    -- faction_lbl:setText("Faction:")
-    -- faction_lbl:setFont("system_15_fnt")
-    -- faction_lbl:setColour("blue")
-    -- faction_lbl:setTextAlignment("LEFT|MIDDLE")
-    -- cnt:attach(faction_lbl)
-
-    -- local faction_value_lbl = Label()
-    -- faction_value_lbl:setRect(115, 30, 100, 15)
-    -- faction_value_lbl:setFont("system_15_fnt")
-    -- faction_value_lbl:setColour("white")
-    -- faction_value_lbl:setTextAlignment("LEFT|MIDDLE")
-    -- cnt:attach(faction_value_lbl)
-
-    -- local params = {
-    --     {text = "Name:", slots = {"name"}},
-    --     {text = "Morale:", slots = {"morale_cur", "morale_max"}},
-    --     {text = "Stamina:", slots = {"stamina_cur", "stamina_max"}},
-    --     {text = "Health:", slots = {"health_cur", "health_max"}},
-    --     {text = "Armour:", slots = {"armour"}},
-    --     {text = "Action Points:", slots = {"action_points_cur", "action_points_max"}},
-    --     {text = "Weapon Skill:", slots = {"weapon_skill"}},
-    -- }
-
-    -- local params_bottom = 0
-    -- for i, data in ipairs(params) do
-    --     local lbl = Label()
-    --     lbl:setRect(10, 50 + (i - 1) * 20, 100, 15)
-    --     lbl:setText(data.text)
-    --     lbl:setFont("system_15_fnt")
-    --     lbl:setColour("blue")
-    --     lbl:setTextAlignment("LEFT|MIDDLE")
-    --     cnt:attach(lbl)
-
-    --     for j, key in ipairs(data.slots) do
-    --         local edit = TextEdit(key)
-
-    --         local x = 115 + (j - 1) * 100
-    --         local y = 50 + (i - 1) * 20
-    --         params_bottom = y + 20
-
-    --         edit:setRect(x, y, 50, 15)
-    --         edit:setFont("system_15_fnt")
-    --         edit:setColour("white")
-    --         edit:setTextAlignment("LEFT|MIDDLE")
-    --         cnt:attach(edit)
-    --         if (#data.slots > 1 and 1 == j) then
-    --             local lbl = Label()
-    --             lbl:setRect(165, y, 50, 15)
-    --             lbl:setText("/")
-    --             lbl:setFont("system_15_fnt")
-    --             lbl:setColour("white")
-    --             lbl:setTextAlignment("CENTER|MIDDLE")
-    --             cnt:attach(lbl)
-    --         end
-    --     end
-    -- end
-
-    -- for i, value in ipairs(Factions) do
-    --     local faction_btn = Button()
-    --     faction_btn:setText(value)
-    --     faction_btn:setFont("system_15_fnt")
-    --     faction_btn:setRect(10 + (i - 1) * 120 , params_bottom, 120, 20)
-    --     faction_btn:setTextAlignment("CENTER|MIDDLE")
-    --     faction_btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-    --     faction_btn:addCallback("MouseUp_Left", self.__onFactionBtnClick, {self, value})
-    --     faction_btn:setColour("white")
-    --     cnt:attach(faction_btn)
-    -- end
 end
 
 --[[ Private ]]
 
 function EditEntityDialog:__onOkBtnClick()
+    self:__applyChanges()
     self:view(false)
-    -- local settings = self.entity.settings
-    -- if (settings) then
-    --     for key, widget in pairs(self.current_map) do
-    --         local text = widget:getText()
-    --         settings[key] = tonumber(text) or text
-    --     end
-    -- end
 end
 
 function EditEntityDialog:__onCancelBtnClick()
     self:view(false)
 end
 
-function EditEntityDialog:__onOpening()
-    -- if (self.entity) then
-    --     local settings = self.entity.settings
-    --     if (settings) then
-    --         for key, value in pairs(settings) do
-    --             if (self.current_map[key]) then
-    --                 self.current_map[key]:setText(value)
-    --             end
-    --         end
-    --     end
-    -- end
+function EditEntityDialog:__applyChanges()
 end
-
--- function EditEntityDialog.__onFactionBtnClick(params)
---     local self = params[1]
---     local value = params[2]
---     local widget = self.current_map["faction"]
---     if (widget) then
---         widget:setText(value)
---     end
--- end
 
 --[[ Public ]]
 
 function EditEntityDialog:tune(params)
-    -- self.type = GameData.getEntityType(entity.id)
+    for i = 1, kMaxSlotsCount do
+        local slot_id = string.format(kSlotIdTemplate, i)
+        local cnt = self:getUI(slot_id)
+        if (cnt) then
+            local param = params and params[i]
+            cnt:view(nil ~= param)
+            if (param) then
+                local id_lbl = cnt:getUI("slot_name_lbl")
+                id_lbl:setText(param[1])
+                
+                local cur_value_input = cnt:getUI("cur_value_input")
+                cur_value_input:view(nil ~= param[2])
+                if (param[2]) then
+                    cur_value_input:setText(param[2])
+                end
 
-    -- for _, cnt_id in ipairs(self.cnt_list) do
-    --     local cnt = self.containers[cnt_id]
-    --     if (cnt) then
-    --         cnt:view(cnt_id == self.type)
-    --     end
-    -- end
-
-    -- self.current_map = self.maps[self.type]
+                local divider_lbl = cnt:getUI("divider_lbl")
+                divider_lbl:view(nil ~= param[3])
+                
+                local max_value_input = cnt:getUI("max_value_input")
+                max_value_input:view(nil ~= param[3])
+                if (param[3]) then
+                    max_value_input:setText(param[3])
+                end
+            end
+        end
+    end
 end

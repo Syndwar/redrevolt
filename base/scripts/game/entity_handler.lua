@@ -240,6 +240,7 @@ function EntityHandler:getInfo()
 end
 
 local _edit_params = {
+    {"Faction:",        "faction"},
     {"Name:",           "name"},
     {"Morale:",         "morale_cur", "morale_max"},
     {"Stamina:",        "stamina_cur", "stamina_max"},

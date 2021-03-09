@@ -52,6 +52,7 @@ ItemsSettings = {
 
 UnitsSettings = {
     ["un_human"] = {
+        faction = "",
         name = "Human",
         morale_cur = 255,
         morale_max = 255,
@@ -65,6 +66,7 @@ UnitsSettings = {
         weapon_skill = 0,
     },
     ["un_combat_droid"] = {
+        faction = "",
         name = "Combat Droid",
         morale_cur = 255,
         morale_max = 255,
@@ -78,6 +80,7 @@ UnitsSettings = {
         weapon_skill = 0,
     },
     ["un_master_droid"] = {
+        faction = "",
         name = "Master Droid",
         morale_cur = 255,
         morale_max = 255,
@@ -91,6 +94,7 @@ UnitsSettings = {
         weapon_skill = 0,
     },
     ["un_android_medium"] = {
+        faction = "",
         name = "Android",
         morale_cur = 255,
         morale_max = 255,
@@ -104,6 +108,7 @@ UnitsSettings = {
         weapon_skill = 0,
     },
     ["un_android_light"] = {
+        faction = "",
         name = "Android",
         morale_cur = 255,
         morale_max = 255,
@@ -117,6 +122,7 @@ UnitsSettings = {
         weapon_skill = 0,
     },
     ["un_sentry_droid_heavy"] = {
+        faction = "",
         name = "Sentry Droid",
         morale_cur = 255,
         morale_max = 255,
@@ -130,6 +136,7 @@ UnitsSettings = {
         weapon_skill = 0,
     },
     ["un_sentry_droid_medium"] = {
+        faction = "",
         name = "Sentry Droid",
         morale_cur = 255,
         morale_max = 255,
@@ -143,6 +150,7 @@ UnitsSettings = {
         weapon_skill = 0,
     },
     ["un_sentry_droid_light"] = {
+        faction = "",
         name = "Sentry Droid",
         morale_cur = 255,
         morale_max = 255,
@@ -156,6 +164,7 @@ UnitsSettings = {
         weapon_skill = 0,
     },
     ["un_patrol_droid_medium"] = {
+        faction = "",
         name = "Patrol Droid",
         morale_cur = 255,
         morale_max = 255,
@@ -169,6 +178,7 @@ UnitsSettings = {
         weapon_skill = 0,
     },
     ["un_patrol_droid_light"] = {
+        faction = "",
         name = "Patrol Droid",
         morale_cur = 255,
         morale_max = 255,
