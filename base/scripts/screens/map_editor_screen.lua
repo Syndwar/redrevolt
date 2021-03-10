@@ -178,15 +178,20 @@ function MapEditorScreen:__load(sender, filename)
     end
 end
 
-function MapEditorScreen:__onEditItem()
-    local edit_entity_dlg = self:getUI("edit_entity_dlg")
+function MapEditorScreen:__onEditItem(params)
     local battlefield = self:getUI("battlefield")
-    if (battlefield and edit_entity_dlg and not edit_entity_dlg:isOpened()) then
-        local selected_entity = battlefield:getSelectedEntity()
-        if (selected_entity and selected_entity:hasObj()) then
-            local edit_params = selected_entity:getEditParams()
-            edit_entity_dlg:tune(edit_params)
-            edit_entity_dlg:view(true)
+    local selected_entity = battlefield and battlefield:getSelectedEntity()
+    if (selected_entity and selected_entity:hasObj()) then
+        if (params) then
+            selected_entity:setEditParams(params)
+            Observer:call("EntityChanged", selected_entity)
+        else
+            local edit_entity_dlg = self:getUI("edit_entity_dlg")
+            if (edit_entity_dlg and not edit_entity_dlg:isOpened()) then
+                local edit_params = selected_entity:getEditParams()
+                edit_entity_dlg:tune(edit_params)
+                edit_entity_dlg:view(true)
+            end
         end
     end
 end

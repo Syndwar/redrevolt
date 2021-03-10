@@ -77,6 +77,8 @@ function EditEntityDialog:init()
     close_transform:add(255, 0, 500)
     self:attachTransform("WidgetClosing", close_transform)
 
+    self._params = nil
+
     self:setModal(true)
     self:setRect(0, 0, 500, 700)
     self:setAlignment("CENTER|MIDDLE", 0, 0)
@@ -87,8 +89,8 @@ end
 --[[ Private ]]
 
 function EditEntityDialog:__onOkBtnClick()
-    self:__applyChanges()
     self:view(false)
+    self:__applyChanges()
 end
 
 function EditEntityDialog:__onCancelBtnClick()
@@ -96,11 +98,49 @@ function EditEntityDialog:__onCancelBtnClick()
 end
 
 function EditEntityDialog:__applyChanges()
+    for i = 1, kMaxSlotsCount do
+        local slot_id = string.format(kSlotIdTemplate, i)
+        local cnt = self:getUI(slot_id)
+        -- if container is opened
+        if (cnt and cnt:isOpened()) then
+            for _, param in ipairs(self._params) do
+                local id_lbl = cnt:getUI("slot_name_lbl")
+                if (id_lbl) then
+                    local key = id_lbl:getText()
+                    -- find a slot that holds the param values
+                    if (param[1] == key) then
+                        -- if param 2 exists than read current value input
+                        if (param[2]) then
+                            local cur_value_input = cnt:getUI("cur_value_input")
+                            local text = cur_value_input and cur_value_input:getText()
+                            if (text) then
+                                param[2] = tonumber(text) or text
+                            end
+                        end
+                        -- if param 3 exists than read max value input
+                        if (param[3]) then
+                            local max_value_input = cnt:getUI("max_value_input")
+                            local text = max_value_input and max_value_input:getText()
+                            if (text) then
+                                param[3] = tonumber(text) or text
+                            end
+                        end
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    if (self._params) then
+        Observer:call("EditEntity", self._params)
+    end
 end
 
 --[[ Public ]]
-
 function EditEntityDialog:tune(params)
+    self._params = params
+
     for i = 1, kMaxSlotsCount do
         local slot_id = string.format(kSlotIdTemplate, i)
         local cnt = self:getUI(slot_id)

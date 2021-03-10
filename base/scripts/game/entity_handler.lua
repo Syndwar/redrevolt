@@ -270,7 +270,6 @@ function EntityHandler:__findParamsInSettings(params)
             table.insert(result, value)
         end
     end
-    if (result) then log(result[1], result[2], result[3]) end
     return result
 end
 
@@ -290,6 +289,23 @@ end
 
 function EntityHandler:getEditParams()
     return self:__fillTemplateParams(_edit_params)
+end
+
+function EntityHandler:setEditParams(params)
+    for _, param in ipairs(params) do
+        for _, edit_param in ipairs(_edit_params) do
+            if (param[1] == edit_param[1]) then
+                for i = 2, #edit_param do
+                    local key = edit_param[i]
+                    if (not self._settings) then
+                        self._settings = {}
+                    end
+                    self._settings[key] = param[i]
+                end
+                break
+            end
+        end
+    end
 end
 
 function EntityHandler:getHotSpot()
