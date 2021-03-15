@@ -120,28 +120,23 @@ Objects = {
 Terrain = {
 }
 
-function GameData.find(id)
-    for _, data in ipairs(Items) do
-        if (data.id == id) then
-            return data
-        end
+Entities = {}
+
+local function __cacheEntities(tbl)
+    for _, data in ipairs(tbl) do
+        local id = data.id
+        assert(not Entities[id], string.format("Duplicate entity is found: %s", id))
+        Entities[id] = data
     end
-    for _, data in ipairs(Units) do
-        if (data.id == id) then
-            return data
-        end
-    end
-    for _, data in ipairs(Objects) do
-        if (data.id == id) then
-            return data
-        end
-    end
-    for _, data in ipairs(Terrain) do
-        if (data.id == id) then
-            return data
-        end
-    end
-    return nil
+end
+
+__cacheEntities(Items)
+__cacheEntities(Units)
+__cacheEntities(Objects)
+__cacheEntities(Terrain)
+
+function GameData.getDefaultDesc(id)
+    return Entities[id]
 end
 
 function GameData.getDefaultSettings(id)
@@ -155,18 +150,4 @@ function GameData.getDefaultSettings(id)
         return TerrainSettings[id]
     end
     return nil
-end
-
-function GameData.isItem(id)
-    for _, v in ipairs(Items) do
-        if (v.id == id) then
-            return true
-        end
-    end
-    return false
-end
-
-function GameData.getSprite(id)
-    local entity = GameData.find(id)
-    return entity and entity.sprite
 end

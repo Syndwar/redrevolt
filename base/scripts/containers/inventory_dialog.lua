@@ -40,7 +40,7 @@ end
 --     self.icon_img:view(nil ~= entity)
 
 --     if (entity) then
---         self.icon_img:setSprite(GameData.getSprite(entity.id))
+--         self.icon_img:setSprite(entity:getSprite())
 --         self.name_lbl:setText(entity.settings.name)
 --     end
 -- end
@@ -139,16 +139,14 @@ end
 --         -- remove from table all non item entities
 --         local x, y = self.floor_cnt:getRect()
 --         local row = 0
---         for i, entity in ipairs(entities_on_floor) do
---             if (GameData.isItem(entity.id)) then
---                 row = row + 1
---                 local slot_cnt = FloorSlot()
---                 slot_cnt:update(entity)
---                 slot_cnt:moveTo(x, y + (row - 1) * 50)
---                 self.floor_cnt:attach(slot_cnt)
---                 table.insert(self.floor_slots, slot_cnt)
---             end
---         end
+        -- for i, entity in ipairs(entities_on_floor) do
+        --     row = row + 1
+        --     local slot_cnt = FloorSlot()
+        --     slot_cnt:update(entity)
+        --     slot_cnt:moveTo(x, y + (row - 1) * 50)
+        --     self.floor_cnt:attach(slot_cnt)
+        --     table.insert(self.floor_slots, slot_cnt)
+        -- end
 --         local content_width, content_height = 200, #self.floor_slots * 50
 --         self.floor_cnt:setContentRect(0, 0, content_width, content_height)
 --     end

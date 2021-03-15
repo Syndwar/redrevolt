@@ -183,7 +183,7 @@ function MapEditorBattlefield:__changeEntity(entity)
     self._map:selectEntity(entity)
 
     local geometry = nil
-    if (entity and not entity:hasObj()) then
+    if (entity and not entity:isValid()) then
         geometry = entity:getGeometry()
     end
     self:__resetCursor(geometry)
@@ -230,7 +230,7 @@ end
 function MapEditorBattlefield:__onFieldLeftClicked()
     local entity = self:getSelectedEntity()
     if (entity) then
-        if (self._map and not entity:hasObj()) then
+        if (self._map and not entity:isValid()) then
             local i, j = self:__getMouseTargetedCell()
             self._map:addEntity(entity, i, j) -- add it to the map
         end
@@ -307,7 +307,7 @@ end
 
 function MapEditorBattlefield:__updateEntity(params)
     local selected_entity = self:getSelectedEntity()
-    if (selected_entity and selected_entity:hasObj()) then
+    if (selected_entity and selected_entity:isValid()) then
         if (params) then
             selected_entity:setEditParams(params)
             Observer:call("EntityChanged", selected_entity)
@@ -317,15 +317,18 @@ end
 
 function MapEditorBattlefield:__editEntity()
     local selected_entity = self:getSelectedEntity()
-    if (selected_entity and selected_entity:hasObj()) then
+    if (selected_entity and selected_entity:isValid()) then
         local params = selected_entity:getEditParams()
         Observer:call("ShowEditDialog", params)
     end
 end
 
 function MapEditorBattlefield:__editInventory()
-    local content = {}
-    Observer:call("ShowInventoryDialog", content)
+    local selected_entity = self:getSelectedEntity()
+    if (selected_entity and selected_entity:isValid()) then
+        local content = selected_entity:getInventoryContent()
+        Observer:call("ShowInventoryDialog", content)
+    end
 end
 
 function MapEditorBattlefield:__updateInventory(content)

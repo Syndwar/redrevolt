@@ -142,9 +142,8 @@ function MapHandler:addEntity(entity, i, j)
         if (self._entity_creator) then
             local obj = self._entity_creator(new_entity) -- create ui object
             new_entity:setObj(obj) -- link entity with ui object
+            table.insert(self._content, new_entity)
         end
-
-        table.insert(self._content, new_entity)
     end
 end
 

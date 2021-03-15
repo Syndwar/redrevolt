@@ -1,5 +1,4 @@
 EntityHandler = {
-    _id = nil,
     _pos = nil,
     _angle = nil,
     _flip = nil,
@@ -56,31 +55,48 @@ function EntityHandler:__getDescription()
     return self._default_desc
 end
 
+function EntityHandler:__getDefaultGeometry()
+    local desc = self:__getDescription()
+    return desc and desc.geometry
+end
+
+function EntityHandler:__fillTemplateParams(templates)
+    local result = nil
+    for _, params in ipairs(templates) do
+        local settings_params = self:__findParamsInSettings(params)
+        if (settings_params) then
+            if (not result) then
+                result = {}
+            end
+            table.insert(result, settings_params)
+        end
+    end
+    return result
+end
+
 --[[ Public ]]
 function EntityHandler.new(id)
     local entity = table.deepcopy(EntityHandler)
-    entity._id = id
     entity._default_settings = GameData.getDefaultSettings(id)
-    entity._default_desc = GameData.find(id)
+    entity._default_desc = GameData.getDefaultDesc(id)
     return entity
 end
 
 function EntityHandler.load(data)
     local entity = table.deepcopy(EntityHandler)
-    entity._id = data.id
     entity._angle = data.angle
     entity._pos = data.pos
     entity._flip = data.flip
     entity._inventory = data.inventory
     entity._settings = data.settings
     entity._default_settings = GameData.getDefaultSettings(data.id)
-    entity._default_desc = GameData.find(data.id)
+    entity._default_desc = GameData.getDefaultDesc(data.id)
     return entity
 end
 
 function EntityHandler:save(data)
     local data = {}
-    data["id"] = self._id
+    data["id"] = self._default_desc.id
     data["angle"] = self._angle
     data["pos"] = self._pos
     data["flip"] = self._flip
@@ -89,16 +105,9 @@ function EntityHandler:save(data)
     return data
 end
 
-function EntityHandler:isValid()
-    return "" ~= self._id
-end
-
 function EntityHandler:getId()
-    return self._id or ""
-end
-
-function EntityHandler:setId(id)
-    self._id = id or ""
+    local desc = self:__getDescription()
+    return desc and desc.id or ""
 end
 
 function EntityHandler:getPos()
@@ -192,13 +201,8 @@ function EntityHandler.rotateGeometry(geometry, angle)
     return result
 end
 
-function EntityHandler:geDefaultGeometry()
-    local desc = self:__getDescription()
-    return desc and desc.geometry
-end
-
 function EntityHandler:getGeometry()
-    local geometry = self:geDefaultGeometry()
+    local geometry = self:__getDefaultGeometry()
     if (1 == #geometry and 1 == geometry[1]) then return geometry end
     
     local result = geometry
@@ -273,20 +277,6 @@ function EntityHandler:__findParamsInSettings(params)
     return result
 end
 
-function EntityHandler:__fillTemplateParams(templates)
-    local result = nil
-    for _, params in ipairs(templates) do
-        local settings_params = self:__findParamsInSettings(params)
-        if (settings_params) then
-            if (not result) then
-                result = {}
-            end
-            table.insert(result, settings_params)
-        end
-    end
-    return result
-end
-
 function EntityHandler:getEditParams()
     return self:__fillTemplateParams(_edit_params)
 end
@@ -353,6 +343,14 @@ function EntityHandler:isHit(i, j)
     return false
 end
 
-function EntityHandler:hasObj()
+function EntityHandler:isValid()
     return nil ~= self._obj
+end
+
+function EntityHandler:getInventoryContent()
+    local content = {}
+    if (self._inventory) then
+        -- fill content
+    end
+    return content
 end
