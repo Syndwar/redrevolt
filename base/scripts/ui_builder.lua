@@ -1,126 +1,75 @@
 UIBuilder = {}
 
-local function __tuneWidget(widget, data)
-    if (widget and data) then
-        if (data.rect) then
+local function __createWidget(data)
+    local widget = nil
+    local widget_class = _G[data.widget]
+    assert(widget_class)
+    if (data) then
+        -- create widget
+        widget = widget_class(data.id or "")
+        -- set rect if possible
+        if (data.rect and widget.setRect) then
             widget:setRect(unpack(data.rect))
         end
-        if (data.alignment) then
+        -- set widget alignment if possible
+        if (data.alignment and widget.setAlignment) then
             widget:setAlignment(unpack(data.alignment))
         end
-    end
-end
-
-local function __createLabel(data)
-    local widget = nil
-    if (data) then
-        widget = Label(data.id or "")
-        __tuneWidget(widget, data)
-
-        widget:setText(data.text or "")
-        widget:setFont(data.font or "")
-
-        if (data.text_align) then
-            widget:setTextAlignment(data.text_align)
-        end
-        if (data.colour) then
-            widget:setColour(data.colour)
-        end
-    end
-    return widget
-end
-
-local function __createImage(data)
-    local widget = nil
-    if (data) then
-        widget = Image(data.id or "")
-        __tuneWidget(widget, data)
-
-        if (data.sprite) then
+        -- set sprite if possible
+        if (data.sprite and widget.setSprite) then
             widget:setSprite(data.sprite)
         end
-        if (data.angle) then
+        -- set angle if possible
+        if (data.angle and widget.setAngle) then
             widget:setAngle(data.angle)
         end
-        if (data.center) then
+        -- set widget center if possible
+        if (data.center and widget.setCenter) then
             widget:setCenter(unpack(data.center))
         end
-    end
-    return widget
-end
-
-local function __createButton(data)
-    local widget = nil
-    if (data) then
-        widget = Button(data.id or "")
-        __tuneWidget(widget, data)
-
-        widget:setText(data.text or "")
-        widget:setFont(data.font or "")
-
-        if (data.text_align) then
-            widget:setTextAlignment(data.text_align)
+        -- set rect if possible
+        if (data.rect and widget.setRect) then
+            widget:setRect(unpack(data.rect))
         end
-        if (data.sprites) then
-            widget:setSprites(unpack(data.sprites))
+        -- change widget scrolling speed if possible
+        if (data.scroll_speed and widget.setScrollSpeed) then
+            widget:setScrollSpeed(data.scroll_speed or 1)
         end
-        if (data.callback) then
+        -- set widget callback if possible
+        if (data.callback and widget.addCallback) then
             widget:addCallback(unpack(data.callback))
         end
-        if (data.colour) then
-            widget:setColour(data.colour)
-        end
-    end
-    return widget
-end
-
-local function __createTextEdit(data)
-    local widget = nil
-    if (data) then
-        widget = TextEdit(data.id or "")
-        __tuneWidget(widget, data)
-
-        widget:setText(data.text or "")
-        widget:setFont(data.font or "")
-
-        if (data.text_align) then
-            widget:setTextAlignment(data.text_align)
-        end
-        if (data.colour) then
-            widget:setColour(data.colour)
-        end
-    end
-    return widget
-end
-
-local function __createScrollContainer(data)
-    local widget = nil
-    if (data) then
-        widget = ScrollContainer(data.id or "")
-        widget:setScrollSpeed(data.scroll_speed or 1)
-        __tuneWidget(widget, data)
-    end
-    return widget
-end
-
-local function __createArea(data)
-    local widget = nil
-    if (data) then
-        widget = Area(data.id or "")
-        __tuneWidget(widget, data)
-        if (data.callbacks) then
+        -- set widget callbacks if possible
+        if (data.callbacks and widget.addCallback) then
             for _, callback in ipairs(data.callbacks) do
                 widget:addCallback(unpack(callback))
             end
         end
-    end
-    return widget
-end
-
-local function __createContainer(data)
-    local widget = nil
-    if (data) then
-        widget = Container(data.id or "")
+        -- set widget text if possible
+        if (data.text and widget.setText) then
+            widget:setText(data.text or "")
+        end
+        -- set widget font if possible
+        if (data.font and widget.setFont) then
+            widget:setFont(data.font or "")
+        end
+        -- set text alignment in widget if possible
+        if (data.text_align and widget.setTextAlignment) then
+            widget:setTextAlignment(data.text_align)
+        end
+        -- set text colour in widget if possible
+        if (data.colour and widget.setColour) then
+            widget:setColour(data.colour)
+        end
+        -- set widget sprites if possible
+        if (data.sprites and widget.setSprites) then
+            widget:setSprites(unpack(data.sprites))
+        end
+        -- set widget visibility status
+        if (nil ~= data.view and widget.instantView) then
+            widget:instantView(data.view)
+        end
+        -- attach other widgets if possible
         if (data.attached) then
             UIBuilder.create(widget, data.attached)
         end
@@ -128,27 +77,14 @@ local function __createContainer(data)
     return widget
 end
 
-UIBuilder._build_tools = {
-    ["Button"] = __createButton,
-    ["Image"] = __createImage,
-    ["Label"] = __createLabel,
-    ["TextEdit"] = __createTextEdit,
-    ["ScrollContainer"] = __createScrollContainer,
-    ["Area"] = __createArea,
-    ["Container"] = __createContainer,
-}
-
 function UIBuilder.create(cnt, desc)
     for _, data in ipairs(desc) do
-        local tool = UIBuilder._build_tools[data.widget]
-        if (tool) then
-            local widget = tool(data)
-            if (widget) then
-                if (data.ui) then
-                    cnt:setUI(data.ui, widget)
-                end
-                cnt:attach(widget)
+        local widget = __createWidget(data)
+        if (widget) then
+            if (data.ui) then
+                cnt:setUI(data.ui, widget)
             end
+            cnt:attach(widget)
         end
     end
 end

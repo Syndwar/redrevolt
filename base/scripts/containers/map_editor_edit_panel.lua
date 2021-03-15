@@ -144,7 +144,7 @@ function MapEditorEditPanel:__editEntity()
 end
 
 function MapEditorEditPanel:__showInventory()
-    Observer:call("ShowInventory")
+    Observer:call("EditInventory")
 end
 
 function MapEditorEditPanel:__rotateEntity()

@@ -21,6 +21,10 @@ function MapEditorBattlefield:init(id)
     Observer:addListener("EntityFlipped", self, self.__flipEntity)
     Observer:addListener("NextEntity", self, self.__goToNextEntity)
     Observer:addListener("PrevEntity", self, self.__goToPrevEntity)
+    Observer:addListener("UpdateEntity", self, self.__updateEntity)
+    Observer:addListener("EditEntity", self, self.__editEntity)
+    Observer:addListener("EditInventory", self, self.__editInventory)
+    Observer:addListener("UpdateInventory", self, self.__updateInventory)
     
     self:addCallback("KeyUp_" .. HotKeys.Grid, self.__switchGrid, self)
     self:addCallback("MouseMove", self.__onMouseMove, self)
@@ -301,19 +305,52 @@ function MapEditorBattlefield:__goToNextEntity()
     end
 end
 
+function MapEditorBattlefield:__updateEntity(params)
+    local selected_entity = self:getSelectedEntity()
+    if (selected_entity and selected_entity:hasObj()) then
+        if (params) then
+            selected_entity:setEditParams(params)
+            Observer:call("EntityChanged", selected_entity)
+        end
+    end
+end
+
+function MapEditorBattlefield:__editEntity()
+    local selected_entity = self:getSelectedEntity()
+    if (selected_entity and selected_entity:hasObj()) then
+        local params = selected_entity:getEditParams()
+        Observer:call("ShowEditDialog", params)
+    end
+end
+
+function MapEditorBattlefield:__editInventory()
+    local content = {}
+    Observer:call("ShowInventoryDialog", content)
+end
+
+function MapEditorBattlefield:__updateInventory(content)
+end
 --[[ Public ]]
 
 function MapEditorBattlefield:loadMap(filename)
     if (self._map) then
         Observer:call("EntityChanged", nil)
-        self._map:load(filename)
+        local result = self._map:load(filename)
+        if (result) then
+            log("Map is loaded.")
+            Observer:call("ShowNotification", "Map is loaded.")
+        end
     end
 end
 
 function MapEditorBattlefield:saveMap(filename)
     if (self._map) then
         Observer:call("EntityChanged", nil)
-        self._map:save(filename)
+        local result = self._map:save(filename)
+        if (result) then
+            log("Map is saved.")
+            Observer:call("ShowNotification", "Map is saved.")
+        end
     end
 end
 

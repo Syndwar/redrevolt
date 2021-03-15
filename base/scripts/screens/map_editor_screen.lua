@@ -9,7 +9,51 @@ require("containers/map_editor_info_panel")
 require("containers/save_load_dialog")
 require("containers/edit_entity_dialog")
 require("containers/notification_dialog")
--- require("containers/inventory_dialog")
+require("containers/inventory_dialog")
+
+local function __getUIDesc(self)
+    local tbl = {
+        {
+            id = "battlefield", widget = "MapEditorBattlefield", ui = "battlefield",
+        },
+        {
+            id = "systemPanel", widget = "MapEditorSystemPanel", ui = "system_panel", view = false,
+
+        },
+        {
+            id = "entitiesPanel", widget = "MapEditorItemsPanel", ui = "entities_panel",
+        },
+        {
+            id = "editPanel", widget = "MapEditorEditPanel", ui = "edit_panel",
+        },
+        {
+            id = "filtersPanel", widget = "MapEditorFiltersPanel",
+        },        
+        {
+            id = "infoPanel", widget = "MapEditorInfoPanel", ui = "info_panel",
+        },
+        {
+            id = "saveLoadDlg", widget = "SaveLoadDialog", ui = "save_load_dlg",
+        },
+        {
+            id = "notificationDlg", widget = "NotificationDialog", ui = "notification_dlg",
+        },
+        {
+            id = "editEntityDlg", widget = "EditEntityDialog", ui = "edit_entity_dlg",
+        },
+        {
+            id = "inventoryDlg", widget = "InventoryDialog", ui = "inventory_dlg",
+        },
+        {
+            id = "menuBtn", widget = "Button",
+            rect = {0, 0, 64, 64}, alignment = {"LEFT|BOTTOM", 0, 0},
+            text = "Menu", font = "system_15_fnt", colour = "red", text_align = "CENTER|MIDDLE",
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
+            callback = {"MouseUp_Left", self.__viewMainMenu, self},
+        }
+    }
+    return tbl
+end
 
 class "MapEditorScreen" (Screen)
 
@@ -19,70 +63,28 @@ function MapEditorScreen:init()
     self:addCallback("KeyUp_" .. HotKeys.Save, self.__quickSaveMap, self)
     self:addCallback("KeyUp_" .. HotKeys.Load, self.__quickLoad, self)
 
-    -- Observer:addListener("ShowInventory", self, self.__showInventory)
-    -- Observer:addListener("DeleteEntity", self, self.onEntityDelete)
-    -- Observer:addListener("AddEntity", self, self.onEntityAdd)
-
-    Observer:addListener("EditEntity", self, self.__onEditItem)
+    Observer:addListener("ShowInventoryDialog", self, self.__showInventoryDialog)
+    Observer:addListener("ShowEditDialog", self, self.__showEditDialog)
     Observer:addListener("ExitScreen", self, self.__exitScreen)
     Observer:addListener("ShowNotification", self, self.__showNotification)
     Observer:addListener("StartNewMap", self, self.__startNewMap)
     Observer:addListener("SaveMapFile", self, self.__save)
     Observer:addListener("LoadMapFile", self, self.__load)
 
-    local btn = Button("menuBtn")
-    btn:setText("Menu")
-    btn:setFont("system_15_fnt")
-    btn:setRect(0, 0, 64, 64)
-    btn:setAlignment("LEFT|BOTTOM", 0, 0)
-    btn:setTextAlignment("CENTER|MIDDLE")
-    btn:setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr")
-    btn:addCallback("MouseUp_Left", self.__viewMainMenu, self)
-    btn:setColour("red")
-    self:attach(btn)
+    UIBuilder.create(self, __getUIDesc(self))
 
-    local battlefield = MapEditorBattlefield("battlefield")
-    self:attach(battlefield)
-    self:setUI("battlefield", battlefield)
-
-    local system_panel = MapEditorSystemPanel("systemPanel")
-    system_panel:instantView(false)
-    self:attach(system_panel)
-    self:setUI("system_panel", system_panel)
-
-    local entities_panel = MapEditorItemsPanel("itemsPanel")
-    entities_panel:addPage(1, Items)
-    entities_panel:addPage(2, Units)
-    entities_panel:addPage(3, Objects)
-    entities_panel:addPage(4, Terrain)
-    self:attach(entities_panel)
-
-    local filters_panel = MapEditorFiltersPanel("filtersPanel")
-    self:attach(filters_panel)
-
-    local edit_panel = MapEditorEditPanel("editPanel")
-    edit_panel:setAngles({0, 90, 180, 270})
-    edit_panel:setFlips({{false, false, "   "}, {true, false, " | "}, {false, true, "- -"}, {true, true, "-|-"}})
-    self:attach(edit_panel)
-
-    local info_panel = MapEditorInfoPanel("info_panel")
-    self:attach(info_panel)
-    self:setUI("info_panel", info_panel)
-
-    local save_load_dlg = SaveLoadDialog("save_load_dlg")
-    self:attach(save_load_dlg)
-    self:setUI("save_load_dlg", save_load_dlg)
-
-    local notification_dlg = NotificationDialog("notificationDialog")
-    self:attach(notification_dlg)
-    self:setUI("notification_dlg", notification_dlg)
-
-    local edit_entity_dlg = EditEntityDialog("edit_entity_dlg")
-    self:attach(edit_entity_dlg)
-    self:setUI("edit_entity_dlg", edit_entity_dlg)
-
---     self.inventory_dlg = InventoryDialog()
---     self:attach(self.inventory_dlg)
+    local entities_panel = self:getUI("entities_panel")
+    if (entities_panel) then
+        entities_panel:addPage(1, Items)
+        entities_panel:addPage(2, Units)
+        entities_panel:addPage(3, Objects)
+        entities_panel:addPage(4, Terrain)
+    end
+    local edit_panel = self:getUI("edit_panel")
+    if (edit_panel) then
+        edit_panel:setAngles({0, 90, 180, 270})
+        edit_panel:setFlips({{false, false, "   "}, {true, false, " | "}, {false, true, "- -"}, {true, true, "-|-"}})
+    end
 end
 
 --[[ Private ]]
@@ -178,63 +180,22 @@ function MapEditorScreen:__load(sender, filename)
     end
 end
 
-function MapEditorScreen:__onEditItem(params)
-    local battlefield = self:getUI("battlefield")
-    local selected_entity = battlefield and battlefield:getSelectedEntity()
-    if (selected_entity and selected_entity:hasObj()) then
-        if (params) then
-            selected_entity:setEditParams(params)
-            Observer:call("EntityChanged", selected_entity)
-        else
-            local edit_entity_dlg = self:getUI("edit_entity_dlg")
-            if (edit_entity_dlg and not edit_entity_dlg:isOpened()) then
-                local edit_params = selected_entity:getEditParams()
-                edit_entity_dlg:tune(edit_params)
-                edit_entity_dlg:view(true)
-            end
-        end
+function MapEditorScreen:__showEditDialog(params)
+    if (not params) then return end
+
+    local edit_entity_dlg = self:getUI("edit_entity_dlg")
+    if (edit_entity_dlg and not edit_entity_dlg:isOpened()) then
+        edit_entity_dlg:tune(params)
+        edit_entity_dlg:view(true)
     end
 end
 
---[[ Public ]]
-
--- function MapEditorScreen:selectItem(index)
---     if (index > 0) then
---         self.selected_item_index = index
---         local entity = MapHandler.getEntity(index)
---         local data = GameData.find(entity.id)
-        
---         self.edit_panel:reset(entity.angle, entity.flip)
---         self.info_panel:instantView(true)
---         self.info_panel:update(data.sprite, self:getItemAngle(), self:getItemFlip(), entity.id, entity)
---     end
--- end
-
--- function MapEditorScreen:onEntityAdd(entity, i, j)
---     if (entity) then
---         entity.pos = {i, j}
---         entity.obj = self:createEntity(entity)
---         MapHandler.addEntity(entity)
---     end
--- end
-
--- function MapEditorScreen:onEntityDelete(index, entity)
---     local index = index or MapHandler.getEntityIndex(entity)
---     if (index > 0) then
---         self.battlefield:detach(entity.obj)
---         MapHandler.deleteEntityByIndex(index)
---     end
--- end
-
--- function MapEditorScreen:__showInventory()
---     if (self.selected_item_index) then
---         local entity = MapHandler.getEntity(self.selected_item_index)
---         if (entity) then
---             local entity_type = GameData.getEntityType(entity.id)
---             if (EntityType.Unit == entity_type) then
---                 self.inventory_dlg:tune(entity)
---                 self.inventory_dlg:view(true)
---             end
---         end
---     end
--- end
+function MapEditorScreen:__showInventoryDialog(content)
+    if (not content) then return end
+    
+    local inventory_dlg = self:getUI("inventory_dlg")
+    if (inventory_dlg) then
+        inventory_dlg:tune(content)
+        inventory_dlg:view(true)
+    end
+end

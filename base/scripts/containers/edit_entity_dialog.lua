@@ -133,7 +133,7 @@ function EditEntityDialog:__applyChanges()
     end
 
     if (self._params) then
-        Observer:call("EditEntity", self._params)
+        Observer:call("UpdateEntity", self._params)
     end
 end
 

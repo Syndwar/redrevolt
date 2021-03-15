@@ -164,11 +164,10 @@ function MapHandler:load(filename)
                 local entity = EntityHandler.load(data)
                 self:addEntity(entity)
             end
-
-            log("Map is loaded.")
-            Observer:call("ShowNotification", "Map is loaded.")
+            return true
         end
     end
+    return false
 end
 
 function MapHandler:save(filename)
@@ -180,9 +179,9 @@ function MapHandler:save(filename)
         table.totxt(save_map, full_file_path)
         -- collect garbage
         Engine.collectGarbage()
-        log("Map is saved.")
-        Observer:call("ShowNotification", "Map is saved.")
+        return true
     end
+    return false
 end
 
 
