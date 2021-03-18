@@ -323,10 +323,17 @@ function MapEditorBattlefield:__editEntity()
     end
 end
 
+function MapEditorBattlefield:__getGroundContent()
+    return {}
+end
+
 function MapEditorBattlefield:__editInventory()
     local selected_entity = self:getSelectedEntity()
     if (selected_entity and selected_entity:isValid()) then
-        local content = selected_entity:getInventoryContent()
+        local content = {
+            ["inventory"] = selected_entity:getInventory(),
+            ["ground"] = self:__getGroundContent(),
+        }
         Observer:call("ShowInventoryDialog", content)
     end
 end

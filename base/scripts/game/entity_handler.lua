@@ -2,10 +2,9 @@ EntityHandler = {
     _pos = nil,
     _angle = nil,
     _flip = nil,
-    _default_settings = nil,
-    _default_desc = nil,
-    _settings = nil,
-    _inventory = nil,
+    _desc = {},
+    _settings = {},
+    _inventory = nil, -- {{id = "medi_probe", settings = {capacity_cur = 0}}, {id = "laser_pack_1", capacity_cur = 5}}},
     _obj = nil,
 }
 
@@ -48,11 +47,11 @@ local function __transpose(tbl)
 end
 
 function EntityHandler:__getSettings()
-    return self._settings or self._default_settings
+    return self._settings
 end
 
 function EntityHandler:__getDescription()
-    return self._default_desc
+    return self._desc
 end
 
 function EntityHandler:__getDefaultGeometry()
@@ -77,26 +76,32 @@ end
 --[[ Public ]]
 function EntityHandler.new(id)
     local entity = table.deepcopy(EntityHandler)
-    entity._default_settings = GameData.getDefaultSettings(id)
-    entity._default_desc = GameData.getDefaultDesc(id)
+    local settings_mt = {
+        __index = GameData.getDefaultSettings(id)
+    }
+    setmetatable(entity._settings, settings_mt)
+    local desc_mt = {
+        __index = GameData.getDefaultDesc(id)
+    }
+    setmetatable(entity._desc, desc_mt)
     return entity
 end
 
 function EntityHandler.load(data)
-    local entity = table.deepcopy(EntityHandler)
+    local entity = EntityHandler.new(data.id)
     entity._angle = data.angle
     entity._pos = data.pos
     entity._flip = data.flip
     entity._inventory = data.inventory
-    entity._settings = data.settings
-    entity._default_settings = GameData.getDefaultSettings(data.id)
-    entity._default_desc = GameData.getDefaultDesc(data.id)
+    for k, v in pairs(data.settings) do
+        entity._settings[k] = v
+    end
     return entity
 end
 
 function EntityHandler:save(data)
     local data = {}
-    data["id"] = self._default_desc.id
+    data["id"] = self._desc["id"]
     data["angle"] = self._angle
     data["pos"] = self._pos
     data["flip"] = self._flip
@@ -184,7 +189,6 @@ function EntityHandler.flipGeometry(geometry, horizontal, vertical)
     if (vertical) then
         result = __mirror_col(result)
     end
-    log(#result)
     return result
 end
 
@@ -224,7 +228,7 @@ local _info_params = {
     {"WS:", "weapon_skill"},
     {"DG:", "damage"},
     {"AC:", "accuracy"},
-    {"CP:", "capacity"},
+    {"CP:", "capacity_max"},
 }
 
 function EntityHandler:getInfo()
@@ -254,7 +258,7 @@ local _edit_params = {
     {"Weapon Skill:",   "weapon_skill"},
     {"Damage:",         "damage"},
     {"Accuracy:",       "accuracy"},
-    {"Capacity:",       "capacity"},
+    {"Capacity:",       "capacity_cur", "capacity_max"},
 }
 
 function EntityHandler:__findParamsInSettings(params)
@@ -300,7 +304,6 @@ end
 
 function EntityHandler:getHotSpot()
     local desc = self:__getDescription()
-    assert(desc, self._default_desc)
     local size = desc.size or {0, 0}
     local angle = self._angle
     local w, h = size[1], size[2]
@@ -347,10 +350,10 @@ function EntityHandler:isValid()
     return nil ~= self._obj
 end
 
-function EntityHandler:getInventoryContent()
-    local content = {}
+function EntityHandler:getInventory()
     if (self._inventory) then
-        -- fill content
+        return self._inventory
     end
-    return content
+    return {{id = "medi_probe", settings = {capacity_cur = 0}}, {id = "laser_pack_1", capacity_cur = 5}}
+    -- return {}
 end

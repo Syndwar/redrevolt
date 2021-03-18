@@ -19,7 +19,7 @@ local function __getUIDesc(self)
         {
             id = "nameLbl", widget = "Label", ui = "name_lbl",
             rect = {95, 0, 150, 40},
-            text = "Inventory", font = "system_15_fnt", colour = "black", text_align = "LEFT|MIDDLE",
+            text = "", font = "system_15_fnt", colour = "white", text_align = "LEFT|MIDDLE",
         },
     }
     return tbl
@@ -31,5 +31,22 @@ function InventorySlot:init()
     UIBuilder.create(self, __getUIDesc(self))
 end
 
+-- [[ Private ]]
+
 function InventorySlot:__selectSlot()
+end
+
+-- [[ Public ]]
+function InventorySlot:setName(name)
+    local lbl = self:getUI("name_lbl")
+    if (lbl) then
+        lbl:setText(name)
+    end
+end
+
+function InventorySlot:setIcon(icon_id)
+    local img = self:getUI("icon_img")
+    if (img) then
+        img:setSprite(icon_id)
+    end
 end

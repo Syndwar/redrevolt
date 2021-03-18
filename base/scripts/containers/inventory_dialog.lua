@@ -46,6 +46,7 @@ end
 -- end
 
 local kInventorySlots = 4
+local kSlotIdTemplate = "slot_%d_cnt"
 
 class "InventoryDialog" (Dialog)
 
@@ -116,9 +117,30 @@ function InventoryDialog:__closeDialog()
     self:view(false)
 end
 
+function InventoryDialog:__updateInventory(content)
+    if (content) then
+        for i = 1, kInventorySlots do
+            local slot = self:getUI(string.format(kSlotIdTemplate, i))
+            local data = content[i]
+            if (slot and data) then
+                local entity = EntityHandler.new(data.id)
+                if (entity) then
+                    slot:setName(entity:getName())
+                    slot:setIcon(entity:getSprite())
+                end
+            end
+        end
+    end
+end
+
+function InventoryDialog:__updateGround(content)
+end
+
 -- [[ Public ]]
 function InventoryDialog:tune(content)
     self._content = content
+    self:__updateInventory(self._content.inventory)
+    self:__updateGround(self._content.ground)
 end
 
 -- function InventoryDialog:updateUnitSlots()
