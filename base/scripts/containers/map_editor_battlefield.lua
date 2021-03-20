@@ -324,6 +324,9 @@ function MapEditorBattlefield:__editEntity()
 end
 
 function MapEditorBattlefield:__getGroundContent()
+    if (self._map) then
+        return self._map:getSelectedEntities(true)
+    end
     return {}
 end
 

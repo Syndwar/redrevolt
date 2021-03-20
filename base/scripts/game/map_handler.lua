@@ -50,6 +50,23 @@ function MapHandler:getSelectedEntity()
     return self._selected_entity
 end
 
+function MapHandler:getSelectedEntities(ignore_active)
+    if (self._selected_entity) then
+        local pos = self._selected_entity:getPos()
+        local entities = self:getEntities(pos[1], pos[2])
+        if (ignore_active) then
+            for i, entity in ipairs(entities) do
+                if (entity == self._selected_entity) then
+                    table.remove(entities, i)
+                    break
+                end
+            end
+        end
+        return entities
+    end
+    return {}
+end
+
 function MapHandler:isEntitySelected()
     return nil ~= self._selected_entity
 end
@@ -89,6 +106,16 @@ function MapHandler:getEntity(i, j)
         end
     end
     return nil
+end
+
+function MapHandler:getEntities(i, j)
+    local result = {}
+    for _, entity in ipairs(self._content) do
+        if (entity:isHit(i, j)) then
+            table.insert(result, entity)
+        end
+    end
+    return result
 end
 
 function MapHandler:getPrevEntity()
@@ -183,17 +210,6 @@ function MapHandler:save(filename)
     return false
 end
 
-
--- function MapHandler.getEntitiesInPos(i, j)
---     local entities = {}
---     for _, v in ipairs(self._content) do
---         if (i == v.pos[1] and j == v.pos[2]) then
---             table.insert(entities, v)
---         end
---     end
---     return entities
--- end
-
 -- function MapHandler.hasDuplicateInCell(id, i, j)
 --     for _, v in ipairs(self._content) do
 --         if (v.id == id and v.pos[1] == i and v.pos[2] == j) then
@@ -201,23 +217,4 @@ end
 --         end
 --     end
 --     return false
--- end
-
--- function MapHandler.getContentSize()
---     return #self._content
--- end
-
--- function MapHandler.deleteEntityByIndex(index)
---     if (index <= #self._content) then
---         table.remove(self._content, index)
---     end
--- end
-
--- function MapHandler.getEntityIndex(entity)
---     for index, value in ipairs(self._content) do
---         if (value == entity) then
---             return index
---         end
---     end
---     return 0
 -- end

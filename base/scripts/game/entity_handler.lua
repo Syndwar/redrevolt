@@ -354,6 +354,5 @@ function EntityHandler:getInventory()
     if (self._inventory) then
         return self._inventory
     end
-    return {{id = "medi_probe", settings = {capacity_cur = 0}}, {id = "laser_pack_1", capacity_cur = 5}}
-    -- return {}
+    return {}
 end

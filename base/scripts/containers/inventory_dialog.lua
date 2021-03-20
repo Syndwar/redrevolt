@@ -86,8 +86,8 @@ local function __getUIDesc(self)
             rect = {150, 190, 275, 40},
         },
         {
-            id = "flootCnt", widget = "ScrollContainer", ui = "floot_cnt",
-            rect = {110, 280, 240, 320}, scroll_speed = 500,
+            id = "floorCnt", widget = "ScrollContainer", ui = "floor_cnt",
+            rect = {150, 280, 240, 320}, scroll_speed = 500,
         }
     }
     return tbl
@@ -118,29 +118,51 @@ function InventoryDialog:__closeDialog()
 end
 
 function InventoryDialog:__updateInventory(content)
-    if (content) then
-        for i = 1, kInventorySlots do
-            local slot = self:getUI(string.format(kSlotIdTemplate, i))
-            local data = content[i]
-            if (slot and data) then
-                local entity = EntityHandler.new(data.id)
+    for i = 1, kInventorySlots do
+        local slot = self:getUI(string.format(kSlotIdTemplate, i))
+        local data = content and content[i]
+        if (slot) then
+            if (data) then
+                local entity = EntityHandler.new(data:getId())
                 if (entity) then
                     slot:setName(entity:getName())
                     slot:setIcon(entity:getSprite())
                 end
+            else
+                slot:setName("")
+                slot:setIcon("")
             end
         end
     end
 end
 
 function InventoryDialog:__updateGround(content)
+    local floor_cnt = self:getUI("floor_cnt")
+    if (floor_cnt) then
+        floor_cnt:detachAll()
+        local x, y = floor_cnt:getRect()
+        for i, data in ipairs(content) do
+            local entity = EntityHandler.new(data:getId())
+            if (entity) then
+                local slot = InventorySlot()
+                slot:setIcon(entity:getSprite())
+                slot:setName(entity:getName())
+                slot:moveTo(x, y + (i - 1) * 50)
+                floor_cnt:attach(slot)
+            end
+
+        end
+        local content_width = 275
+        local content_height = content and (50 * #content) or 0
+        floor_cnt:setContentRect(0, 0, content_width, content_height)
+    end
 end
 
 -- [[ Public ]]
 function InventoryDialog:tune(content)
     self._content = content
-    self:__updateInventory(self._content.inventory)
-    self:__updateGround(self._content.ground)
+    self:__updateInventory(self._content["inventory"])
+    self:__updateGround(self._content["ground"])
 end
 
 -- function InventoryDialog:updateUnitSlots()
@@ -153,25 +175,7 @@ end
 -- end
 
 -- function InventoryDialog:updateFloorSlots()
---     self.floor_slots = {}
---     self.floor_cnt:detachAll()
---     if (self.entity) then
---         -- get list of the entities in units position on the map
---         local entities_on_floor = MapHandler.getEntitiesInPos(unpack(self.entity.pos))
---         -- remove from table all non item entities
---         local x, y = self.floor_cnt:getRect()
---         local row = 0
-        -- for i, entity in ipairs(entities_on_floor) do
-        --     row = row + 1
-        --     local slot_cnt = FloorSlot()
-        --     slot_cnt:update(entity)
-        --     slot_cnt:moveTo(x, y + (row - 1) * 50)
-        --     self.floor_cnt:attach(slot_cnt)
-        --     table.insert(self.floor_slots, slot_cnt)
-        -- end
---         local content_width, content_height = 200, #self.floor_slots * 50
---         self.floor_cnt:setContentRect(0, 0, content_width, content_height)
---     end
+
 -- end
 
 -- function InventoryDialog:createFloorContainers()
