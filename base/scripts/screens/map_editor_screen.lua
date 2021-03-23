@@ -1,7 +1,8 @@
 require('game/map_handler')
 require('game/entity_handler')
 require("containers/map_editor_battlefield")
-require("containers/map_editor_items_panel")
+require("containers/map_editor_entities_panel")
+require("containers/map_editor_selection_panel")
 require("containers/map_editor_filters_panel")
 require("containers/map_editor_system_panel")
 require("containers/map_editor_edit_panel")
@@ -18,10 +19,12 @@ local function __getUIDesc(self)
         },
         {
             id = "systemPanel", widget = "MapEditorSystemPanel", ui = "system_panel", view = false,
-
         },
         {
-            id = "entitiesPanel", widget = "MapEditorItemsPanel", ui = "entities_panel",
+            id = "entitiesPanel", widget = "MapEditorEntitiesPanel", ui = "entities_panel",
+        },
+        {
+            id = "selectionPanel", widget = "MapEditorSelectionPanel", ui = "selection_panel", view = false,
         },
         {
             id = "editPanel", widget = "MapEditorEditPanel", ui = "edit_panel",
@@ -63,6 +66,7 @@ function MapEditorScreen:init()
     self:addCallback("KeyUp_" .. HotKeys.Save, self.__quickSaveMap, self)
     self:addCallback("KeyUp_" .. HotKeys.Load, self.__quickLoad, self)
 
+    Observer:addListener("ShowSelectionPanel", self, self.__showSelectionPanel)
     Observer:addListener("ShowInventoryDialog", self, self.__showInventoryDialog)
     Observer:addListener("ShowEditDialog", self, self.__showEditDialog)
     Observer:addListener("ExitScreen", self, self.__exitScreen)
@@ -198,4 +202,17 @@ function MapEditorScreen:__showInventoryDialog(content)
         inventory_dlg:tune(content)
         inventory_dlg:view(true)
     end
+end
+
+function MapEditorScreen:__showSelectionPanel(entities)
+    local entities_panel = self:getUI("entities_panel")
+    if (entities_panel) then
+        entities_panel:instantView(false)
+    end
+    local selection_panel = self:getUI("selection_panel")
+    if (selection_panel) then
+        selection_panel:tune(entities)
+        selection_panel:getId()
+        selection_panel:instantView(true)
+    end 
 end

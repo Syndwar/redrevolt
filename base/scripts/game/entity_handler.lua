@@ -93,8 +93,10 @@ function EntityHandler.load(data)
     entity._pos = data.pos
     entity._flip = data.flip
     entity._inventory = data.inventory
-    for k, v in pairs(data.settings) do
-        entity._settings[k] = v
+    if (data.settings) then
+        for k, v in pairs(data.settings) do
+            entity._settings[k] = v
+        end
     end
     return entity
 end

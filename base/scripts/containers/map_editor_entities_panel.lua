@@ -1,4 +1,4 @@
-class "MapEditorItemsPanel" (Container)
+class "MapEditorEntitiesPanel" (Container)
 
 local function __getUIDesc(self)
     return 
@@ -30,7 +30,7 @@ local function __getUIDesc(self)
     }
 end
 
-function MapEditorItemsPanel:init()
+function MapEditorEntitiesPanel:init()
     self._page_size = {}
     self._active_page = nil
 
@@ -39,7 +39,7 @@ function MapEditorItemsPanel:init()
     UIBuilder.create(self, __getUIDesc(self))
 end
 
-function MapEditorItemsPanel:addPage(id, entities)
+function MapEditorEntitiesPanel:addPage(id, entities)
     local scroll_cnt = self:getUI("scroll_cnt")
     if (scroll_cnt) then
         local cnt = Container()
@@ -58,7 +58,7 @@ function MapEditorItemsPanel:addPage(id, entities)
     end
 end
 
-function MapEditorItemsPanel.__scrollTo(params)
+function MapEditorEntitiesPanel.__scrollTo(params)
     local self = params[1]
     local scroll_cnt = self:getUI("scroll_cnt")
     if (scroll_cnt) then
@@ -68,12 +68,12 @@ function MapEditorItemsPanel.__scrollTo(params)
     end
 end
 
-function MapEditorItemsPanel.__changeEntity(id)
+function MapEditorEntitiesPanel.__changeEntity(id)
     local entity = EntityHandler.new(id)
     Observer:call("EntityChanged", entity)
 end
 
-function MapEditorItemsPanel:__viewActivePage(value)
+function MapEditorEntitiesPanel:__viewActivePage(value)
     if (self._active_page) then
         local active_cnt = self:getUI(self._active_page)
         if (active_cnt) then
@@ -82,7 +82,7 @@ function MapEditorItemsPanel:__viewActivePage(value)
     end
 end
 
-function MapEditorItemsPanel:__changeFilter(id)
+function MapEditorEntitiesPanel:__changeFilter(id)
     local scroll_cnt = self:getUI("scroll_cnt")
     if (scroll_cnt) then
         scroll_cnt:jumpTo(0, 0)

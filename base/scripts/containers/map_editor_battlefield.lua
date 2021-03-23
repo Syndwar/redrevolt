@@ -236,8 +236,12 @@ function MapEditorBattlefield:__onFieldLeftClicked()
         end
     else
         local i, j = self:__getMouseTargetedCell()
-        local entity = self._map:getEntity(i, j) -- get an item from the map
-        Observer:call("EntityChanged", entity)
+        local entities = self._map:getEntities(i, j) -- get entities from the map
+        if (#entities > 1) then
+            Observer:call("ShowSelectionPanel", entities)
+        elseif (#entities == 1) then
+            Observer:call("EntityChanged", entities[1])
+        end
     end
 end
 
