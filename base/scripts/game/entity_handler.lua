@@ -356,3 +356,8 @@ function EntityHandler:getInventory()
     end
     return {}
 end
+
+function EntityHandler:hasInventory()
+    local desc = self:__getDescription()
+    return desc.has_inventory
+end

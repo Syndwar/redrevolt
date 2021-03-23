@@ -28,16 +28,16 @@ Items = {
 }
 
 Units = {
-    {id = "un_human",               type = EntityType.Unit,  desc = nil, sprite = "un_human_idle_spr",           size = {32, 32}, geometry = {{1}}},
-    {id = "un_combat_droid",        type = EntityType.Unit,  desc = nil, sprite = "un_combat_droid_idle_spr",    size = {32, 32}, geometry = {{1}}},
-    {id = "un_master_droid",        type = EntityType.Unit,  desc = nil, sprite = "un_master_droid_spr",         size = {32, 32}, geometry = {{1}}},
-    {id = "un_android_medium",      type = EntityType.Unit,  desc = nil, sprite = "un_android_v1_idle_spr",      size = {32, 32}, geometry = {{1}}},
-    {id = "un_android_light",       type = EntityType.Unit,  desc = nil, sprite = "un_android_v2_idle_spr",      size = {32, 32}, geometry = {{1}}},
-    {id = "un_sentry_droid_heavy",  type = EntityType.Unit,  desc = nil, sprite = "un_sentry_droid_v1_idle_spr", size = {32, 32}, geometry = {{1}}},
-    {id = "un_sentry_droid_medium", type = EntityType.Unit,  desc = nil, sprite = "un_sentry_droid_v2_idle_spr", size = {32, 32}, geometry = {{1}}},
-    {id = "un_sentry_droid_light",  type = EntityType.Unit,  desc = nil, sprite = "un_sentry_droid_v3_idle_spr", size = {32, 32}, geometry = {{1}}},
-    {id = "un_patrol_droid_medium", type = EntityType.Unit,  desc = nil, sprite = "un_patrol_droid_v1_idle_spr", size = {32, 32}, geometry = {{1}}},
-    {id = "un_patrol_droid_light",  type = EntityType.Unit,  desc = nil, sprite = "un_patrol_droid_v2_idle_spr", size = {32, 32}, geometry = {{1}}},
+    {id = "un_human",               type = EntityType.Unit,  desc = nil, sprite = "un_human_idle_spr",           size = {32, 32}, geometry = {{1}}, has_inventory = true},
+    {id = "un_combat_droid",        type = EntityType.Unit,  desc = nil, sprite = "un_combat_droid_idle_spr",    size = {32, 32}, geometry = {{1}}, has_inventory = true},
+    {id = "un_master_droid",        type = EntityType.Unit,  desc = nil, sprite = "un_master_droid_spr",         size = {32, 32}, geometry = {{1}}, has_inventory = true},
+    {id = "un_android_medium",      type = EntityType.Unit,  desc = nil, sprite = "un_android_v1_idle_spr",      size = {32, 32}, geometry = {{1}}, has_inventory = true},
+    {id = "un_android_light",       type = EntityType.Unit,  desc = nil, sprite = "un_android_v2_idle_spr",      size = {32, 32}, geometry = {{1}}, has_inventory = true},
+    {id = "un_sentry_droid_heavy",  type = EntityType.Unit,  desc = nil, sprite = "un_sentry_droid_v1_idle_spr", size = {32, 32}, geometry = {{1}}, has_inventory = true},
+    {id = "un_sentry_droid_medium", type = EntityType.Unit,  desc = nil, sprite = "un_sentry_droid_v2_idle_spr", size = {32, 32}, geometry = {{1}}, has_inventory = true},
+    {id = "un_sentry_droid_light",  type = EntityType.Unit,  desc = nil, sprite = "un_sentry_droid_v3_idle_spr", size = {32, 32}, geometry = {{1}}, has_inventory = true},
+    {id = "un_patrol_droid_medium", type = EntityType.Unit,  desc = nil, sprite = "un_patrol_droid_v1_idle_spr", size = {32, 32}, geometry = {{1}}, has_inventory = true},
+    {id = "un_patrol_droid_light",  type = EntityType.Unit,  desc = nil, sprite = "un_patrol_droid_v2_idle_spr", size = {32, 32}, geometry = {{1}}, has_inventory = true},
 }
 
 Objects = {

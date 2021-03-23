@@ -332,7 +332,7 @@ end
 
 function MapEditorBattlefield:__editInventory()
     local selected_entity = self:getSelectedEntity()
-    if (selected_entity and selected_entity:isValid()) then
+    if (selected_entity and selected_entity:isValid() and selected_entity:hasInventory()) then
         local content = {
             ["inventory"] = selected_entity:getInventory(),
             ["ground"] = self:__getGroundContent(),
