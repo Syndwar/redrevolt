@@ -72,6 +72,7 @@ function MapEditorFiltersPanel.__onFilterBtnClick(params)
 end
 
 function MapEditorFiltersPanel.__changeFilter(id)
+    Observer:call("ShowEntityPanel")
     Observer:call("ChangeFilter", id)
 end
 

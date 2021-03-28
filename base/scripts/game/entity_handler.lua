@@ -1,7 +1,10 @@
 EntityHandler = {
-    _pos = nil,
-    _angle = nil,
-    _flip = nil,
+    _geometry = {
+        -- angle = nil,
+        -- flip = nil,
+        -- pos = nil,
+        -- order = 0,
+    },
     _desc = {},
     _settings = {},
     _inventory = nil, -- {{id = "medi_probe", settings = {capacity_cur = 0}}, {id = "laser_pack_1", capacity_cur = 5}}},
@@ -89,9 +92,10 @@ end
 
 function EntityHandler.load(data)
     local entity = EntityHandler.new(data.id)
-    entity._angle = data.angle
-    entity._pos = data.pos
-    entity._flip = data.flip
+    entity._geometry.angle = data.angle
+    entity._geometry.pos = data.pos
+    entity._geometry.flip = data.flip
+    entity._geometry.order = data.order
     entity._inventory = data.inventory
     if (data.settings) then
         for k, v in pairs(data.settings) do
@@ -104,9 +108,10 @@ end
 function EntityHandler:save(data)
     local data = {}
     data["id"] = self._desc["id"]
-    data["angle"] = self._angle
-    data["pos"] = self._pos
-    data["flip"] = self._flip
+    data["angle"] = self._geometry.angle
+    data["pos"] = self._geometry.pos
+    data["flip"] = self._geometry.flip
+    data["order"] = self._geometry.order
     data["inventory"] = self._inventory
     data["settings"] = self._settings
     return data
@@ -117,24 +122,37 @@ function EntityHandler:getId()
     return desc and desc.id or ""
 end
 
+function EntityHandler:getLayer()
+    local desc = self:__getDescription()
+    return desc.layer or 0
+end
+
+function EntityHandler:getOrder()
+    return self._geometry.order or 0
+end
+
+function EntityHandler:setOrder(order)
+    self._geometry.order = order
+end
+
 function EntityHandler:getPos()
-    return self._pos or {0, 0}
+    return self._geometry.pos or {0, 0}
 end
 
 function EntityHandler:getAngle()
-    return self._angle or 0
+    return self._geometry.angle or 0
 end
 
 function EntityHandler:getFlip()
-    return self._flip or {false, false}
+    return self._geometry.flip or {false, false}
 end
 
 function EntityHandler:setPos(i, j)
-    if (not self._pos) then
-        self._pos = {i, j}
+    if (not self._geometry.pos) then
+        self._geometry.pos = {i, j}
     else
-        self._pos[1] = i
-        self._pos[2] = j
+        self._geometry.pos[1] = i
+        self._geometry.pos[2] = j
     end
 end
 
@@ -145,18 +163,18 @@ function EntityHandler:setObj(obj)
 end
 
 function EntityHandler:setAngle(angle)
-    self._angle = angle
+    self._geometry.angle = angle
     if (self._obj) then
         self._obj:setAngle(angle)
     end
 end
 
 function EntityHandler:setFlip(fliph, flipv)
-    if (not self._flip) then
-        self._flip = {fliph, flipv}
+    if (not self._geometry.flip) then
+        self._geometry.flip = {fliph, flipv}
     else
-        self._flip[1] = fliph
-        self._flip[2] = flipv
+        self._geometry.flip[1] = fliph
+        self._geometry.flip[2] = flipv
     end
     if (self._obj) then
         self._obj:setFlip(fliph, flipv)
@@ -212,11 +230,11 @@ function EntityHandler:getGeometry()
     if (1 == #geometry and 1 == geometry[1]) then return geometry end
     
     local result = geometry
-    if (self._angle) then
-        result = EntityHandler.rotateGeometry(result, self._angle)
+    if (self._geometry.angle) then
+        result = EntityHandler.rotateGeometry(result, self._geometry.angle)
     end
-    if (self._flip) then
-        result = EntityHandler.flipGeometry(result, self._flip[1], self._flip[2])
+    if (self._geometry.flip) then
+        result = EntityHandler.flipGeometry(result, self._geometry.flip[1], self._geometry.flip[2])
     end
     return result
 end
@@ -307,7 +325,7 @@ end
 function EntityHandler:getHotSpot()
     local desc = self:__getDescription()
     local size = desc.size or {0, 0}
-    local angle = self._angle
+    local angle = self._geometry.angle
     local w, h = size[1], size[2]
     local midw = w / 2
     local midh = h / 2

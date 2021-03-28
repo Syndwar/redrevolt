@@ -36,7 +36,7 @@ end
 
 function MapEditorSelectionPanel:tune(entities)
     self._entities = entities
-    log(#entities)
+
     local scroll_cnt = self:getUI("scroll_cnt")
     if (scroll_cnt) then
         scroll_cnt:detachAll()
@@ -49,7 +49,7 @@ function MapEditorSelectionPanel:tune(entities)
             local btn = Button(id)
             btn:setRect(x, y + (i - 1) * 32, 32, 32)
             btn:setSprites(sprite, sprite, sprite)
-            btn:addCallback("MouseUp_Left", self.__entitySelected, entity)
+            btn:addCallback("MouseUp_Left", self.__entitySelected, {self, entity})
             scroll_cnt:attach(btn)
         end
         scroll_cnt:setContentRect(0, 0, 32, #entities * 32)
@@ -66,6 +66,8 @@ function MapEditorSelectionPanel.__scrollTo(params)
     end
 end
 
-function MapEditorSelectionPanel.__entitySelected(entity)
-    -- Observer:call("EntityChanged", entity)
+function MapEditorSelectionPanel.__entitySelected(params)
+    local self, entity = unpack(params)
+    Observer:call("EntityChanged", entity)
+    Observer:call("ShowEntityPanel")
 end

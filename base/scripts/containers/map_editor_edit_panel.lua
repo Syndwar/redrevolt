@@ -38,6 +38,13 @@ local function __getUIDesc(self)
             text = "I", colour = "green", font = "system_10_fnt", text_align = "CENTER|MIDDLE",
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
         },
+        {
+            id = "orderBtn", widget = "Button", ui = "order_btn",
+            rect = {0, 160, 32, 32},
+            callback = {"MouseUp_Left", self.__changeOrder, self},
+            text = "0", colour = "green", font = "system_10_fnt", text_align = "CENTER|MIDDLE",
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
+        },
     }
    
 end
@@ -47,6 +54,8 @@ function MapEditorEditPanel:init()
     self._flips = nil
     self._angle_index = 1
     self._flip_index = 1
+    self._orders = {0, 0}
+    self._order = 0
 
     Observer:addListener("EntityChanged", self, self.__changeEntity)
 
@@ -71,6 +80,10 @@ function MapEditorEditPanel:setFlips(flips)
     self._flips = flips
 end
 
+function MapEditorEditPanel:setOrders(min, max)
+    self._orders = {min, max}
+end
+
 function MapEditorEditPanel:__getFlip()
     return self._flips and self._flips[self._flip_index]
 end
@@ -79,7 +92,11 @@ function MapEditorEditPanel:__getAngle()
     return self._angles and self._angles[self._angle_index] or 0
 end
 
-function MapEditorEditPanel:__reset(angle, flip)
+function MapEditorEditPanel:__getOrder()
+    return self._order or 0
+end
+
+function MapEditorEditPanel:__reset(angle, flip, order)
     self._angle_index = 1
     if (angle) then
         for i, v in ipairs(self._angles) do
@@ -97,6 +114,8 @@ function MapEditorEditPanel:__reset(angle, flip)
             end
         end
     end
+
+    self:__setOrder(order)
 end
 
 function MapEditorEditPanel:__switchAngle()
@@ -130,13 +149,22 @@ function MapEditorEditPanel:__updateFlipBtn()
     end
 end
 
+function MapEditorEditPanel:__updateLayerBtn()
+    local order_btn = self:getUI("order_btn")
+    if (order_btn) then
+        order_btn:setText(self._order)
+    end
+end
+
 function MapEditorEditPanel:__update()
     self:__updateRotateBtn()
     self:__updateFlipBtn()
+    self:__updateLayerBtn()
 end
 
 function MapEditorEditPanel:__cancelEntity()
     Observer:call("EntityChanged", nil)
+    Observer:call("ShowEntityPanel")
 end
 
 function MapEditorEditPanel:__editEntity()
@@ -162,6 +190,20 @@ end
 function MapEditorEditPanel:__changeEntity(entity)
     local angle = entity and entity:getAngle()
     local flip = entity and entity:getFlip()
-    self:__reset(angle, flip)
+    local order = entity and entity:getOrder()
+    self:__reset(angle, flip, order)
     self:__update()
+end
+
+function MapEditorEditPanel:__changeOrder()
+    self:__setOrder(self._order + 1)
+    self:__update()
+    Observer:call("EntityOrderChanged", self:__getOrder())
+end
+
+function MapEditorEditPanel:__setOrder(order)
+    self._order = order or 0
+    if (self._order > self._orders[2]) then
+        self._order = self._orders[1]
+    end
 end

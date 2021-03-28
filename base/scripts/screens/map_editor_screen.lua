@@ -66,6 +66,7 @@ function MapEditorScreen:init()
     self:addCallback("KeyUp_" .. HotKeys.Save, self.__quickSaveMap, self)
     self:addCallback("KeyUp_" .. HotKeys.Load, self.__quickLoad, self)
 
+    Observer:addListener("ShowEntityPanel", self, self.__showEntityPanel)
     Observer:addListener("ShowSelectionPanel", self, self.__showSelectionPanel)
     Observer:addListener("ShowInventoryDialog", self, self.__showInventoryDialog)
     Observer:addListener("ShowEditDialog", self, self.__showEditDialog)
@@ -88,6 +89,7 @@ function MapEditorScreen:init()
     if (edit_panel) then
         edit_panel:setAngles({0, 90, 180, 270})
         edit_panel:setFlips({{false, false, "   "}, {true, false, " | "}, {false, true, "- -"}, {true, true, "-|-"}})
+        edit_panel:setOrders(0, 5)
     end
 end
 
@@ -212,7 +214,17 @@ function MapEditorScreen:__showSelectionPanel(entities)
     local selection_panel = self:getUI("selection_panel")
     if (selection_panel) then
         selection_panel:tune(entities)
-        selection_panel:getId()
         selection_panel:instantView(true)
+    end 
+end
+
+function MapEditorScreen:__showEntityPanel()
+    local entities_panel = self:getUI("entities_panel")
+    if (entities_panel) then
+        entities_panel:instantView(true)
+    end
+    local selection_panel = self:getUI("selection_panel")
+    if (selection_panel) then
+        selection_panel:instantView(false)
     end 
 end

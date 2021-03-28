@@ -7,6 +7,8 @@ function MapEditorBattlefield:init(id)
     self._pos = {32, 32}
     self._offset = {-64, -96}
 
+    self._layers = {}
+
     local function entity_creator(entity)
         return self:__createEntityOnField(entity)
     end
@@ -19,6 +21,7 @@ function MapEditorBattlefield:init(id)
     Observer:addListener("EntityChanged", self, self.__changeEntity)
     Observer:addListener("EntityRotated", self, self.__rotateEntity)
     Observer:addListener("EntityFlipped", self, self.__flipEntity)
+    Observer:addListener("EntityOrderChanged", self, self.__changeEntityOrder)
     Observer:addListener("NextEntity", self, self.__goToNextEntity)
     Observer:addListener("PrevEntity", self, self.__goToPrevEntity)
     Observer:addListener("UpdateEntity", self, self.__updateEntity)
@@ -47,6 +50,23 @@ end
 
 --[[ Private ]]
 
+function MapEditorBattlefield:__createLayer(index)
+    local cnt = Container()
+    self:setOrder(index)
+    self:attach(cnt)
+
+    self._layers[index] = cnt
+end
+
+function MapEditorBattlefield:__getLayer(index)
+    local layer = self._layers[index]
+    if (not layer) then
+        self:__createLayer(index)
+        layer = self._layers[index]
+    end
+    return layer
+end
+
 function MapEditorBattlefield:__createMapContent()
     local screen_width = Engine.getScreenWidth()
     local screen_height = Engine.getScreenHeight()
@@ -61,11 +81,13 @@ function MapEditorBattlefield:__createMapContent()
 
     local grid = Primitive("fieldGrid")
     grid:setColour("green")
+    grid:setOrder(1000)
     grid:createLines(self:__createGridLines())
     self:attach(grid)
     self:setUI("fieldGrid", grid)
 
     local cursor = Primitive("cursorRect")
+    cursor:setOrder(1001)
     cursor:setColour("yellow")
     cursor:createRects({{0, 0, cell_width, cell_height}}, false)
     cursor:instantView(false)
@@ -160,6 +182,10 @@ function MapEditorBattlefield.__scrollToDirection(params)
         local value = params[3]
         self:enableScroll(direction, value)
     end
+end
+
+function MapEditorBattlefield:__changeEntityOrder(order)
+    -- TODO
 end
 
 function MapEditorBattlefield:__flipEntity(flip)
@@ -259,7 +285,10 @@ function MapEditorBattlefield:__createEntityOnField(entity)
     img:setCenter(entity:getHotSpot())
     img:setAngle(angle)
     img:setFlip(unpack(entity:getFlip()))
-    self:attach(img)
+    img:setOrder(entity:getLayer())
+
+    local layer = self:__getLayer(entity:getLayer())
+    layer:attach(img)
     return img
 end
 
