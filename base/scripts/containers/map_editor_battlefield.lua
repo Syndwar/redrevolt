@@ -28,6 +28,7 @@ function MapEditorBattlefield:init(id)
     Observer:addListener("EditEntity", self, self.__editEntity)
     Observer:addListener("EditInventory", self, self.__editInventory)
     Observer:addListener("UpdateInventory", self, self.__updateInventory)
+    Observer:addListener("SwitchLayer", self, self.__switchLayer)
     
     self:addCallback("KeyUp_" .. HotKeys.Grid, self.__switchGrid, self)
     self:addCallback("MouseMove", self.__onMouseMove, self)
@@ -375,6 +376,37 @@ function MapEditorBattlefield:__editInventory()
 end
 
 function MapEditorBattlefield:__updateInventory(content)
+end
+
+function MapEditorBattlefield:__switchLayer()
+    local all_opened = true
+    local opened_index = 0
+    for i, layer in ipairs(self._layers) do
+        local is_opened = layer:isOpened()
+        if (is_opened) then
+            opened_index = i
+        else
+            all_opened = false
+        end
+    end
+
+    if (all_opened) then
+        all_opened = false
+        opened_index = 1
+    else
+        opened_index = opened_index + 1
+    end
+
+
+    if (opened_index > #self._layers) then
+        all_opened = true
+    end
+
+    log(opened_index, all_opened)
+
+    for i, layer in ipairs(self._layers) do
+        layer:instantView(all_opened or i == opened_index)
+    end
 end
 --[[ Public ]]
 
