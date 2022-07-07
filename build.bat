@@ -1,5 +1,5 @@
 @ECHO OFF
-SET ENGINE_FOLDER="h:\working_dir\stren\"
+SET ENGINE_FOLDER="c:\git\stren\"
 
 SET BIN_FOLDER=bin
 SET PROJECT_FOLDER=%~dp0
