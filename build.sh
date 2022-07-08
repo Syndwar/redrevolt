@@ -15,25 +15,22 @@ case $choice in
   d) debug=true;;
   D) debug=true;;
 esac
-
+printf "\n"
 if $release; then
-  source $ENGINE_FOLDER/build/make_and_install_release_x86.sh	
+    (cd $ENGINE_FOLDER && source $ENGINE_FOLDER/build/make_and_install_release_x86.sh)
 fi
 
 if $debug; then
-  source $ENGINE_FOLDER/build/make_and_install_debug_x86.sh
+    (cd $ENGINE_FOLDER && source $ENGINE_FOLDER/build/make_and_install_debug_x86.sh)
 fi
 
 if $release || $debug; then
-  cd $ENGINE_FOLDER
 
   printf "\nRemoving bin folder..."
   rm -f -r "$PROJECT_FOLDER/$BIN_FOLDER" 
 
   printf "\nCopying engine libs and executables..."
-  cp -r "$ENGINE_FOLDER/.install/bin" "$PROJECT_FOLDER/$BIN_FOLDER"
+  cp -a "$ENGINE_FOLDER/.install/bin/." "$PROJECT_FOLDER/$BIN_FOLDER"
   printf "\nCopying game data..."
-  cp -r "$PROJECT_FOLDER/src" "$PROJECT_FOLDER/$BIN_FOLDER"
-
-  cd $PROJECT_FOLDER
+  cp -a "$PROJECT_FOLDER/src/." "$PROJECT_FOLDER/$BIN_FOLDER"
 fi
