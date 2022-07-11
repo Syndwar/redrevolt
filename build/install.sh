@@ -1,8 +1,6 @@
 #!/bin/sh
 
 SOLUTION_TYPE=$1
-BUILD_TYPE=$2
-INSTALL_PATH=$3
 OUTPUT_PATH=$TEMP_BUILD_DIR/$BUILD_TYPE
 
-cmake --install "$OUTPUT_PATH" --prefix "$INSTALL_PATH" --config "$SOLUTION_TYPE"
+(cd .. && cmake --install "$OUTPUT_PATH" --prefix "$PWD" --config "$SOLUTION_TYPE")
