@@ -32,5 +32,6 @@ if $release || $debug; then
   printf "\nCopying engine libs and executables..."
   cp -a "$ENGINE_FOLDER/.install/bin/." "$PROJECT_FOLDER/$BIN_FOLDER"
   printf "\nCopying game data..."
-  cp -a "$PROJECT_FOLDER/src/." "$PROJECT_FOLDER/$BIN_FOLDER"
+  cp -a "$PROJECT_FOLDER/src/maps/". "$PROJECT_FOLDER/$BIN_FOLDER/maps"
+  cp -a "$PROJECT_FOLDER/src/base/". "$PROJECT_FOLDER/$BIN_FOLDER/base"
 fi
