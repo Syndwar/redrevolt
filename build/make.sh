@@ -1,0 +1,8 @@
+#!/bin/sh
+SOLUTION_TYPE=$1
+BUILD_TYPE=$2
+
+OUTPUT_PATH=$TEMP_BUILD_DIR/$BUILD_TYPE
+
+cmake -G "$COMPILER" -A "$BUILD_TYPE" -S . -B "$OUTPUT_PATH"
+cmake --build "$OUTPUT_PATH" --config "$SOLUTION_TYPE"

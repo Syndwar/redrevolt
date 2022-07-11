@@ -1,7 +1,8 @@
 #include "stren.h"
 
-void main(int argc, char * args[])
+int main(int argc, char * args[])
 {
     Stren stren;
     stren.run();
+    return 0;
 }
