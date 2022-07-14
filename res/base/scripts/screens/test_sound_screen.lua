@@ -57,17 +57,17 @@ function TestSoundScreen:onBackBtnClick()
 end
 
 function TestSoundScreen:onPlayMusicBtnClick()
-    Engine.playMusic("main_menu_mus")
+    Engine.addCommand({id = "play_music", value = "main_menu_mus"})
 end
 
 function TestSoundScreen:onStopMusicBtnClick()
-    Engine.stopMusic()
+    Engine.addCommand({id = "stop_music"})
 end
 
 function TestSoundScreen:onPlaySoundBtnClick()
-    Engine.playSound("kick_snd", 0)
+    Engine.addCommand({id = "play_sound", value = "kick_snd", loop = 0})
 end
 
 function TestSoundScreen:onPlayDoubleSoundBtnClick()
-    Engine.playSound("kick_snd", 1)
+    Engine.addCommand({id = "play_sound", value = "kick_snd", loop = 1})
 end

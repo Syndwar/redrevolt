@@ -27,8 +27,8 @@ end
 function main()
     UserSave:init()
 
-    Engine.deserialize()
-    Engine.createGame()
+    Engine.addCommand({id = "deserialize"})
+    Engine.addCommand({id = "create_game"})
 
     SystemToolsPanel = SystemTools("systemTools")
 

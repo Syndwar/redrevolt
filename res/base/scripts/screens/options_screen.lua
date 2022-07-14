@@ -118,7 +118,7 @@ function OptionsScreen:onApplyBtnClick()
     UserSave:setScreenHeight(res[2])
     UserSave:save()
 
-    Engine.restart()
+    Engine.addCommand({id = "restart"})
 end
 
 function OptionsScreen:onVsyncBtnClick()

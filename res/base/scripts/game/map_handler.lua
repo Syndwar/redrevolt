@@ -156,7 +156,7 @@ function MapHandler:clear()
     end
     self._content = {}
     -- collect garbage
-    Engine.collectGarbage()
+    Engine.addCommand({id = "collect_garbage"})
 end
 
 function MapHandler:addEntity(entity, i, j)
@@ -204,7 +204,7 @@ function MapHandler:save(filename)
         local full_file_path = self.__getMapFilePath(filename)
         table.totxt(save_map, full_file_path)
         -- collect garbage
-        Engine.collectGarbage()
+        Engine.addCommand({id = "collect_garbage"})
         return true
     end
     return false

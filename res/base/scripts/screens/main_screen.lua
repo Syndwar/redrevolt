@@ -1,5 +1,81 @@
 require("containers/system_tools")
 
+MainScreenDemo = {
+    ui = {
+        {
+            type = "Button",
+            id = "testBtn",
+            text = "Test Screen",
+            font = "system_15_fnt",
+            rect = {0, 0, 256, 64},
+            colour = "green",
+            text_align = {"CENTER|MIDDLE"},
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_sptr"},
+            callback = {"MouseUp_Left", "MainScreen.onTestBtnClicked"}
+        },
+        {
+            type = "Button",
+            id = "newGameBtn",
+            text = "New Game",
+            font = "system_15_fnt",
+            rect = {0, 0, 256, 64},
+            align = {"RIGHT|TOP", -64, 64},
+            colour = "white",
+            text_align = {"CENTER|MIDDLE"},
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_sptr"},
+            callback = {"MouseUp_Left", "MainScreen.onNewGameBtnClicked"}
+        },
+        {
+            type = "Button",
+            id = "loadGameBtn",
+            text = "Load Game",
+            font = "system_15_fnt",
+            rect = {0, 0, 256, 64},
+            align = {"RIGHT|TOP", -64, 138},
+            colour = "white",
+            text_align = {"CENTER|MIDDLE"},
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_sptr"},
+            callback = {"MouseUp_Left", "MainScreen.onLoadGameBtnClicked"}
+        },
+        {
+            type = "Button",
+            id = "optionsBtn",
+            text = "Options",
+            font = "system_15_fnt",
+            rect = {0, 0, 256, 64},
+            align = {"RIGHT|TOP", -64, 212},
+            colour = "white",
+            text_align = {"CENTER|MIDDLE"},
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_sptr"},
+            callback = {"MouseUp_Left", "MainScreen.onOptionsBtnClicked"}
+        },
+        {
+            type = "Button",
+            id = "mapEditorBtn",
+            text = "Map Editor",
+            font = "system_15_fnt",
+            rect = {0, 0, 256, 64},
+            align = {"RIGHT|TOP", -64, 286},
+            colour = "white",
+            text_align = {"CENTER|MIDDLE"},
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_sptr"},
+            callback = {"MouseUp_Left", "MainScreen.onMapEditorBtnClicked"}
+        },
+        {
+            type = "Button",
+            id = "exitBtn",
+            text = "Exit",
+            font = "system_15_fnt",
+            rect = {0, 0, 256, 64},
+            align = {"RIGHT|TOP", -64, -64},
+            colour = "red",
+            text_align = {"CENTER|MIDDLE"},
+            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_sptr"},
+            callback = {"MouseUp_Left", "MainScreen.onExitBtnClicked"}
+        }
+    }
+}
+
 class "MainScreen"(Screen)
 
 function MainScreen:init()
@@ -66,7 +142,7 @@ function MainScreen:init()
 end
 
 function MainScreen:onExitBtnClicked()
-    Engine.shutdown()
+    Engine.addCommand({id = "shutdown"})
 end
 
 function MainScreen:onMapEditorBtnClicked()

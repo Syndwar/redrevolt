@@ -1,22 +1,18 @@
 #!/bin/sh
 
-read -n 1 -p "Press R for Release or D for Debug: " choice
+BUILD_TYPE=$1
 
-release=false
-debug=false
+if [ "$BUILD_TYPE" = "Debug" ]; then
+    cd ..
+    cd bin
+    ./redrevoltd.exe
+    cd ..
+    cd build
 
-case $choice in
-  r) release=true;;
-  R) release=true;;
-  d) debug=true;;
-  D) debug=true;;
-esac
-printf "\n"
-
-if $release; then
-    (cd bin && ./stren.exe)
-fi
-
-if $debug; then
-    (cd bin && ./strend.exe) 
+elif [ "$BUILD_TYPE" = "Release" ]; then 
+    cd ..
+    cd bin
+    ./redrevolt.exe
+    cd ..
+    cd build
 fi
