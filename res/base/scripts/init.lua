@@ -57,7 +57,7 @@ function Screen:load()
         SystemToolsPanel:reset()
         self:attach(SystemToolsPanel)
     end
-    Game.changeScreen(self)
+    Engine.addCommand({id = "create_screen", desc = self.desc})
 end
 
 function Screen:unload()

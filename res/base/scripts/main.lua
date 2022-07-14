@@ -32,7 +32,7 @@ function main()
 
     SystemToolsPanel = SystemTools("systemTools")
 
-    Screens.load("LoadingScreen", "MapEditorScreen")
+    Screens.load("MainScreen", "MainScreen")
 end
 
 function exit()

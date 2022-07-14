@@ -1,6 +1,9 @@
 require("containers/system_tools")
 
-MainScreenDemo = {
+class "MainScreen"(Screen)
+
+MainScreen.desc = 
+{
     ui = {
         {
             type = "Button",
@@ -73,10 +76,8 @@ MainScreenDemo = {
             sprites = {"up_btn_spr", "down_btn_spr", "over_btn_sptr"},
             callback = {"MouseUp_Left", "MainScreen.onExitBtnClicked"}
         }
-    }
+        }
 }
-
-class "MainScreen"(Screen)
 
 function MainScreen:init()
     local btn = Button("testBtn")
