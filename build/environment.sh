@@ -1,6 +1,6 @@
 #!/bin/sh
 BUILD_TYPE="Win32"
-ENGINE_PATH="c:/git/stren"
+ENGINE_DIR="stren"
 ENGINE_INSTALL_DIR=".install"
 ENGINE_BIN_DIR="bin"
 COMPILER="Visual Studio 16 2019"
