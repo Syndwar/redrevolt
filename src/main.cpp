@@ -249,6 +249,7 @@ namespace redrevolt
     {
     public:
         StartScreen(const std::string & id = String::kEmpty) 
+            : Screen(id)
         {
             const int screenWidth = EngineHandler::getScreenWidth();
             const int screenHeight = EngineHandler::getScreenHeight();
@@ -281,8 +282,7 @@ namespace redrevolt
 
         void goToNextScreen(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen);
-            command.setParam("LoadingScreen");
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
             command.setParam2("MainScreen");
             EngineHandler::executeCommand(command);
         }
@@ -294,6 +294,8 @@ namespace redrevolt
         std::string m_nextScreenId;
     public:
         LoadingScreen(const std::string & id = String::kEmpty, const std::string & nextId = String::kEmpty)
+            : Screen(id)
+            , m_nextScreenId(nextId)
         {
             Label * lbl = new Label();
             lbl->setRect(0, 0, 200, 40);
@@ -317,9 +319,430 @@ namespace redrevolt
 
         void onTimerElapsed(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen);
-            command.setParam("MainScreen");
+            EngineCommand command(EngineCommand::Type::SwitchScreen, m_nextScreenId); 
             EngineHandler::executeCommand(command);
+        }
+    };
+    
+    class OptionsScreen : public Screen
+    {
+    public:
+        OptionsScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+        {
+        }
+
+        virtual ~OptionsScreen()
+        {
+        }
+    };
+
+    class MapEditorScreen : public Screen
+    {
+    public:
+        MapEditorScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+        {
+        }
+
+        virtual ~MapEditorScreen()
+        {
+        }
+    };
+
+    class TestScreen : public Screen
+    {
+    public:
+        TestScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+        {
+            Button * btn = new Button("backBtn");
+            btn->setText("Main Screen");
+            btn->setFont("system_15_fnt");
+            btn->setColour("red");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScreen::onBackBtnClicked);
+            attach(btn);
+
+            btn = new Button("testPrimitiveScreenBtn");
+            btn->setText("Test Primitive Screen");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 138);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScreen::toTestPrimitiveScreen);
+            attach(btn);
+            
+            btn = new Button("testFaderScreenBtn");
+            btn->setText("Test Fader Screen");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 212);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScreen::toTestFaderScreen);
+            attach(btn);
+            
+            btn = new Button("testSoundScreenBtn");
+            btn->setText("Test Sound Screen");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 286);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScreen::toTestSoundScreen);
+            attach(btn);
+            
+            btn = new Button("testWidgetsScreenBtn");
+            btn->setText("Test Widgets Screen");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 360);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScreen::toTestWidgetsScreen);
+            attach(btn);
+
+            btn = new Button("testScrollScreenBtn");
+            btn->setText("Test Scroll Screen");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 434);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScreen::toTestScrollScreen);
+            attach(btn);
+            
+            btn = new Button("testFontScreenBtn");
+            btn->setText("Test Font Screen");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 508);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScreen::toTestFontScreen);
+            attach(btn);
+
+            btn = new Button("testAtlasScreenBtn");
+            btn->setText("Test Atlas Screen");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 582);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScreen::toAtlasScreen);
+            attach(btn);
+
+            btn = new Button("testBattlefieldScreenBtn");
+            btn->setText("Test Battlefield Screen");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 656);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScreen::toBattlefieldScreen);
+            attach(btn);
+        }
+
+        virtual ~TestScreen()
+        {
+        }
+
+    private:
+        void onBackBtnClicked(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("MainScreen");
+            EngineHandler::executeCommand(command);
+        }
+
+        void toTestPrimitiveScreen(Widget * sender)
+        {
+        }
+
+        void toTestFaderScreen(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestFaderScreen");
+            EngineHandler::executeCommand(command);
+         }
+
+        void toTestSoundScreen(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestSoundScreen");
+            EngineHandler::executeCommand(command);
+        }
+
+        void toTestWidgetsScreen(Widget * sender)
+        {
+        }
+
+        void toTestScrollScreen(Widget * sender)
+        {
+        }
+
+        void toTestFontScreen(Widget * sender)
+        {
+        }
+
+        void toAtlasScreen(Widget * sender)
+        {
+        }
+
+        void toBattlefieldScreen(Widget * sender)
+        {
+        }
+    };
+    
+    class TestSoundScreen : public Screen
+    {
+    public:
+        TestSoundScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+        {
+            Button * btn = new Button("backBtn");
+            btn->setText("Exit");
+            btn->setFont("system_15_fnt");
+            btn->setColour("red");
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setRect(0, 0, 256, 64);
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestSoundScreen::onBackBtnClick);
+            attach(btn);
+            
+            btn = new Button("playMusicBtn");
+            btn->setText("Music On");
+            btn->setFont("system_15_fnt");
+            btn->setColour("red");
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setRect(256, 0, 256, 64);
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestSoundScreen::onPlayMusicBtnClick);
+            attach(btn);
+            
+            btn = new Button("stopMusicBtn");
+            btn->setText("Music Off");
+            btn->setFont("system_15_fnt");
+            btn->setColour("red");
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setRect(256, 64, 256, 64);
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestSoundScreen::onStopMusicBtnClick);
+            attach(btn);
+
+            btn = new Button("playSoundBtn");
+            btn->setText("Play Sound");
+            btn->setFont("system_15_fnt");
+            btn->setColour("red");
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setRect(512, 0, 256, 64);
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestSoundScreen::onPlaySoundBtnClick);
+            attach(btn);
+
+            btn = new Button("playDoubleSoundBtn");
+            btn->setText("Play Double Sound");
+            btn->setFont("system_15_fnt");
+            btn->setColour("red");
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setRect(512, 64, 256, 64);
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestSoundScreen::onPlayDoubleSoundBtnClick);
+            attach(btn);
+        }
+
+        virtual ~TestSoundScreen()
+        {
+        }
+    private:
+        void onBackBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestScreen");
+            EngineHandler::executeCommand(command);
+        }
+
+        void onPlayMusicBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::PlayMusic, "main_menu_mus");
+            EngineHandler::executeCommand(command);
+        }
+
+        void onStopMusicBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::StopMusic);
+            EngineHandler::executeCommand(command);
+        }
+
+        void onPlaySoundBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::PlaySound, "kick_snd");
+            command.setIParam(0);
+            command.setIParam2(-1);
+            EngineHandler::executeCommand(command);
+        }
+
+        void onPlayDoubleSoundBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::PlaySound, "kick_snd");
+            command.setIParam(1);
+            command.setIParam2(-1);
+            EngineHandler::executeCommand(command);
+         }
+    };
+
+    class TestFaderScreen : public Screen
+    {
+    private:
+        int m_fadeSpeed;
+        Fader * m_fader;
+        Label * m_fadeSpeedLbl;
+
+    public:
+        TestFaderScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+            , m_fadeSpeed(100)
+            , m_fader(nullptr)
+            , m_fadeSpeedLbl(nullptr)
+        {
+            const int screenWidth = EngineHandler::getScreenWidth();
+            const int screenHeight = EngineHandler::getScreenHeight();
+
+            Primitive * primitive = new Primitive();
+            primitive->setColour("white");
+            const Rect rect(0, 0, screenWidth, screenHeight);
+            primitive->createRect(rect, true);
+            attach(primitive);
+
+            Button * btn = new Button("backBtn");
+            btn->setText("Exit");
+            btn->setFont("system_15_fnt");
+            btn->setColour("red");
+            btn->setRect(0, 0, 256, 64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setOrder(2);
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestFaderScreen::onBackBtnClick);
+            attach(btn);
+
+            m_fader = new Fader("fader");
+            m_fader->setRect(0, 0, screenWidth, screenHeight);
+            m_fader->setFadeSpeed(m_fadeSpeed);
+            m_fader->setSprite("dark_img_spr");
+            attach(m_fader);
+
+            btn = new Button("fadeInBtn");
+            btn->setText("Fade In");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 70, 256, 64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestFaderScreen::onFadeInBtnClick);
+            attach(btn);
+            
+            btn = new Button("fadeOutBtn");
+            btn->setText("Fade Out");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 140, 256, 64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestFaderScreen::onFadeOutBtnClick);
+            attach(btn);
+
+            btn = new Button("fadeSpeedUpBtn");
+            btn->setText("+");
+            btn->setFont("system_15_fnt");
+            btn->setRect(50, 210, 64, 64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestFaderScreen::onFadeSpeedUpBtnClick);
+            attach(btn);
+
+            btn = new Button("fadeSpeedDownBtn");
+            btn->setText("-");
+            btn->setFont("system_15_fnt");
+            btn->setRect(150, 210, 64, 64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestFaderScreen::onFadeSpeedDownBtnClick);
+            attach(btn);
+
+            Label * lbl = new Label();
+            lbl->setRect(50, 280, 100, 64);
+            lbl->setText("Fade speed:");
+            lbl->setFont("system_15_fnt");
+            lbl->setTextAlignment("RIGHT|MIDDLE");
+            lbl->setColour("red");
+            attach(lbl);
+
+            m_fadeSpeedLbl = new Label("fadeSpeedLbl");
+            m_fadeSpeedLbl->setRect(164, 280, 256, 64);
+            m_fadeSpeedLbl->setText(std::to_string(m_fadeSpeed));
+            m_fadeSpeedLbl->setFont("system_15_fnt");
+            m_fadeSpeedLbl->setTextAlignment("LEFT|MIDDLE");
+            m_fadeSpeedLbl->setColour("blue");
+            attach(m_fadeSpeedLbl);
+
+        }
+
+        virtual ~TestFaderScreen()
+        {
+        }
+
+        void onBackBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestScreen");
+            EngineHandler::executeCommand(command);
+        }
+
+        void onFadeInBtnClick(Widget * sender)
+        {
+            if (m_fader)
+            {
+                m_fader->fadeIn();
+            }
+         }
+
+        void onFadeOutBtnClick(Widget * sender)
+        {
+            if (m_fader)
+            {
+                m_fader->fadeOut();
+            }
+        }
+
+        void onFadeSpeedUpBtnClick(Widget * sender)
+        {
+            if (m_fader)
+            {
+                int speed = m_fader->getFadeSpeed();
+                m_fader->setFadeSpeed(speed + 1);
+                if (m_fadeSpeedLbl)
+                {
+                    speed = m_fader->getFadeSpeed();
+                    m_fadeSpeedLbl->setText(std::to_string(speed));
+                }
+            }
+        }
+
+        void onFadeSpeedDownBtnClick(Widget * sender)
+        {
+            if (m_fader)
+            {
+                int speed = m_fader->getFadeSpeed();
+                m_fader->setFadeSpeed(speed - 1);
+                if (m_fadeSpeedLbl)
+                {
+                    speed = m_fader->getFadeSpeed();
+                    m_fadeSpeedLbl->setText(std::to_string(speed));
+                }
+             }
         }
     };
 
@@ -332,7 +755,7 @@ namespace redrevolt
             SystemTools * systemTools = new SystemTools("systemTools");
             attach(systemTools);
             {
-                Button * btn = Button::create("testBtn");
+                Button * btn = new Button("testBtn");
                 btn->setText("Test Screen");
                 btn->setTextAlignment("CENTER|MIDDLE");
                 btn->setFont("system_15_fnt");
@@ -344,7 +767,7 @@ namespace redrevolt
                 attach(btn);
             }
             {
-                Button * btn = Button::create("newGameBtn");
+                Button * btn = new Button("newGameBtn");
                 btn->setText("New Game");
                 btn->setTextAlignment("CENTER|MIDDLE");
                 btn->setFont("system_15_fnt");
@@ -356,7 +779,7 @@ namespace redrevolt
                 attach(btn);
             }
             {
-                Button * btn = Button::create("loadGameBtn");
+                Button * btn = new Button("loadGameBtn");
                 btn->setText("Load Game");
                 btn->setTextAlignment("CENTER|MIDDLE");
                 btn->setFont("system_15_fnt");
@@ -368,7 +791,7 @@ namespace redrevolt
                 attach(btn);
             }
             {
-                Button * btn = Button::create("optionsBtn");
+                Button * btn = new Button("optionsBtn");
                 btn->setText("Options");
                 btn->setTextAlignment("CENTER|MIDDLE");
                 btn->setFont("system_15_fnt");
@@ -380,7 +803,7 @@ namespace redrevolt
                 attach(btn);
             }
             {
-                Button * btn = Button::create("mapEditorBtn");
+                Button * btn = new Button("mapEditorBtn");
                 btn->setText("Map Editor");
                 btn->setTextAlignment("CENTER|MIDDLE");
                 btn->setFont("system_15_fnt");
@@ -392,7 +815,7 @@ namespace redrevolt
                 attach(btn);
             }
             {
-                Button * btn = Button::create("exitBtn");
+                Button * btn = new Button("exitBtn");
                 btn->setText("Exit");
                 btn->setTextAlignment("CENTER|MIDDLE");
                 btn->setFont("system_15_fnt");
@@ -407,11 +830,14 @@ namespace redrevolt
 
         virtual ~MainScreen()
         {
-            // Screens.load("LoadingScreen", "TestScreen")
         }
 
+    private:
         void onTestBtnClicked(Widget * sender)
         {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestScreen");
+            EngineHandler::executeCommand(command);
         }
 
         void onNewGameBtnClicked(Widget * sender)
@@ -426,14 +852,16 @@ namespace redrevolt
 
         void onOptionsBtnClicked(Widget * sender)
         {
-            log("options");
-            // Screens.load("LoadingScreen", "OptionsScreen")
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("OptionsScreen");
+            EngineHandler::executeCommand(command);
         }
 
         void onMapEditorBtnClicked(Widget * sender)
         {
-            log("map editor");
-            // Screens.load("LoadingScreen", "MapEditorScreen")
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("MapEditorScreen");
+            EngineHandler::executeCommand(command);
         }
 
         void onExitBtnClicked(Widget * sender)
@@ -464,8 +892,7 @@ namespace redrevolt
             stren::Logger("green") << "Red Revolt Game creating...";
             init();
 
-            EngineCommand command(EngineCommand::Type::SwitchScreen);
-            command.setParam("StartScreen");
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "StartScreen");
             switchScreen(command);
             stren::Logger("green") << "Red Revolt Game created.";
         }
@@ -491,6 +918,27 @@ namespace redrevolt
             {
                 return new StartScreen(id);
             }
+            else if ("TestScreen" == id)
+            {
+                return new TestScreen(id);
+            }
+            else if ("OptionsScreen" == id)
+            {
+                return new OptionsScreen(id);
+            }
+            else if ("MapEditorScreen" == id)
+            {
+                return new MapEditorScreen(id);
+            }
+            else if ("TestSoundScreen" == id)
+            {
+                return new TestSoundScreen(id);
+            }
+            else if ("TestFaderScreen" == id)
+            {
+                return new TestFaderScreen(id);
+            }
+
             return nullptr;
         }
 

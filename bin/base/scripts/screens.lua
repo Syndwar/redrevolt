@@ -1,8 +1,5 @@
-require("screens/test_screen")
 require("screens/test_primitives_screen")
-require("screens/test_fader_screen")
 require("screens/test_font_screen")
-require("screens/test_sound_screen")
 require("screens/test_atlas_screen")
 require("screens/test_widgets_screen")
 require("screens/test_scroll_screen")
@@ -11,11 +8,8 @@ require("screens/options_screen")
 require("screens/map_editor_screen")
 
 Screens = {
-    ["TestScreen"] = TestScreen,
     ["TestPrimitivesScreen"] = TestPrimitivesScreen,
-    ["TestFaderScreen"] = TestFaderScreen,
     ["TestFontScreen"] = TestFontScreen,
-    ["TestSoundScreen"] = TestSoundScreen,
     ["TestAtlasScreen"] = TestAtlasScreen,
     ["TestWidgetsScreen"] = TestWidgetsScreen,
     ["TestScrollScreen"] = TestScrollScreen,
