@@ -245,10 +245,55 @@ namespace redrevolt
         }
     };
 
-    class LoadingScreen : public Screen
+    class StartScreen : public Screen
     {
     public:
-        LoadingScreen(const std::string & id = String::kEmpty)
+        StartScreen(const std::string & id = String::kEmpty) 
+        {
+            const int screenWidth = EngineHandler::getScreenWidth();
+            const int screenHeight = EngineHandler::getScreenHeight();
+
+            Button * btn = new Button("logoBtn");
+            btn->setRect(0, 0, screenWidth, screenHeight);
+            btn->setAlignment("LEFT|TOP", 0, 0);
+            btn->addCallback("MouseUp_Left", this, &StartScreen::goToNextScreen);
+            attach(btn);
+
+            Label * lbl = new Label();
+            lbl->setRect(0, 0, 200, 400);
+            lbl->setText("Click to continue...");
+            lbl->setAlignment("CENTER|BOTTOM", -40, 0);
+            lbl->setFont("system_24_fnt");
+            lbl->setColour("white");
+            lbl->setTextAlignment("CENTER|BOTTOM");
+            attach(lbl);
+
+            Timer * timer = new Timer();
+            timer->addCallback("TimerElapsed", this, &StartScreen::goToNextScreen);
+            attach(timer);
+
+            timer->restart(5000);
+        }
+
+        virtual ~StartScreen()
+        {
+        }
+
+        void goToNextScreen(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen);
+            command.setParam("LoadingScreen");
+            command.setParam2("MainScreen");
+            EngineHandler::executeCommand(command);
+        }
+    };
+
+    class LoadingScreen : public Screen
+    {
+    private:
+        std::string m_nextScreenId;
+    public:
+        LoadingScreen(const std::string & id = String::kEmpty, const std::string & nextId = String::kEmpty)
         {
             Label * lbl = new Label();
             lbl->setRect(0, 0, 200, 40);
@@ -272,6 +317,9 @@ namespace redrevolt
 
         void onTimerElapsed(Widget * sender)
         {
+            EngineCommand command(EngineCommand::Type::SwitchScreen);
+            command.setParam("MainScreen");
+            EngineHandler::executeCommand(command);
         }
     };
 
@@ -413,24 +461,35 @@ namespace redrevolt
         RedRevoltGame()
             : Game()
         {
+            stren::Logger("green") << "Red Revolt Game creating...";
             init();
 
-            switchScreen("LoadingScreen");
+            EngineCommand command(EngineCommand::Type::SwitchScreen);
+            command.setParam("StartScreen");
+            switchScreen(command);
+            stren::Logger("green") << "Red Revolt Game created.";
         }
 
         virtual ~RedRevoltGame()
         {
         }
 
-        virtual Screen * createScreen(const std::string & id) override
+        virtual Screen * createScreen(const EngineCommand & command) override
         {
+            const std::string & id = command.getParam();
+            stren::Logger("red") << id;
             if ("LoadingScreen" == id)
             {
-                return new LoadingScreen(id);
+                const std::string & nextId = command.getParam2();
+                return new LoadingScreen(id, nextId);
             }
             else if ("MainScreen" == id)
             {
                 return new MainScreen(id);
+            }
+            else if ("StartScreen" == id)
+            {
+                return new StartScreen(id);
             }
             return nullptr;
         }
