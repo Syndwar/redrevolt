@@ -40,5 +40,6 @@
 .temp
 
 # Folders
-bin/
-stren/
+.install/
+.temp/
+libs/

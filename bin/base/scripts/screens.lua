@@ -1,6 +1,5 @@
 require("screens/loading_screen")
 require("screens/start_screen")
-require("screens/main_screen")
 require("screens/test_screen")
 require("screens/test_primitives_screen")
 require("screens/test_fader_screen")
@@ -16,7 +15,6 @@ require("screens/map_editor_screen")
 Screens = {
     ["LoadingScreen"] = LoadingScreen,
     ["StartScreen"] = StartScreen,
-    ["MainScreen"] = MainScreen,
     ["TestScreen"] = TestScreen,
     ["TestPrimitivesScreen"] = TestPrimitivesScreen,
     ["TestFaderScreen"] = TestFaderScreen,

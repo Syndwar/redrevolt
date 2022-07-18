@@ -18,23 +18,19 @@ require("usersave")
 require("game/gamedata")
 require("screens")
 
-function log(...)
-    if (SystemToolsPanel) then
-        SystemToolsPanel:log(...)
-    end
-end
+-- function log(...)
+--     if (SystemToolsPanel) then
+--        SystemToolsPanel:log(...)
+--    end
+-- end
 
 function main()
-    UserSave:init()
+     UserSave:init()
 
-    Engine.addCommand({id = "deserialize"})
-    Engine.addCommand({id = "create_game"})
-
-    SystemToolsPanel = SystemTools("systemTools")
-
-    Screens.load("MainScreen", "MainScreen")
+--    SystemToolsPanel = SystemTools("systemTools")
+--
 end
 
 function exit()
-    SystemToolsPanel = nil
+--   SystemToolsPanel = nil
 end
