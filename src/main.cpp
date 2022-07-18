@@ -4,21 +4,163 @@ using namespace stren;
 
 namespace redrevolt
 {
-    class SystemTools : public Container
+    class Console : public Dialog
     {
     public:
-        SystemTools(const std::string & id = String::kEmpty)
-            : Container(id)
+        Console(const std::string & id)
+            : Dialog(id)
         {
+            const int screenWidth = EngineHandler::getScreenWidth();
+            const int screenHeight = EngineHandler::getScreenHeight();
+            const int dialogHeight = screenHeight / 2;
+
+            Image * backImg = new Image();
+            backImg->setRect(0, 0, screenWidth, dialogHeight);
+            backImg->setSprite("dark_img_spr");
+            attach(backImg);
+
+            Primitive * line = new Primitive();
+            line->createLines({{0, 0}, {screenWidth, 0}});
+            line->moveBy(0, dialogHeight);
+            line->setColour("green");
+            attach(line);
 
         }
 
-        virtual ~SystemTools()
+        virtual ~Console()
+        {
+        }
+
+        void log(const char * msg)
         {
 
         }
     };
 
+    class DebugPanel : public Dialog
+    {
+    public:
+        DebugPanel(const std::string & id)
+            : Dialog(id)
+        {
+        }
+
+        virtual ~DebugPanel()
+        {
+        }
+    };
+
+    class WidgetsTree : public ScrollContainer
+    {
+    public:
+        WidgetsTree(const std::string & id)
+            : ScrollContainer(id)
+        {
+        }
+
+        virtual ~WidgetsTree()
+        {
+        }
+    };
+    
+    class SystemTools : public Container
+    {
+    private:
+        Console * m_console;
+        WidgetsTree * m_widgetsTree;
+        DebugPanel * m_debugPanel;
+        
+
+    public:
+        SystemTools(const std::string & id = String::kEmpty)
+            : Container(id)
+            , m_console(nullptr)
+            , m_widgetsTree(nullptr)
+            , m_debugPanel(nullptr)
+        {
+            addCallback("KeyDown_Grave", this, &SystemTools::viewConsole);
+            addCallback("KeyDown_F1", this, &SystemTools::viewSystemInfo);
+            addCallback("KeyDown_F2", this, &SystemTools::viewDebugView);
+            addCallback("KeyDown_F3", this, &SystemTools::viewWidgetsTree);
+
+            m_console = new Console("console");
+            attach(m_console);
+            m_widgetsTree = new WidgetsTree("widgetsTree");
+            attach(m_widgetsTree);
+            m_debugPanel = new DebugPanel("debugPanel");
+            attach(m_debugPanel);
+
+            setOrder(999);
+        }
+
+        virtual ~SystemTools()
+        {
+            if (m_console)
+            {
+                delete m_console;
+                m_console = nullptr;
+            }
+            if (m_widgetsTree)
+            {
+                delete m_widgetsTree;
+                m_widgetsTree = nullptr;
+            }
+            if (m_debugPanel)
+            {
+                delete m_debugPanel;
+                m_debugPanel = nullptr;
+            }
+        }
+
+        void viewConsole(Widget * sender)
+        {
+            if (m_console)
+            {
+                m_console->view(!m_console->isOpened());
+            }
+        }
+
+        void viewSystemInfo(Widget * sender)
+        {
+            if (m_debugPanel)
+            {
+                m_debugPanel->view(!m_debugPanel->isOpened());
+            }
+        }
+
+        void viewDebugView(Widget * sender)
+        {
+            Screen * screen = EngineHandler::getCurrentScreen();
+            if  (screen)
+            {
+                screen->switchDebugView();
+            }
+        }
+
+        void viewWidgetsTree(Widget * sender)
+        {
+            if (m_widgetsTree)
+            {
+                m_widgetsTree->view(!m_widgetsTree->isOpened());
+            }
+        }
+
+        void log(const char * msg)
+        {
+            if (m_console)
+            {
+                m_console->log(msg);
+            }
+        }
+
+        void reset()
+        {
+            if (m_widgetsTree)
+            {
+                m_widgetsTree->instantClose();
+            }
+        }
+    };
 
     class MainScreen : public Screen
     {
@@ -26,6 +168,8 @@ namespace redrevolt
         MainScreen(const std::string & id = String::kEmpty)
             : Screen(id)
         {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
             {
                 Button * btn = Button::create("testBtn");
                 btn->setText("Test Screen");
