@@ -631,12 +631,11 @@ namespace redrevolt
                 m_resButtons.push_back(btn);
                 attach(btn);
 
-                ++i;
-
                 if (isSelected)
                 {
                     m_resIndex = i;
                 }
+                ++i;
             }
         }
 
@@ -653,16 +652,37 @@ namespace redrevolt
 
         void onApplyBtnClick(Widget * sender)
         {
-            //   UserSave:setVSync(self.is_vsync)
-            //   UserSave:setBorderless(self.is_borderless)
-            //   UserSave:setFullscreen(self.is_fullscreen)
-            //   local res = kResolutions[self.res_index]
-            //   UserSave:setScreenWidth(res[1])
-            //   UserSave:setScreenHeight(res[2])
-            //   UserSave:save()
-
-            EngineCommand command(EngineCommand::Type::Restart);
-            Engine::executeCommand(command);
+            if (m_resIndex < m_resolutions.size())
+            {
+                Resolution & res = m_resolutions[m_resIndex];
+                EngineCommand command(EngineCommand::Type::UpdateConfig, "resolution");
+                command.setIParam(res.width);
+                command.setIParam2(res.height);
+                Engine::executeCommand(command);
+            }
+            {
+                EngineCommand command(EngineCommand::Type::UpdateConfig, "vsync");
+                command.setBParam(m_isVSync);
+                Engine::executeCommand(command);
+            }
+            {
+                EngineCommand command(EngineCommand::Type::UpdateConfig, "fullscreen");
+                command.setBParam(m_isFullscreen);
+                Engine::executeCommand(command);
+            }
+            {
+                EngineCommand command(EngineCommand::Type::UpdateConfig, "borderless");
+                command.setBParam(m_isBorderless);
+                Engine::executeCommand(command);
+            }
+            {
+                EngineCommand command(EngineCommand::Type::Save);
+                Engine::executeCommand(command);
+            }
+            {
+                EngineCommand command(EngineCommand::Type::Restart);
+                Engine::executeCommand(command);
+            }
         }
 
         void onVSyncBtnClick(Widget * sender)
@@ -2161,6 +2181,16 @@ namespace redrevolt
             return nullptr;
         }
 
+        virtual void restart() override
+        {
+            stren::Logger("green") << "Red Revolt Game restarting...";
+            init();
+
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "StartScreen");
+            switchScreen(command);
+            stren::Logger("green") << "Red Revolt Game restarted.";
+         }
+
         void init()
         {
             Engine::deserialize();
@@ -2174,5 +2204,8 @@ int main(int argc, char * args[])
     redrevolt::RedRevoltGame * game = new redrevolt::RedRevoltGame();
     engine.setGame(game);
     engine.run();
+    delete game;
+    game = nullptr;
     return 0;
 }
+

@@ -1,8 +1,7 @@
 package.path = package.path .. ";./base/scripts/?.lua;./base/res/?.lua"
 
-require("init")
-require("file_system")
-require("observer")
+require("utils/file_system")
+require("utils/observer")
 require("config")
 require("fonts")
 require("textures")
@@ -11,26 +10,18 @@ require("texts")
 require("sounds")
 require("music")
 require("hotkeys")
-require("ui_builder")
 
 require("usersave")
 
 require("game/gamedata")
-require("screens")
-
--- function log(...)
---     if (SystemToolsPanel) then
---        SystemToolsPanel:log(...)
---    end
--- end
 
 function main()
-     UserSave:init()
+    UserSave:init()
+end
 
---    SystemToolsPanel = SystemTools("systemTools")
---
+function serialize()
+    UserSave:save()
 end
 
 function exit()
---   SystemToolsPanel = nil
 end
