@@ -4,6 +4,28 @@ using namespace stren;
 
 namespace redrevolt
 {
+    struct HotKeys
+    {
+        std::string ScrollUp = "W";
+        std::string ScrollLeft = "A";
+        std::string ScrollRight = "D";
+        std::string ScrollDown = "S";
+        std::string Panel1 = "1";
+        std::string Panel2 = "2";
+        std::string Panel3 = "3";
+        std::string Panel4 = "4";
+        std::string Save = "F5",
+        std::string Load = "F8";
+        std::string Grid = "G";
+        std::string Rotate = "R";
+        std::string Flip = "F";
+        std::string Edit = "E";
+        std::string Next = "N";
+        std::string Previous = "P";
+        std::string Inventory = "I";
+        std::string Cancel = "Escape";
+    };
+
     enum RedRevoltEvents
     {
         RRE_ExitScreen,
@@ -1106,11 +1128,29 @@ namespace redrevolt
     class MapEditorScreen : public Screen
     {
     private:
+        std::string m_currentMapFile;
         std::vector<Observer *> m_observers;
+        MapEditorBattlefield * m_battlefield;
+        MapEditorNotificationDialog * m_notificationDlg;
+        MapEditorSaveLoadDialog * m_saveLoadDlg;
+        MapEditorEditEntityDialog * m_editEntityDlg;
+        MapEditorInventoryDialog * m_inventoryDlg; 
+        MapEditorEntitiesPanel * m_entitiesPanel;
+        MapEditorSelectionPanel * m_selectionPanel;
     public:
         MapEditorScreen(const std::string & id = String::kEmpty)
             : Screen(id)
+            , m_battlefield(nullptr)
+            , m_notificationDlg(nullptr)
+            , m_saveLoadDlg(nullptr)
+            , m_editEntityDlg(nullptr)
+            , m_inventoryDlg(nullptr)
+            , m_entitiesPanel(nullptr)
+            , m_selectionPanel(nullptr)
         {
+            addCallback("KeyUp_" + HotKeys.Save, this, &MapEditorScreen::quickSaveMap);
+            addCallback("KeyUp_" + HotKeys.Load, this, &MapEditorScreen::quickLoadMap);
+
             SystemTools * systemTools = new SystemTools("systemTools");
             attach(systemTools);
             
@@ -1135,17 +1175,25 @@ namespace redrevolt
                 systemPanel->addObserver(observer);
             }
 
-            MapEditorBattlefield * battlefield = new MapEditorBattlefield("battlefield");
-            attach(battlefield);
+            m_battlefield = new MapEditorBattlefield("battlefield");
+            attach(m_battlefield);
 
-            MapEditorEntitiesPanel * entitiesPanel = new MapEditorEntitiesPanel("entitiesPanel");
-            attach(entitiesPanel);
+            m_entitiesPanel = new MapEditorEntitiesPanel("entitiesPanel");
+            m_entitiesPanel->addPage(1, Items);
+            m_entitiesPanel->addPage(2, Units);
+            m_entitiesPanel->addPage(3, Objects);
+            m_entitiesPanel->addPage(4, Terrain);
+            attach(m_entitiesPanel);
 
-            MapEditorSelectionPanel * selectionPanel = new MapEditorSelectionPanel("selectionPanel");
-            selectionPanel->instantView(false);
-            attach(selectionPanel);
+            m_selectionPanel = new MapEditorSelectionPanel("selectionPanel");
+            m_selectionPanel->instantView(false);
+            attach(m_selectionPanel);
 
             MapEditorEditPanel * editPanel = new MapEditorEditPanel("editPanel");
+            editPanel->setAngles({0, 90, 180, 270});
+            editPanel->setFlips({"false", "false", "   "}, {"true", "false", " | "}, {"false", "true", "- -"}, {"true", "true", "-|-"});
+            
+            editPanel->serOrders(0, 5);
             attach(editPanel);
 
             MapEditorFiltersPanel * filtersPanel = new MapEditorFiltersPanel("filtersPanel");
@@ -1154,17 +1202,17 @@ namespace redrevolt
             MapEditorInfoPanel * infoPanel = new MapEditorInfoPanel("infoPanel");
             attach(infoPanel);
 
-            MapEditorSaveLoadDialog * saveLoadDlg = new MapEditorSaveLoadDialog("saveLoadDlg");
-            attach(saveLoadDlg);
+            m_saveLoadDlg = new MapEditorSaveLoadDialog("saveLoadDlg");
+            attach(m_saveLoadDlg);
 
-            MapEditorNotificationDialog * notificationDlg = new MapEditorNotificationDialog("notificationDlg");
-            attach(notificationDlg);
+            m_notificationDlg = new MapEditorNotificationDialog("notificationDlg");
+            attach(m_notificationDlg);
 
-            MapEditorEditEntityDialog * editEntityDlg = new MapEditorEditEntityDialog("editEntityDlg");
-            attach(editEntityDlg);
+            m_editEntityDlg = new MapEditorEditEntityDialog("editEntityDlg");
+            attach(m_editEntityDlg);
 
-            MapEditorInventoryDialog * inventoryDlg = new MapEditorInventoryDialog("inventoryDlg");
-            attach(inventoryDlg);
+            m_inventoryDlg = new MapEditorInventoryDialog("inventoryDlg");
+            attach(m_inventoryDlg);
 
             Button * menuBtn = new Button("menuBtn");
             menuBtn->setRect(0, 0, 64, 64);
@@ -1212,27 +1260,56 @@ namespace redrevolt
 
          void startNewMap()
          {
+             if (m_battlefield)
+             {
+                 m_battlefield->clear();
+             }
          }
 
          void showNotification(const std::string & msg)
          {
+             if (m_notificationDlg)
+             {
+                 m_notificationDlg->setMessage(msg);
+                 m_notificationDlg->view(true);
+             }
          }
 
          void saveBattlefieldMap(const std::string & filename)
          {
+             if (m_battlefield)
+             {
+                 m_battlefield->saveMap(filename);
+             }
          }
 
          void loadBattlefieldMap(const std::string & filename)
          {
+             if (m_battlefield)
+             {
+                 m_battlefield->loadMap(filename);
+             }
          }
 
          void openSaveDialog()
          {
+             if (m_saveLoadDlg && !m_saveLoadDlg->isOpened())
+             {
+                 m_saveLoadDlg->setFiles(FileSystem::getFilesInFolder(Config.map_folder));
+                 m_saveLoadDlg->switchToSave();
+                 m_saveLoadDlg->view(true);
+             }
          }
 
          void openLoadDialog()
          {
-         }
+             if (m_saveLoadDlg && !m_saveLoadDlg->isOpened())
+             {
+                 m_saveLoadDlg->setFiles(FileSystem::getFilesInFolder(Config.map_folder));
+                 m_saveLoadDlg->switchToLoad();
+                 m_saveLoadDlg->view(true);
+             }
+          }
 
          void quickSaveMap()
          {
@@ -1259,7 +1336,7 @@ namespace redrevolt
             }
          }
 
-         void quickLoad(const std::string & filename)
+         void quickLoadMap(const std::string & filename)
          {
             load(filename);
          }
@@ -1278,18 +1355,47 @@ namespace redrevolt
 
          void showEditDialog()
          {
+             if (m_editEntityDlg && !m_editEntityDlg->isOpened())
+             {
+                 m_editEntityDlg->tune(params);
+                 m_editEntityDlg->view(true);
+             }
          }
 
          void showInventoryDialog()
          {
+             if (m_inventoryDlg)
+             {
+                 m_inventoryDlg->tune(content);
+                 m_inventoryDlg->view(true);
+             }
          }
 
          void showSelectionPanel()
          {
+             if (m_entitiesPanel)
+             {
+                 m_entitiesPanel->instantView(false);
+             }
+             if (m_selectionPanel)
+             {
+                 m_selectionPanel->tune(entities);
+                 m_selectionPanel->instantView(true);
+             }
+
          }
 
          void showEntityPanel()
          {
+             if (m_entitiesPanel)
+             {
+                 m_entitiesPanel->instantView(true);
+             }
+             if (m_selectionPanel)
+             {
+                 m_selectionPanel->instantView(false);
+             }
+
          }
     };
 
