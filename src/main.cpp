@@ -2192,6 +2192,11 @@ int main(int argc, char * args[])
     redrevolt::RedRevoltGame * game = new redrevolt::RedRevoltGame();
     engine.setGame(game);
     engine.run();
+    if (game)
+    {
+        delete game;
+        game = nullptr;
+    }
     return 0;
 }
 
