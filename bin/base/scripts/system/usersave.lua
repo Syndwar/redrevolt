@@ -1,4 +1,4 @@
-require("base/scripts/config")
+require("base/scripts/system/config")
 require("base/scripts/utils/table_ext")
 
 local USERSAVEFILE = "save/user.sav"

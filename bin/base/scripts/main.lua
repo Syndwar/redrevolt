@@ -1,19 +1,16 @@
-package.path = package.path .. ";./base/scripts/?.lua;./base/res/?.lua"
+package.path = package.path .. ";./base/?.lua;./base/scripts/?.lua;./base/res/?.lua"
 
 require("utils/file_system")
 require("utils/observer")
-require("config")
-require("fonts")
-require("textures")
-require("sprites")
-require("texts")
-require("sounds")
-require("music")
-require("hotkeys")
-
-require("usersave")
-
-require("game/gamedata")
+require("system/config")
+require("res/fonts")
+require("res/textures")
+require("res/sprites")
+require("res/texts")
+require("res/sounds")
+require("res/music")
+require("system/hotkeys")
+require("system/usersave")
 
 function main()
     UserSave:init()

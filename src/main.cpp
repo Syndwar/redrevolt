@@ -667,7 +667,7 @@ namespace redrevolt
         void onVSyncBtnClick(Widget * sender)
         {
             m_isVSync = !m_isVSync;
-            if (m_isVSync)
+            if (m_vsyncBtn)
             {
                 m_vsyncBtn->setText(m_isVSync ? "VSync On" : "VSync Off");
                 m_vsyncBtn->setColour(m_isVSync ? "green" : "red");
@@ -826,7 +826,7 @@ namespace redrevolt
             btn->setAlignment("RIGHT|TOP", -64, 656);
             btn->setTextAlignment("CENTER|MIDDLE");
             btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
-            btn->addCallback("MouseUp_Left", this, &TestScreen::toBattlefieldScreen);
+            btn->addCallback("MouseUp_Left", this, &TestScreen::toTestBattlefieldScreen);
             attach(btn);
         }
 
@@ -899,9 +899,13 @@ namespace redrevolt
             command.execute();
          }
 
-        void toBattlefieldScreen(Widget * sender)
+        void toTestBattlefieldScreen(Widget * sender)
         {
-        }
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestBattlefieldScreen");
+            command.execute();
+         }
     };
     
     class TestSoundScreen : public Screen
@@ -1105,6 +1109,37 @@ namespace redrevolt
         }
 
         virtual ~TestPrimitivesScreen()
+        {
+        }
+
+        void onBackBtnClick(Widget * sender)
+        {
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestScreen");
+            command.execute();
+        }
+    };
+
+    class TestBattlefieldScreen : public Screen
+    {
+    public:
+        TestBattlefieldScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+        {
+            Button * btn = new Button("backBtn");
+            btn->setText("Exit");
+            btn->setFont("system_15_fnt");
+            btn->setColour("red");
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setRect(0, 0, 64, 64);
+            btn->setAlignment("LEFT|BOTTOM", 0, 0);
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestBattlefieldScreen::onBackBtnClick);
+            attach(btn);
+        }
+
+        virtual ~TestBattlefieldScreen()
         {
         }
 
@@ -2175,9 +2210,9 @@ namespace redrevolt
             {
                 return new TestAtlasScreen(id);
             }
-            else if ("OptionsScreen" == id)
+           else if ("TestBattlefieldScreen" == id)
             {
-                return new OptionsScreen(id);
+                return new TestBattlefieldScreen(id);
             }
 
             return nullptr;
