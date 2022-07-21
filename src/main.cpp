@@ -538,13 +538,15 @@ namespace redrevolt
             , m_isFullscreen(false)
             , m_resIndex(0)
         {
-            //     local saved_config = UserSave:getConfig()
-            // 
-            //     self.is_vsync = UserSave:isVSync()
-            //     self.is_borderless = UserSave:isBorderless()
-            //     self.is_fullscreen = UserSave:isFullscreen()
             SystemTools * systemTools = new SystemTools("systemTools");
             attach(systemTools);
+
+            GetConfigCommand command;
+            command.execute();
+
+            m_isVSync = command.isVSync();
+            m_isFullscreen = command.isFullscreen();
+            m_isBorderless = command.isBorderless();
 
             Button * btn = new Button("backBtn");
             btn->setText("Main Screen");
@@ -2102,12 +2104,15 @@ namespace redrevolt
         {
             stren::Logger("green") << "Red Revolt Game creating...";
             init();
+            stren::Logger("green") << "Red Revolt Game created.";
+        }
 
+        virtual void start() override
+        {
             SwitchScreenCommand command;
             command.setScreen("StartScreen");
             command.execute();
-            stren::Logger("green") << "Red Revolt Game created.";
-        }
+         }
 
         virtual ~RedRevoltGame()
         {
