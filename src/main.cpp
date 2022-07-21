@@ -133,16 +133,192 @@ namespace redrevolt
         }
     };
 
+    class WidgetTreeBranch : public Container
+    {
+    public:
+        static const int lineHeight = 32;
+    private:
+        bool m_isExpanded;
+        bool m_hasChildren;
+        int m_level;
+        Widget * m_widget;
+        Button * m_expandBtn;
+        Button * m_nameBtn;
+    public:
+        WidgetTreeBranch(const std::string & id, Widget * widget, const bool hasChildren, const int level)
+            : Container(id)
+            , m_isExpanded(false)
+            , m_hasChildren(hasChildren)
+            , m_level(level)
+            , m_widget(widget)
+            , m_expandBtn(nullptr)
+            , m_nameBtn(nullptr)
+        {
+            if (!widget) return;
+
+            const std::string & widgetId = widget->getId();
+            const bool isOpened = widget->isOpened();
+
+            m_expandBtn = new Button();
+            m_expandBtn->setText(m_hasChildren ? (m_isExpanded ? "-" : "+") : " ");
+            m_expandBtn->setRect(0, 0, 32, lineHeight);
+            m_expandBtn->setFont("system_15_fnt");
+            m_expandBtn->setTextAlignment("CENTER|MIDDLE");
+            if (m_hasChildren)
+            {
+                m_expandBtn->addCallback("MouseUp_Left", this, &WidgetTreeBranch::onExpandBranchClick);
+            }
+            attach(m_expandBtn);
+
+            m_nameBtn = new Button();
+            m_nameBtn->setRect(32, 0, 200, lineHeight);
+            m_nameBtn->setFont("system_15_fnt");
+            m_nameBtn->setTextAlignment("LEFT|MIDDLE");
+            m_nameBtn->addCallback("MouseUp_Left", this, &WidgetTreeBranch::onEnableWidgetClick);
+            m_nameBtn->setColour(isOpened ? "white" : "grey");
+            m_nameBtn->setText("" != widgetId ? widgetId : "[empty]");
+            attach(m_nameBtn);
+
+            instantView(false);
+        }
+
+        virtual ~WidgetTreeBranch()
+        {
+        }
+
+        bool isExpanded() const { return m_isExpanded; }
+
+        bool hasChildren() const { return m_hasChildren; }
+        
+        int getLevel() const { return m_level; }
+
+        void expand()
+        {
+            if (m_hasChildren)
+            {
+                m_isExpanded = !m_isExpanded;
+                m_expandBtn->setText(m_isExpanded ? "-" : "+");
+            }
+        }
+
+        void onExpandBranchClick(Widget * sender)
+        {
+        }
+
+        void onEnableWidgetClick(Widget * sender)
+        {
+            m_widget->instantView(!m_widget->isOpened());
+            m_nameBtn->setColour(m_widget->isOpened() ? "white" : "grey");
+        }
+    };
+
     class WidgetsTree : public ScrollContainer
     {
+    private:
+        int m_level;
+        std::vector<WidgetTreeBranch *> m_branches;
+
     public:
         WidgetsTree(const std::string & id)
             : ScrollContainer(id)
+            , m_level(0)
         {
+            addCallback("WidgetOpened", this, &WidgetsTree::onOpening);
+
+            const int screenWidth = Engine::getScreenWidth();
+            const int screenHeight = Engine::getScreenHeight();
+            setRect(0, 0, screenWidth, screenHeight);
+
+            instantView(false);
         }
 
         virtual ~WidgetsTree()
         {
+            m_branches.clear();
+        }
+
+        void onOpening(Widget * sender)
+        {
+            reset();
+            update();
+        }
+
+        void reset()
+        {
+            m_branches.clear();
+            m_level = 0;
+            detachAll();
+            Screen * screen = Engine::getCurrentScreen(); 
+            createBranch(screen);
+        }
+
+        void createBranch(Widget * parent)
+        {
+            if (!parent) return;
+
+            Container * parentCnt = dynamic_cast<Container *>(parent);
+            if (!parentCnt) return;
+
+            std::vector<Widget *> attached = parentCnt->debugGetAttached();
+            for (Widget * w : attached)
+            {
+                const std::string & id = w->getId();
+                if ("systemTools" != id)
+                {
+                    Container * cnt = dynamic_cast<Container *>(w);
+                    bool hasChildren(false);
+                    if (cnt)
+                    {
+                        std::vector<Widget *> children = cnt->debugGetAttached();
+                        hasChildren = !children.empty();
+                    }
+                    WidgetTreeBranch * branch = new WidgetTreeBranch(String::kEmpty, w, hasChildren, m_level);
+                    attach(branch);
+
+                    m_branches.push_back(branch);
+
+                    if (hasChildren)
+                    {
+                        m_level += 1;
+                        createBranch(cnt);
+                        m_level -= 1;
+                    }
+                }
+            }
+        }
+
+        void update()
+        {
+            int visibleBranchCounter(0);
+            int lockLevel(0);
+
+            for (WidgetTreeBranch * branch : m_branches)
+            {
+                if (!branch) continue;
+                // close all branches
+                branch->instantView(false);
+                const int branchLevel = branch->getLevel();
+                const bool isVisible = branchLevel <= lockLevel;
+                if (isVisible)
+                {
+                    lockLevel = branchLevel;
+                }
+                const bool isExpandedContainer = branch->hasChildren() && branch->isExpanded();
+                if (isExpandedContainer)
+                {
+                    lockLevel = branchLevel + 1;
+                }
+                if (isVisible)
+                {
+                    const int newPosX = branchLevel * 32;
+                    const int newPosY = WidgetTreeBranch::lineHeight * visibleBranchCounter;
+                    branch->instantView(true);
+                    branch->moveTo(newPosX, newPosY);
+                    visibleBranchCounter += 1;
+                }
+            }
+            const int screenWidth = Engine::getScreenWidth();
+            setContentRect(0, 0, screenWidth, WidgetTreeBranch::lineHeight * visibleBranchCounter);
         }
     };
     
@@ -330,6 +506,8 @@ namespace redrevolt
         OptionsScreen(const std::string & id = String::kEmpty)
             : Screen(id)
         {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
         }
 
         virtual ~OptionsScreen()
@@ -343,6 +521,8 @@ namespace redrevolt
         MapEditorScreen(const std::string & id = String::kEmpty)
             : Screen(id)
         {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
         }
 
         virtual ~MapEditorScreen()
@@ -356,6 +536,9 @@ namespace redrevolt
         TestScreen(const std::string & id = String::kEmpty)
             : Screen(id)
         {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
+
             Button * btn = new Button("backBtn");
             btn->setText("Main Screen");
             btn->setFont("system_15_fnt");
@@ -480,7 +663,10 @@ namespace redrevolt
 
         void toTestWidgetsScreen(Widget * sender)
         {
-        }
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestWidgetsScreen");
+            Engine::executeCommand(command);
+         }
 
         void toTestScrollScreen(Widget * sender)
         {
@@ -505,6 +691,9 @@ namespace redrevolt
         TestSoundScreen(const std::string & id = String::kEmpty)
             : Screen(id)
         {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
+
             Button * btn = new Button("backBtn");
             btn->setText("Exit");
             btn->setFont("system_15_fnt");
@@ -596,6 +785,352 @@ namespace redrevolt
          }
     };
 
+    class TestDialog : public Dialog
+    {
+    public:
+        TestDialog(const std::string & id = String::kEmpty)
+            : Dialog(id)
+        {
+            Transform openTransform;
+            openTransform.add(0, 100, 1000);
+            openTransform.add(100, 255, 1000);
+            attachTransform("WidgetOpening", openTransform);
+
+            Transform closeTransform;
+            closeTransform.add(255, 0, 3000);
+            attachTransform("WidgetClosing", closeTransform);
+
+            setRect(0, 0, 400, 400);
+            setAlignment("CENTER|MIDDLE", 0, 0);
+
+            Image * backImg = new Image();
+            backImg->setRect(0, 0, 400, 400);
+            backImg->setSprite("up_btn_spr");
+            attach(backImg);
+
+            Label * lbl = new Label();
+            lbl->setRect(100, 180, 200, 40);
+            lbl->setText("Hello");
+            lbl->setFont("system_24_fnt");
+            lbl->setColour("green");
+            lbl->setTextAlignment("CENTER|MIDDLE");
+            attach(lbl);
+        }
+
+        virtual ~TestDialog()
+        {
+        }
+    };
+
+    class TestWidgetsScreen : public Screen
+    {
+    private:
+        int m_resizeValue;
+        Dialog * m_testDlg;
+        Label * m_exitLbl;
+        Label * m_multilineLbl;
+        ProgressBar * m_pb1;
+        ProgressBar * m_pb2;
+        ScrollContainer * m_scrollCnt;
+        Container * m_widgetCnt;
+    public:
+        TestWidgetsScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+            , m_resizeValue(10)
+            , m_testDlg(nullptr)
+            , m_exitLbl(nullptr)
+            , m_multilineLbl(nullptr)
+            , m_pb1(nullptr)
+            , m_pb2(nullptr)
+            , m_scrollCnt(nullptr)
+            , m_widgetCnt(nullptr)
+        {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
+
+            Button * backBtn = new Button("backBtn");
+            backBtn->setText("Exit");
+            backBtn->setFont("system_15_fnt");
+            backBtn->setColour("red");
+            backBtn->setRect(0, 0, 256, 64);
+            backBtn->setTextAlignment("CENTER|MIDDLE");
+            backBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            backBtn->addCallback("MouseUp_Left", this, &TestWidgetsScreen::onBackBtnClick);
+            attach(backBtn);
+
+            Button * lockBtn = new Button("lockBtn");
+            lockBtn->setText("View Label");
+            lockBtn->setFont("system_15_fnt");
+            lockBtn->setRect(0, 64, 256, 64);
+            lockBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            lockBtn->addCallback("MouseUp_Left", this, &TestWidgetsScreen::onLockBtnClick);
+            attach(lockBtn);
+
+            Button * windBtn = new Button("windBtn");
+            windBtn->setText("Wind Progressbar");
+            windBtn->setFont("system_15_fnt");
+            windBtn->setColour("yellow");
+            windBtn->setRect(0, 128, 256, 64);
+            windBtn->setTextAlignment("CENTER|MIDDLE");
+            windBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            windBtn->addCallback("MouseUp_Left", this, &TestWidgetsScreen::onWindBtnClick);
+            attach(windBtn);
+
+            Button * moveCntBtn = new Button("moveCnt");
+            moveCntBtn->setText("Move Container");
+            moveCntBtn->setFont("system_15_fnt");
+            moveCntBtn->setRect(0, 192, 256, 64);
+            moveCntBtn->setTextAlignment("CENTER|MIDDLE");
+            moveCntBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            moveCntBtn->addCallback("MouseUp_Left", this, &TestWidgetsScreen::onMoveCntBtnClick);
+            moveCntBtn->setColour("white");
+            attach(moveCntBtn);
+            
+            Button * resizeBtn = new Button();
+            resizeBtn->setText("Increase Label");
+            resizeBtn->setFont("system_15_fnt");
+            resizeBtn->setRect(0, 256, 256, 64);
+            resizeBtn->setTextAlignment("CENTER|MIDDLE");
+            resizeBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            resizeBtn->addCallback("MouseUp_Left", this, &TestWidgetsScreen::onResizeBtnUpClick);
+            resizeBtn->setColour("white");
+            attach(resizeBtn);
+
+            resizeBtn = new Button();
+            resizeBtn->setText("Decrease Label");
+            resizeBtn->setFont("system_15_fnt");
+            resizeBtn->setRect(0, 320, 256, 64);
+            resizeBtn->setTextAlignment("CENTER|MIDDLE");
+            resizeBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            resizeBtn->addCallback("MouseUp_Left", this, &TestWidgetsScreen::onResizeBtnDownClick);
+            resizeBtn->setColour("white");
+            attach(resizeBtn);
+
+            Image * img = new Image();
+            img->setRect(0, 0, 100, 100);
+            img->setSprite("round_btn_spr");
+            img->setAlignment("RIGHT|TOP", 0, 0);
+            img->setAngle(0);
+            img->setFlip(true, true);
+            attach(img);
+
+            m_multilineLbl = new Label("multilineLbl");
+            m_multilineLbl->setRect(0, 0, 300, 20);
+            m_multilineLbl->setAlignment("CENTER|TOP", 0, 50);
+            m_multilineLbl->setText("Very long text for this label that should be rendered on several lines");
+            m_multilineLbl->setWrap(true);
+            m_multilineLbl->setFont("system_15_fnt");
+            m_multilineLbl->setColour("white");
+            attach(m_multilineLbl);
+
+            m_exitLbl = new Label("exitLbl");
+            m_exitLbl->setRect(0, 0, 100, 100);
+            m_exitLbl->setAlignment("RIGHT|TOP", 0, 100);
+            m_exitLbl->setText("exit_lbl");
+            m_exitLbl->setFont("system_24_fnt");
+            m_exitLbl->setColour("green");
+            attach(m_exitLbl);
+
+            m_pb1 = new ProgressBar("pb1");
+            m_pb1->setRect(656, 620, 100, 20);
+            m_pb1->setSprite("progressbar_spr");
+            m_pb1->setCurrentValue(0);
+            m_pb1->setMaxValue(100);
+            m_pb1->setFillSpeed(100);
+            m_pb1->setVertical(false);
+            attach(m_pb1);
+
+            m_pb2 = new ProgressBar("pb2");
+            m_pb2->setRect(626, 620, 20, 100);
+            m_pb2->setSprite("progressbar_spr");
+            m_pb2->setCurrentValue(100);
+            m_pb2->setMaxValue(100);
+            m_pb2->setFillSpeed(100);
+            m_pb2->setVertical(true);
+            attach(m_pb2);
+
+            TextEdit * textEdit = new TextEdit("textEdit");
+            textEdit->setRect(400, 228, 300, 100);
+            textEdit->setText("Click to enter the text");
+            textEdit->setColour("blue");
+            textEdit->setFont("system_24_fnt");
+            textEdit->addCallback("TextEdited", this, &TestWidgetsScreen::onTextEdited);
+            attach(textEdit);
+
+            m_widgetCnt = new Container("widgetCnt");
+            m_widgetCnt->setRect(500, 328, 0, 0);
+            attach(m_widgetCnt);
+
+            Label * cntLbl = new Label("cntLbl");
+            cntLbl->setRect(500, 328, 100, 100);
+            cntLbl->setText("Label in Container");
+            cntLbl->setColour("white");
+            cntLbl->setFont("system_24_fnt");
+            cntLbl->setOrder(999);
+            m_widgetCnt->attach(cntLbl);
+
+            Button * cntBtn = new Button("cntBtn");
+            cntBtn->setText("Button in Container");
+            cntBtn->setFont("system_15_fnt");
+            cntBtn->setRect(600, 428, 256, 64);
+            cntBtn->setTextAlignment("CENTER|MIDDLE");
+            cntBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            cntBtn->setColour("white");
+            cntBtn->addCallback("MouseUp_Left", this, &TestWidgetsScreen::onBtnInCntClick); 
+            m_widgetCnt->attach(cntBtn);
+
+            m_scrollCnt = new ScrollContainer("scrollCnt");
+            m_scrollCnt->setAlignment("RIGHT|TOP", -160, 60);
+            m_scrollCnt->setRect(0, 0, 100, 100);
+            m_scrollCnt->setScrollSpeed(500);
+            m_scrollCnt->setContentRect(0, 0, 100, 200);
+            attach(m_scrollCnt);
+
+            Image * img1 = new Image();
+            img1->setRect(0, 0, 100, 100);
+            img1->setSprite("round_btn_spr");
+            m_scrollCnt->attach(img1);
+
+            Image * img2 = new Image();
+            img2->setRect(0, 100, 100, 100);
+            img2->setSprite("round_btn_spr");
+            m_scrollCnt->attach(img2);
+
+            Image * upImg = new Image();
+            upImg->setRect(0, 0, 100, 20);
+            upImg->setAlignment("RIGHT|TOP", -160, 20);
+            upImg->setSprite("up_btn_spr");
+            attach(upImg);
+
+            Area * scrollUpArea = new Area("scrollUpArea");
+            scrollUpArea->setRect(0, 0, 100, 20);
+            scrollUpArea->setAlignment("RIGHT|TOP", -160, 20);
+            scrollUpArea->addCallback("MouseOver", this, &TestWidgetsScreen::scrollTo); // { "Up", true});
+            scrollUpArea->addCallback("MouseLeft", this, &TestWidgetsScreen::scrollTo); // { "Up", false});
+            attach(scrollUpArea);
+
+            Image * downImg = new Image();
+            downImg->setRect(0, 0, 100, 20);
+            downImg->setAlignment("RIGHT|TOP", -160, 180);
+            downImg->setSprite("up_btn_spr");
+            attach(downImg);
+
+            Area * scrollDownArea = new Area("scrollDownArea");
+            scrollDownArea->setRect(0, 0, 100, 20);
+            scrollDownArea->setAlignment("RIGHT|TOP", -160, 180);
+            scrollDownArea->addCallback("MouseOver", this, &TestWidgetsScreen::scrollTo); // { "Down", true});
+            scrollDownArea->addCallback("MouseLeft", this, &TestWidgetsScreen::scrollTo); // { "Down", false});
+            attach(scrollDownArea);
+
+            m_testDlg= new TestDialog();
+            attach(m_testDlg);
+        }
+
+        virtual ~TestWidgetsScreen()
+        {
+        }
+
+        void onBackBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("MainScreen");
+            Engine::executeCommand(command);
+        }
+
+        void onLockBtnClick(Widget * sender)
+        {
+            if (m_exitLbl)
+            {
+                m_exitLbl->view(!m_exitLbl->isOpened());
+            }
+        }
+
+        void onWindBtnClick(Widget * sender)
+        {
+            if (m_pb1)
+            {
+                const int value = m_pb1->getCurrentValue();
+                if (100 == value)
+                {
+                    m_pb1->windTo(0);
+                }
+                else if (0 == value)
+                {
+                    m_pb1->windTo(100);
+                }
+            }
+
+            if (m_pb2)
+            {
+                const int value = m_pb2->getCurrentValue();
+                if (100 == value)
+                {
+                    m_pb2->windTo(0);
+                }
+                else if (0 == value)
+                {
+                    m_pb2->windTo(100);
+                }
+            }
+        }
+        
+        void onMoveCntBtnClick(Widget * sender)
+        {
+            if (m_widgetCnt)
+            {
+                m_widgetCnt->moveTo(600, 328);
+            }
+        }
+
+        void onResizeBtnUpClick(Widget * sender)
+        {
+            if (m_multilineLbl)
+            {
+                Rect rect = m_multilineLbl->getRect();
+                rect.setWidth(rect.getWidth() + m_resizeValue);
+                m_multilineLbl->setRect(rect);
+            }
+
+        }
+        
+        void onResizeBtnDownClick(Widget * sender)
+        {
+            if (m_multilineLbl)
+            {
+                Rect rect = m_multilineLbl->getRect();
+                rect.setWidth(rect.getWidth() - m_resizeValue);
+                m_multilineLbl->setRect(rect);
+            }
+
+        }
+
+        void onBtnInCntClick(Widget * sender)
+        {
+            if (m_testDlg)
+            {
+                m_testDlg->view(!m_testDlg->isOpened());
+            }
+        }
+
+        void scrollTo(Widget * sender)
+        {
+            const int direction = ScrollContainer::Up;
+            // const int direction = ScrollContainer::Down;
+            const bool value(true);
+            if (m_scrollCnt)
+            {
+                m_scrollCnt->scrollTo(direction, value);
+            }
+        }
+
+        void onTextEdited(Widget * sender)
+        {
+            // local self = params[1]
+            // local edit = params[2]
+            // log(edit:getText())
+        }
+    };
+
     class TestFaderScreen : public Screen
     {
     private:
@@ -610,6 +1145,9 @@ namespace redrevolt
             , m_fader(nullptr)
             , m_fadeSpeedLbl(nullptr)
         {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
+
             const int screenWidth = Engine::getScreenWidth();
             const int screenHeight = Engine::getScreenHeight();
 
@@ -937,6 +1475,10 @@ namespace redrevolt
             else if ("TestFaderScreen" == id)
             {
                 return new TestFaderScreen(id);
+            }
+            else if ("TestWidgetsScreen" == id)
+            {
+                return new TestWidgetsScreen(id);
             }
 
             return nullptr;

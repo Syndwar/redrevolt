@@ -1,7 +1,6 @@
 require("screens/test_primitives_screen")
 require("screens/test_font_screen")
 require("screens/test_atlas_screen")
-require("screens/test_widgets_screen")
 require("screens/test_scroll_screen")
 require("screens/test_battlefield_screen")
 require("screens/options_screen")
@@ -11,7 +10,6 @@ Screens = {
     ["TestPrimitivesScreen"] = TestPrimitivesScreen,
     ["TestFontScreen"] = TestFontScreen,
     ["TestAtlasScreen"] = TestAtlasScreen,
-    ["TestWidgetsScreen"] = TestWidgetsScreen,
     ["TestScrollScreen"] = TestScrollScreen,
     ["TestBattlefieldScreen"] = TestBattlefieldScreen,
     ["OptionsScreen"] = OptionsScreen,
