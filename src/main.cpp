@@ -459,9 +459,10 @@ namespace redrevolt
 
         void goToNextScreen(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("MainScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("MainScreen");
+            command.execute();
         }
     };
 
@@ -496,8 +497,9 @@ namespace redrevolt
 
         void onTimerElapsed(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, m_nextScreenId); 
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen(m_nextScreenId);
+            command.execute();
         }
     };
     
@@ -633,44 +635,31 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("MainScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("MainScreen");
+            command.execute();
         }
 
         void onApplyBtnClick(Widget * sender)
         {
+            UpdateConfigCommand configCommand;
             if (m_resIndex < m_resolutions.size())
             {
                 Resolution & res = m_resolutions[m_resIndex];
-                EngineCommand command(EngineCommand::Type::UpdateConfig, "resolution");
-                command.setIParam(res.width);
-                command.setIParam2(res.height);
-                Engine::executeCommand(command);
+                configCommand.setScreenWidth(res.width);
+                configCommand.setScreenHeight(res.height);
             }
-            {
-                EngineCommand command(EngineCommand::Type::UpdateConfig, "vsync");
-                command.setBParam(m_isVSync);
-                Engine::executeCommand(command);
-            }
-            {
-                EngineCommand command(EngineCommand::Type::UpdateConfig, "fullscreen");
-                command.setBParam(m_isFullscreen);
-                Engine::executeCommand(command);
-            }
-            {
-                EngineCommand command(EngineCommand::Type::UpdateConfig, "borderless");
-                command.setBParam(m_isBorderless);
-                Engine::executeCommand(command);
-            }
-            {
-                EngineCommand command(EngineCommand::Type::Save);
-                Engine::executeCommand(command);
-            }
-            {
-                EngineCommand command(EngineCommand::Type::Restart);
-                Engine::executeCommand(command);
-            }
+            configCommand.setBorderless(m_isBorderless);
+            configCommand.setFullscreen(m_isFullscreen);
+            configCommand.setVSync(m_isVSync);
+            configCommand.execute();
+
+            SerializeCommand serializeCommand;
+            serializeCommand.execute();
+
+            RestartCommand restartCommand;
+            restartCommand.execute();
         }
 
         void onVSyncBtnClick(Widget * sender)
@@ -846,58 +835,66 @@ namespace redrevolt
     private:
         void onBackBtnClicked(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("MainScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("MainScreen");
+            command.execute();
         }
 
         void toTestPrimitiveScreen(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestPrimitivesScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestPrimitivesScreen");
+            command.execute();
         }
 
         void toTestFaderScreen(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestFaderScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestFaderScreen");
+            command.execute();
          }
 
         void toTestSoundScreen(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestSoundScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestSoundScreen");
+            command.execute();
         }
 
         void toTestWidgetsScreen(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestWidgetsScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestWidgetsScreen");
+            command.execute();
          }
 
         void toTestScrollScreen(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestScrollScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestScrollScreen");
+            command.execute();
          }
 
         void toTestFontScreen(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestFontScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestFontScreen");
+            command.execute();
         }
 
         void toTestAtlasScreen(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestAtlasScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestAtlasScreen");
+            command.execute();
          }
 
         void toBattlefieldScreen(Widget * sender)
@@ -971,37 +968,39 @@ namespace redrevolt
     private:
         void onBackBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestScreen");
+            command.execute();
         }
 
         void onPlayMusicBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::PlayMusic, "main_menu_mus");
-            Engine::executeCommand(command);
+            PlayMusicCommand command;
+            command.setTrack("main_menu_mus");
+            command.execute();
         }
 
         void onStopMusicBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::StopMusic);
-            Engine::executeCommand(command);
+            StopMusicCommand command;
+            command.execute();
         }
 
         void onPlaySoundBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::PlaySound, "kick_snd");
-            command.setIParam(0);
-            command.setIParam2(-1);
-            Engine::executeCommand(command);
+            PlaySoundCommand command;
+            command.setSound("kick_snd");
+            command.setLoop(0);
+            command.execute();
         }
 
         void onPlayDoubleSoundBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::PlaySound, "kick_snd");
-            command.setIParam(1);
-            command.setIParam2(-1);
-            Engine::executeCommand(command);
+            PlaySoundCommand command;
+            command.setSound("kick_snd");
+            command.setLoop(1);
+            command.execute();
          }
     };
 
@@ -1109,9 +1108,10 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestScreen");
+            command.execute();
         }
     };
 
@@ -1163,9 +1163,10 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestScreen");
+            command.execute();
          }
     };
 
@@ -1214,10 +1215,11 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestScreen");
-            Engine::executeCommand(command);
-        }
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestScreen");
+            command.execute();
+         }
         
         void onChangeFontBtnClick(Widget * sender)
         {
@@ -1414,10 +1416,11 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestScreen");
-            Engine::executeCommand(command);
-        }
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestScreen");
+            command.execute();
+         }
 
         void onJumpBtnClick(Widget * sender)
         {
@@ -1684,10 +1687,11 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("MainScreen");
-            Engine::executeCommand(command);
-        }
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("MainScreen");
+            command.execute();
+         }
 
         void onLockBtnClick(Widget * sender)
         {
@@ -1899,10 +1903,11 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestScreen");
-            Engine::executeCommand(command);
-        }
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestScreen");
+            command.execute();
+         }
 
         void onFadeInBtnClick(Widget * sender)
         {
@@ -2038,10 +2043,11 @@ namespace redrevolt
     private:
         void onTestBtnClicked(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("TestScreen");
-            Engine::executeCommand(command);
-        }
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("TestScreen");
+            command.execute();
+         }
 
         void onNewGameBtnClicked(Widget * sender)
         {
@@ -2055,16 +2061,18 @@ namespace redrevolt
 
         void onOptionsBtnClicked(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("OptionsScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("OptionsScreen");
+            command.execute();
         }
 
         void onMapEditorBtnClicked(Widget * sender)
         {
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
-            command.setParam2("MapEditorScreen");
-            Engine::executeCommand(command);
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("MapEditorScreen");
+            command.execute();
         }
 
         void onExitBtnClicked(Widget * sender)
@@ -2095,8 +2103,9 @@ namespace redrevolt
             stren::Logger("green") << "Red Revolt Game creating...";
             init();
 
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "StartScreen");
-            switchScreen(command);
+            SwitchScreenCommand command;
+            command.setScreen("StartScreen");
+            command.execute();
             stren::Logger("green") << "Red Revolt Game created.";
         }
 
@@ -2104,13 +2113,13 @@ namespace redrevolt
         {
         }
 
-        virtual Screen * createScreen(const EngineCommand & command) override
+        virtual Screen * createScreen(const SwitchScreenCommand * command) override
         {
-            const std::string & id = command.getParam();
+            const std::string & id = command->getScreen();
             stren::Logger("red") << id;
             if ("LoadingScreen" == id)
             {
-                const std::string & nextId = command.getParam2();
+                const std::string & nextId = command->getNextScreen();
                 return new LoadingScreen(id, nextId);
             }
             else if ("MainScreen" == id)
@@ -2174,8 +2183,9 @@ namespace redrevolt
             stren::Logger("green") << "Red Revolt Game restarting...";
             init();
 
-            EngineCommand command(EngineCommand::Type::SwitchScreen, "StartScreen");
-            switchScreen(command);
+            SwitchScreenCommand command;
+            command.setScreen("StartScreen");
+            command.execute();
             stren::Logger("green") << "Red Revolt Game restarted.";
          }
 
