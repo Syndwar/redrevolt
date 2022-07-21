@@ -18,9 +18,6 @@ local function __getUIDesc(self)
             id = "battlefield", widget = "MapEditorBattlefield", ui = "battlefield",
         },
         {
-            id = "systemPanel", widget = "MapEditorSystemPanel", ui = "system_panel", view = false,
-        },
-        {
             id = "entitiesPanel", widget = "MapEditorEntitiesPanel", ui = "entities_panel",
         },
         {
@@ -47,13 +44,6 @@ local function __getUIDesc(self)
         {
             id = "inventoryDlg", widget = "InventoryDialog", ui = "inventory_dlg",
         },
-        {
-            id = "menuBtn", widget = "Button",
-            rect = {0, 0, 64, 64}, alignment = {"LEFT|BOTTOM", 0, 0},
-            text = "Menu", font = "system_15_fnt", colour = "red", text_align = "CENTER|MIDDLE",
-            sprites = {"up_btn_spr", "down_btn_spr", "over_btn_spr"},
-            callback = {"MouseUp_Left", self.__viewMainMenu, self},
-        }
     }
     return tbl
 end
@@ -76,8 +66,6 @@ function MapEditorScreen:init()
     Observer:addListener("SaveMapFile", self, self.__save)
     Observer:addListener("LoadMapFile", self, self.__load)
 
-    UIBuilder.create(self, __getUIDesc(self))
-
     local entities_panel = self:getUI("entities_panel")
     if (entities_panel) then
         entities_panel:addPage(1, Items)
@@ -97,13 +85,6 @@ end
 
 function MapEditorScreen:__exitScreen()
     Screens.load("LoadingScreen", "MainScreen")
-end
-
-function MapEditorScreen:__viewMainMenu()
-    local panel = self:getUI("system_panel")
-    if (panel) then
-        panel:instantView(not panel:isOpened())
-    end
 end
 
 function MapEditorScreen:__startNewMap()
