@@ -780,6 +780,8 @@ namespace redrevolt
             newMapBtn->addCallback("MouseUp_Left", this, &MapEditorSystemPanel::onNewMapBtnClick);
             attach(newMapBtn);
 
+            // Observer::addListener("SwitchGrid", this, $MapEditorSystemPanel::onGridSwitched)
+
             update();
         }
 
@@ -806,22 +808,27 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
+            // Observer::call("ExitScreen")
         }
 
         void onSaveBtnClick(Widget * sender)
         {
+            // Observer::call("SaveMap")
         }
 
         void onLoadBtnClick(Widget * sender)
         {
+            // Observer::call("LoadMap")
         }
 
         void onGridBtnClick(Widget * sender)
         {
+            // Observer::call("SwitchGrid")
         }
 
         void onNewMapBtnClick(Widget * sender)
         {
+            // Observer::call("StartNewMap")
         }
     };
 
