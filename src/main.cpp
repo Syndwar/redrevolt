@@ -247,7 +247,7 @@ namespace redrevolt
         {
             m_branches.clear();
             m_level = 0;
-            detachAll();
+            clean();
             Screen * screen = Engine::getCurrentScreen(); 
             createBranch(screen);
         }
@@ -259,7 +259,7 @@ namespace redrevolt
             Container * parentCnt = dynamic_cast<Container *>(parent);
             if (!parentCnt) return;
 
-            std::vector<Widget *> attached = parentCnt->debugGetAttached();
+            std::list<Widget *> attached = parentCnt->debugGetAttached();
             for (Widget * w : attached)
             {
                 const std::string & id = w->getId();
@@ -269,7 +269,7 @@ namespace redrevolt
                     bool hasChildren(false);
                     if (cnt)
                     {
-                        std::vector<Widget *> children = cnt->debugGetAttached();
+                        std::list<Widget *> children = cnt->debugGetAttached();
                         hasChildren = !children.empty();
                     }
                     WidgetTreeBranch * branch = new WidgetTreeBranch(this, w, hasChildren, m_level);
@@ -367,21 +367,9 @@ namespace redrevolt
 
         virtual ~SystemTools()
         {
-            if (m_console)
-            {
-                delete m_console;
-                m_console = nullptr;
-            }
-            if (m_widgetsTree)
-            {
-                delete m_widgetsTree;
-                m_widgetsTree = nullptr;
-            }
-            if (m_debugPanel)
-            {
-                delete m_debugPanel;
-                m_debugPanel = nullptr;
-            }
+            m_console = nullptr;
+            m_widgetsTree = nullptr;
+            m_debugPanel = nullptr;
         }
 
         void viewConsole(Widget * sender)
@@ -2204,8 +2192,6 @@ int main(int argc, char * args[])
     redrevolt::RedRevoltGame * game = new redrevolt::RedRevoltGame();
     engine.setGame(game);
     engine.run();
-    delete game;
-    game = nullptr;
     return 0;
 }
 
