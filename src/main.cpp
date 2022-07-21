@@ -4,6 +4,15 @@ using namespace stren;
 
 namespace redrevolt
 {
+    enum RedRevoltEvents
+    {
+        RRE_ExitScreen,
+        RRE_SaveMap,
+        RRE_LoadMap,
+        RRE_SwitchGrid,
+        RRE_StartNewMap
+    };
+
     class Console : public Dialog
     {
         std::list<Label *> m_labels;
@@ -800,7 +809,7 @@ namespace redrevolt
         {
            if (observer)
            {
-               m_eventListender.remove(observer)
+               m_eventListener.remove(observer);
            }
         }
 
@@ -823,37 +832,39 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
-            // m_eventListener.notify("ExitScreeen");
+            m_eventListener.notify(RRE_ExitScreen);
         }
 
         void onSaveBtnClick(Widget * sender)
         {
-            // m_eventListener.notify("SaveMap");
+            m_eventListener.notify(RRE_SaveMap);
         }
 
         void onLoadBtnClick(Widget * sender)
         {
-            // m_eventListener.notify("LoadMap");
+            m_eventListener.notify(RRE_LoadMap);
         }
 
         void onGridBtnClick(Widget * sender)
         {
-            // m_eventListener.notify("SwitchGrid");
+            m_eventListener.notify(RRE_SwitchGrid);
         }
 
         void onNewMapBtnClick(Widget * sender)
         {
-            // m_eventListener.notify("StartNewMap");
+            m_eventListener.notify(RRE_StartNewMap);
         }
     }; // MapEditorSystemPanel
+
+    class MapEditorScreen;
 
     class StartNewMapObserver : public Observer
     {
     private:
         MapEditorScreen * m_screen;
     public:
-        StartNewMapObserver(MapEditrScreen * screen)
-            : Observer()
+        StartNewMapObserver(MapEditorScreen * screen)
+            : Observer({RRE_StartNewMap})
             , m_screen(screen)
         {
         }
@@ -872,8 +883,8 @@ namespace redrevolt
     private:
         MapEditorScreen * m_screen;
     public:
-        LoadMapObserver(MapEditrScreen * screen)
-            : Observer()
+        LoadMapObserver(MapEditorScreen * screen)
+            : Observer({RRE_LoadMap})
             , m_screen(screen)
         {
         }
@@ -892,8 +903,8 @@ namespace redrevolt
     private:
         MapEditorScreen * m_screen;
     public:
-        SaveMapObserver(MapEditrScreen * screen)
-            : Observer()
+        SaveMapObserver(MapEditorScreen * screen)
+            : Observer({RRE_SaveMap})
             , m_screen(screen)
         {
         }
@@ -912,8 +923,8 @@ namespace redrevolt
     private:
         MapEditorScreen * m_screen;
     public:
-        SwitchGridMapObserver(MapEditrScreen * screen)
-            : Observer()
+        SwitchGridMapObserver(MapEditorScreen * screen)
+            : Observer({RRE_SwitchGrid})
             , m_screen(screen)
         {
         }
@@ -932,8 +943,8 @@ namespace redrevolt
     private:
         MapEditorScreen * m_screen;
     public:
-        ExitScreenMapObserver(MapEditrScreen * screen)
-            : Observer()
+        ExitScreenMapObserver(MapEditorScreen * screen)
+            : Observer({RRE_ExitScreen})
             , m_screen(screen)
         {
         }
@@ -983,7 +994,7 @@ namespace redrevolt
         {
         }
 
-        virtual ~MapEditorEntitiespanel()
+        virtual ~MapEditorEntitiesPanel()
         {
         }
     };
@@ -1009,7 +1020,7 @@ namespace redrevolt
         {
         }
 
-        virtual ~MapEditorEditpanel()
+        virtual ~MapEditorEditPanel()
         {
         }
     }; 
@@ -1109,9 +1120,9 @@ namespace redrevolt
             m_observers.push_back(observer);
             observer = new SaveMapObserver(this);
             m_observers.push_back(observer);
-            observer = new SwitchGreedObserver(this);
+            observer = new SwitchGridMapObserver(this);
             m_observers.push_back(observer);
-            observer = new ExitScreenObserver(this);
+            observer = new ExitScreenMapObserver(this);
             m_observers.push_back(observer);
             
             MapEditorSystemPanel * systemPanel = new MapEditorSystemPanel("systemPanel");
@@ -1127,7 +1138,7 @@ namespace redrevolt
             MapEditorBattlefield * battlefield = new MapEditorBattlefield("battlefield");
             attach(battlefield);
 
-            MapEditorEntitiesPanel * entitiesPanel = new MapEntitiesPanel("entitiesPanel");
+            MapEditorEntitiesPanel * entitiesPanel = new MapEditorEntitiesPanel("entitiesPanel");
             attach(entitiesPanel);
 
             MapEditorSelectionPanel * selectionPanel = new MapEditorSelectionPanel("selectionPanel");
@@ -1137,7 +1148,7 @@ namespace redrevolt
             MapEditorEditPanel * editPanel = new MapEditorEditPanel("editPanel");
             attach(editPanel);
 
-            MapEditorFiltersPanel * filtersPanel = new MapEditorFilterspanel("filtersPanel");
+            MapEditorFiltersPanel * filtersPanel = new MapEditorFiltersPanel("filtersPanel");
             attach(filtersPanel);
 
             MapEditorInfoPanel * infoPanel = new MapEditorInfoPanel("infoPanel");
@@ -1171,9 +1182,10 @@ namespace redrevolt
         {
             for (Observer * observer : m_observers)
             {
-                if (m_systemPanel)
+                MapEditorSystemPanel * panel = find<MapEditorSystemPanel *>("systemPanel");
+                if (panel)
                 {
-                    m_systemPanel->removeObserver(observer);
+                    panel->removeObserver(observer);
                 }
                 delete observer;
             }
