@@ -718,6 +718,7 @@ namespace redrevolt
     {
     private:
         bool m_isGridOn;
+        EventListener m_eventListener;
     public:
         MapEditorSystemPanel(const std::string & id = String::kEmpty)
             : Container(id)
@@ -785,8 +786,22 @@ namespace redrevolt
             update();
         }
 
-        virtual ~ MapEditorSystemPanel()
+        virtual ~MapEditorSystemPanel()
         {
+        }
+
+        void addObserver(Observer * observer)
+        {
+            if (!observer) return;
+            m_eventListener.add(observer);
+        }
+
+        void removeObserver(Observer * observer)
+        {
+           if (observer)
+           {
+               m_eventListender.remove(observer)
+           }
         }
 
     private:
@@ -808,43 +823,337 @@ namespace redrevolt
 
         void onBackBtnClick(Widget * sender)
         {
-            // Observer::call("ExitScreen")
+            // m_eventListener.notify("ExitScreeen");
         }
 
         void onSaveBtnClick(Widget * sender)
         {
-            // Observer::call("SaveMap")
+            // m_eventListener.notify("SaveMap");
         }
 
         void onLoadBtnClick(Widget * sender)
         {
-            // Observer::call("LoadMap")
+            // m_eventListener.notify("LoadMap");
         }
 
         void onGridBtnClick(Widget * sender)
         {
-            // Observer::call("SwitchGrid")
+            // m_eventListener.notify("SwitchGrid");
         }
 
         void onNewMapBtnClick(Widget * sender)
         {
-            // Observer::call("StartNewMap")
+            // m_eventListener.notify("StartNewMap");
+        }
+    }; // MapEditorSystemPanel
+
+    class StartNewMapObserver : public Observer
+    {
+    private:
+        MapEditorScreen * m_screen;
+    public:
+        StartNewMapObserver(MapEditrScreen * screen)
+            : Observer()
+            , m_screen(screen)
+        {
+        }
+
+        virtual ~StartNewMapObserver()
+        {
+        }
+        
+        virtual void notify(const Event & event, bool & isEventCaptured) override
+        {
         }
     };
 
+    class LoadMapObserver : public Observer
+    {
+    private:
+        MapEditorScreen * m_screen;
+    public:
+        LoadMapObserver(MapEditrScreen * screen)
+            : Observer()
+            , m_screen(screen)
+        {
+        }
+
+        virtual ~LoadMapObserver()
+        {
+        }
+
+        virtual void notify(const Event & event, bool & isEventCaptured) override
+        {
+        }
+    };
+    
+    class SaveMapObserver : public Observer
+    {
+    private:
+        MapEditorScreen * m_screen;
+    public:
+        SaveMapObserver(MapEditrScreen * screen)
+            : Observer()
+            , m_screen(screen)
+        {
+        }
+
+        virtual ~SaveMapObserver()
+        {
+        }
+        
+        virtual void notify(const Event & event, bool & isEventCaptured) override
+        {
+        }
+    };
+
+    class SwitchGridMapObserver : public Observer
+    {
+    private:
+        MapEditorScreen * m_screen;
+    public:
+        SwitchGridMapObserver(MapEditrScreen * screen)
+            : Observer()
+            , m_screen(screen)
+        {
+        }
+
+        virtual ~SwitchGridMapObserver()
+        {
+        }
+
+        virtual void notify(const Event & event, bool & isEventCaptured) override
+        {
+        }
+    };
+
+    class ExitScreenMapObserver : public Observer
+    {
+    private:
+        MapEditorScreen * m_screen;
+    public:
+        ExitScreenMapObserver(MapEditrScreen * screen)
+            : Observer()
+            , m_screen(screen)
+        {
+        }
+
+        virtual ~ExitScreenMapObserver()
+        {
+        }
+
+        virtual void notify(const Event & event, bool & isEventCaptured) override
+        {
+        }
+    };
+    
+    class Battlefield : public ScrollContainer
+    {
+    public:
+        Battlefield(const std::string & id = String::kEmpty)
+            : ScrollContainer(id)
+        {
+        }
+
+        virtual ~Battlefield()
+        {
+        }
+
+    };
+
+
+    class MapEditorBattlefield : public Battlefield
+    {
+    public:
+        MapEditorBattlefield(const std::string & id = String::kEmpty)
+            : Battlefield(id)
+        {
+        }
+
+        virtual ~MapEditorBattlefield()
+        {
+        }
+    };
+
+    class MapEditorEntitiesPanel : public Container
+    {
+    public:
+        MapEditorEntitiesPanel(const std::string & id = String::kEmpty)
+            : Container(id)
+        {
+        }
+
+        virtual ~MapEditorEntitiespanel()
+        {
+        }
+    };
+
+    class MapEditorSelectionPanel: public Container
+    {
+    public:
+        MapEditorSelectionPanel(const std::string & id = String::kEmpty)
+            : Container(id)
+        {
+        }
+
+        virtual ~MapEditorSelectionPanel()
+        {
+        }
+    };
+
+    class MapEditorEditPanel: public Container 
+    {
+    public:
+        MapEditorEditPanel(const std::string & id = String::kEmpty)
+            : Container(id)
+        {
+        }
+
+        virtual ~MapEditorEditpanel()
+        {
+        }
+    }; 
+
+    class MapEditorFiltersPanel: public Container 
+    {
+    public:
+        MapEditorFiltersPanel(const std::string & id = String::kEmpty)
+            : Container(id)
+        {
+        }
+
+        virtual ~MapEditorFiltersPanel()
+        {
+        }
+    }; 
+
+    class MapEditorInfoPanel: public Container 
+    {
+    public:
+        MapEditorInfoPanel(const std::string & id = String::kEmpty)
+            : Container(id)
+        {
+        }
+
+        virtual ~MapEditorInfoPanel()
+        {
+        }
+    }; 
+
+    class MapEditorSaveLoadDialog: public Dialog 
+    {
+    public:
+        MapEditorSaveLoadDialog(const std::string & id = String::kEmpty)
+            : Dialog(id)
+        {
+        }
+
+        virtual ~MapEditorSaveLoadDialog()
+        {
+        }
+    }; 
+
+    class MapEditorNotificationDialog: public Dialog 
+    {
+    public:
+        MapEditorNotificationDialog(const std::string & id = String::kEmpty)
+            : Dialog(id)
+        {
+        }
+
+        virtual ~MapEditorNotificationDialog()
+        {
+        }
+    }; 
+
+    class MapEditorEditEntityDialog: public Dialog 
+    {
+    public:
+        MapEditorEditEntityDialog(const std::string & id = String::kEmpty)
+            : Dialog(id)
+        {
+        }
+
+        virtual ~MapEditorEditEntityDialog()
+        {
+        }
+    }; 
+
+    class MapEditorInventoryDialog: public Dialog 
+    {
+    public:
+        MapEditorInventoryDialog(const std::string & id = String::kEmpty)
+            : Dialog(id)
+        {
+        }
+
+        virtual ~MapEditorInventoryDialog()
+        {
+        }
+    }; 
+
     class MapEditorScreen : public Screen
     {
+    private:
+        std::vector<Observer *> m_observers;
     public:
         MapEditorScreen(const std::string & id = String::kEmpty)
             : Screen(id)
         {
             SystemTools * systemTools = new SystemTools("systemTools");
             attach(systemTools);
-
+            
+            Observer * observer = new StartNewMapObserver(this);
+            m_observers.push_back(observer);
+            observer = new LoadMapObserver(this);
+            m_observers.push_back(observer);
+            observer = new SaveMapObserver(this);
+            m_observers.push_back(observer);
+            observer = new SwitchGreedObserver(this);
+            m_observers.push_back(observer);
+            observer = new ExitScreenObserver(this);
+            m_observers.push_back(observer);
+            
             MapEditorSystemPanel * systemPanel = new MapEditorSystemPanel("systemPanel");
             systemPanel->instantView(false);
             systemPanel->setAlignment("LEFT|BOTTOM", 0, -64);
             attach(systemPanel);
+
+            for (Observer * observer : m_observers)
+            {
+                systemPanel->addObserver(observer);
+            }
+
+            MapEditorBattlefield * battlefield = new MapEditorBattlefield("battlefield");
+            attach(battlefield);
+
+            MapEditorEntitiesPanel * entitiesPanel = new MapEntitiesPanel("entitiesPanel");
+            attach(entitiesPanel);
+
+            MapEditorSelectionPanel * selectionPanel = new MapEditorSelectionPanel("selectionPanel");
+            selectionPanel->instantView(false);
+            attach(selectionPanel);
+
+            MapEditorEditPanel * editPanel = new MapEditorEditPanel("editPanel");
+            attach(editPanel);
+
+            MapEditorFiltersPanel * filtersPanel = new MapEditorFilterspanel("filtersPanel");
+            attach(filtersPanel);
+
+            MapEditorInfoPanel * infoPanel = new MapEditorInfoPanel("infoPanel");
+            attach(infoPanel);
+
+            MapEditorSaveLoadDialog * saveLoadDlg = new MapEditorSaveLoadDialog("saveLoadDlg");
+            attach(saveLoadDlg);
+
+            MapEditorNotificationDialog * notificationDlg = new MapEditorNotificationDialog("notificationDlg");
+            attach(notificationDlg);
+
+            MapEditorEditEntityDialog * editEntityDlg = new MapEditorEditEntityDialog("editEntityDlg");
+            attach(editEntityDlg);
+
+            MapEditorInventoryDialog * inventoryDlg = new MapEditorInventoryDialog("inventoryDlg");
+            attach(inventoryDlg);
 
             Button * menuBtn = new Button("menuBtn");
             menuBtn->setRect(0, 0, 64, 64);
@@ -860,6 +1169,15 @@ namespace redrevolt
 
         virtual ~MapEditorScreen()
         {
+            for (Observer * observer : m_observers)
+            {
+                if (m_systemPanel)
+                {
+                    m_systemPanel->removeObserver(observer);
+                }
+                delete observer;
+            }
+            m_observers.clear();
         }
 
     private:
