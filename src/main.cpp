@@ -515,17 +515,204 @@ namespace redrevolt
     
     class OptionsScreen : public Screen
     {
+    private:
+        struct Resolution
+        {
+            int width;
+            int height;
+        };
+        Button * m_vsyncBtn;
+        Button * m_borderlessBtn;
+        Button * m_fullscreenBtn;
+        bool m_isVSync;
+        bool m_isBorderless;
+        bool m_isFullscreen;
+        int m_resIndex;
+        std::vector<Button *> m_resButtons;
+        std::vector<Resolution> m_resolutions = {
+            {800, 600},
+            {1024, 768},
+            {1280, 720},
+            {1360, 768},
+            {1600, 1900},
+            {1920, 1080}
+        };
     public:
         OptionsScreen(const std::string & id = String::kEmpty)
             : Screen(id)
+            , m_vsyncBtn(nullptr)
+            , m_borderlessBtn(nullptr)
+            , m_fullscreenBtn(nullptr)
+            , m_isVSync(false)
+            , m_isBorderless(false)
+            , m_isFullscreen(false)
+            , m_resIndex(0)
         {
+            //     local saved_config = UserSave:getConfig()
+            // 
+            //     self.is_vsync = UserSave:isVSync()
+            //     self.is_borderless = UserSave:isBorderless()
+            //     self.is_fullscreen = UserSave:isFullscreen()
             SystemTools * systemTools = new SystemTools("systemTools");
             attach(systemTools);
+
+            Button * btn = new Button("backBtn");
+            btn->setText("Main Screen");
+            btn->setFont("system_15_fnt");
+            btn->setColour("red");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|TOP", -64, 64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &OptionsScreen::onBackBtnClick);
+            attach(btn);
+
+            btn = new Button("applyBtn");
+            btn->setText("Apply");
+            btn->setFont("system_15_fnt");
+            btn->setColour("white");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|BOTTOM", -64, -64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &OptionsScreen::onApplyBtnClick);
+            attach(btn);
+
+            m_vsyncBtn = new Button("vsyncBtn");
+            m_vsyncBtn->setText(m_isVSync ? "VSync On" : "VSync Off");
+            m_vsyncBtn->setColour(m_isVSync ? "green" : "red");
+            m_vsyncBtn->setFont("system_15_fnt");
+            m_vsyncBtn->setRect(0, 0, 256, 64);
+            m_vsyncBtn->setAlignment("LEFT|TOP", 64, 64);
+            m_vsyncBtn->setTextAlignment("CENTER|MIDDLE");
+            m_vsyncBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            m_vsyncBtn->addCallback("MouseUp_Left", this, &OptionsScreen::onVSyncBtnClick);
+            attach(m_vsyncBtn);
+
+            m_borderlessBtn = new Button("borderlessBtn");
+            m_borderlessBtn->setText(m_isBorderless ? "Window Border On" : "Window Border Off");
+            m_borderlessBtn->setColour(m_isBorderless ? "green" : "red");
+            m_borderlessBtn->setFont("system_15_fnt");
+            m_borderlessBtn->setRect(0, 0, 256, 64);
+            m_borderlessBtn->setAlignment("LEFT|TOP", 64, 128);
+            m_borderlessBtn->setTextAlignment("CENTER|MIDDLE");
+            m_borderlessBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            m_borderlessBtn->addCallback("MouseUp_Left", this, &OptionsScreen::onBorderlessBtnClick);
+            attach(m_borderlessBtn);
+
+            m_fullscreenBtn = new Button("m_fullscreenBtn");
+            m_fullscreenBtn->setText(m_isFullscreen ? "Fullscreen On" : "Fullscreen Off");
+            m_fullscreenBtn->setColour(m_isFullscreen ? "green" : "red");
+            m_fullscreenBtn->setFont("system_15_fnt");
+            m_fullscreenBtn->setRect(0, 0, 256, 64);
+            m_fullscreenBtn->setAlignment("LEFT|TOP", 64, 196);
+            m_fullscreenBtn->setTextAlignment("CENTER|MIDDLE");
+            m_fullscreenBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            m_fullscreenBtn->addCallback("MouseUp_Left", this, &OptionsScreen::onFullscreenBtnClick);
+            attach(m_fullscreenBtn);
+
+            const int screenWidth = Engine::getScreenWidth();
+            const int screenHeight = Engine::getScreenHeight();
+
+            size_t i(0);
+            for (const Resolution & res : m_resolutions)
+            {
+                const std::string resStr = std::to_string(res.width) + "x" + std::to_string(res.height);
+                const bool isSelected = screenWidth == res.width && screenHeight == res.height;
+                Button * btn = new Button();
+                btn->setText(resStr);
+                btn->setFont("system_15_fnt");
+                btn->setTextAlignment("CENTER|MIDDLE");
+                btn->setRect(0, 0, 256, 64);
+                btn->setAlignment("LEFT|TOP", 320, (i + 1) * 64);
+                btn->setColour(isSelected ? "green" : "red");
+                btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+                btn->addCallback("MouseUp_Left", this, &OptionsScreen::onResolutionBtnClick);
+                m_resButtons.push_back(btn);
+                attach(btn);
+
+                ++i;
+
+                if (isSelected)
+                {
+                    m_resIndex = i;
+                }
+            }
         }
 
         virtual ~OptionsScreen()
         {
         }
+
+        void onBackBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("MainScreen");
+            Engine::executeCommand(command);
+        }
+
+        void onApplyBtnClick(Widget * sender)
+        {
+            //   UserSave:setVSync(self.is_vsync)
+            //   UserSave:setBorderless(self.is_borderless)
+            //   UserSave:setFullscreen(self.is_fullscreen)
+            //   local res = kResolutions[self.res_index]
+            //   UserSave:setScreenWidth(res[1])
+            //   UserSave:setScreenHeight(res[2])
+            //   UserSave:save()
+
+            EngineCommand command(EngineCommand::Type::Restart);
+            Engine::executeCommand(command);
+        }
+
+        void onVSyncBtnClick(Widget * sender)
+        {
+            m_isVSync = !m_isVSync;
+            if (m_isVSync)
+            {
+                m_vsyncBtn->setText(m_isVSync ? "VSync On" : "VSync Off");
+                m_vsyncBtn->setColour(m_isVSync ? "green" : "red");
+            }
+        }
+
+        void onBorderlessBtnClick(Widget * sender)
+        {
+            m_isBorderless = !m_isBorderless;
+            if (m_borderlessBtn)
+            {
+                m_borderlessBtn->setText(m_isBorderless ? "Window Border On" : "Window Border Off");
+                m_borderlessBtn->setColour(m_isBorderless ? "green" : "red");
+            }
+        }
+
+        void onFullscreenBtnClick(Widget * sender)
+        {
+            m_isFullscreen = !m_isFullscreen;
+            if (m_fullscreenBtn)
+            {
+                m_fullscreenBtn->setText(m_isFullscreen ? "Fullscreen On" : "Fullscreen Off");
+                m_fullscreenBtn->setColour(m_isFullscreen ? "green" : "red");
+            }
+        }
+        
+        void onResolutionBtnClick(Widget * sender)
+        {
+            size_t i(0);
+            for (Button * btn : m_resButtons)
+            {
+                if (btn == sender)
+                {
+                    btn->setColour("green");
+                    m_resIndex = i;
+                }
+                else
+                {
+                    btn->setColour("red");
+                }
+                ++i;
+            }
+        }
+
     };
 
     class MapEditorScreen : public Screen
@@ -1965,6 +2152,10 @@ namespace redrevolt
             else if ("TestAtlasScreen" == id)
             {
                 return new TestAtlasScreen(id);
+            }
+            else if ("OptionsScreen" == id)
+            {
+                return new OptionsScreen(id);
             }
 
             return nullptr;
