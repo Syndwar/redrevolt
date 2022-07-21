@@ -4,6 +4,18 @@ using namespace stren;
 
 namespace redrevolt
 {
+    struct Config
+    {
+        std::string mapFolder;
+    };
+
+    class FileSystem
+    {
+    public:
+        static std::vector<std::string> getFilesInFolder(const std::string & mapFilename)
+        {
+        }
+    };
     struct HotKeys
     {
         std::string ScrollUp = "W";
@@ -14,7 +26,7 @@ namespace redrevolt
         std::string Panel2 = "2";
         std::string Panel3 = "3";
         std::string Panel4 = "4";
-        std::string Save = "F5",
+        std::string Save = "F5";
         std::string Load = "F8";
         std::string Grid = "G";
         std::string Rotate = "R";
@@ -32,7 +44,12 @@ namespace redrevolt
         RRE_SaveMap,
         RRE_LoadMap,
         RRE_SwitchGrid,
-        RRE_StartNewMap
+        RRE_StartNewMap,
+        RRE_ShowEditDialog,
+        RRE_ShowNotification,
+        RRE_ShowInventoryDialog,
+        RRE_ShowSelectionPanel,
+        RRE_ShowEntityPanel 
     };
 
     class Console : public Dialog
@@ -1075,27 +1092,227 @@ namespace redrevolt
 
     class MapEditorSaveLoadDialog: public Dialog 
     {
+    private:
+        bool m_isSave;
+        std::vector<std::string> m_files;
+        TextEdit * m_fileNameInput;
+        ScrollContainer * m_folderCnt;
     public:
         MapEditorSaveLoadDialog(const std::string & id = String::kEmpty)
             : Dialog(id)
+            , m_isSave(true)
+            , m_fileNameInput(nullptr)
+            , m_folderCnt(nullptr)
         {
+            Transform openTransform;
+            openTransform.add(0, 255, 500);
+            attachTransform("WidgetOpening", openTransform);
+
+            Transform closeTransform;
+            closeTransform.add(255, 0, 500);
+            attachTransform("WidgetClosing", closeTransform);
+
+            setModal(true);
+            setRect(0, 0, 500, 700);
+            setAlignment("CENTER|MIDDLE", 0, 0);
+
+            addCallback("WidgetOpening", this, &MapEditorSaveLoadDialog::onOpening);
+
+            Image * img = new Image();
+            img->setRect(0, 0, 500, 700);
+            img->setSprite("dark_img_spr");
+            attach(img);
+
+            m_fileNameInput = new TextEdit("fileNameInput");
+            m_fileNameInput->setRect(50, 10, 400, 30);
+            m_fileNameInput->setText("new_map");
+            m_fileNameInput->setColour("white");
+            m_fileNameInput->setFont("system_24_fnt");
+            attach(m_fileNameInput);
+
+            Label * lbl = new Label();
+            lbl->setRect(50, 50, 400, 30);
+            lbl->setText("Maps in folder:");
+            lbl->setColour("green");
+            lbl->setFont("system_15_fnt");
+            lbl->setTextAlignment("CENTER|MIDDLE");
+            attach(lbl);
+
+            m_folderCnt = new ScrollContainer("folderCnt");
+            m_folderCnt->setRect(50, 80, 400, 520);
+            attach(m_folderCnt);
+
+            Button * btn = new Button("okBtn");
+            btn->setRect(100, 636, 64, 64);
+            btn->setText("OK");
+            btn->setFont("system_15_fnt");
+            btn->setColour("white");
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &MapEditorSaveLoadDialog::onOkBtnClick);
+            attach(btn);
+
+            Button * cancelBtn = new Button("cancelBtn");
+            cancelBtn->setText("Cancel");
+            cancelBtn->setFont("system_15_fnt");
+            cancelBtn->setColour("white");
+            cancelBtn->setTextAlignment("CENTER|MIDDLE");
+            cancelBtn->setRect(336, 636, 64, 64);
+            cancelBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            cancelBtn->addCallback("MouseUp_Left", this, &MapEditorSaveLoadDialog::onCancelBtnClick);
+            attach(cancelBtn);
         }
 
         virtual ~MapEditorSaveLoadDialog()
         {
         }
+
+        void onOpening(Widget * sender)
+        {
+            // Config.mapFolder
+            if (m_folderCnt)
+            {
+                int i(0);
+                m_folderCnt->detachAll();
+                const Rect & rect = m_folderCnt->getRect();
+                const x, y = rect.getX(), rect.getY();
+                for (const std::string & file : m_files)
+                {
+                    const size_t pos = file.find(".map");
+                    if (string::npos != pos)
+                    {
+                        const std::string text = file.erase(file.end() - pos, file.end());
+                        Button * btn = new Button()
+                        btn->setText(text);
+                        btn->setFont("system_15_fnt");
+                        btn->setTextAlignment("CENTER|MIDDLE");
+                        btn->setColour("white");
+                        btn->setRect(x, y + i * 30, 400, 30);
+                        btn->addCallback("MouseUp_Left", this, &MapEditorSaveLoadDialog::onScrollerRowClick);
+                        attach(btn);
+                        ++i;
+                    }
+                }
+            }
+        }
+
+        void switchToSave()
+        {
+            m_isSave = true;
+        }
+
+        void switchToLoad()
+        {
+            m_isSave = false;
+        }
+
+        void setFiles(const std::vector<std::string> & files)
+        {
+            m_files = files;
+        }
+
+        void onOkBtnClick(Widget * sender)
+        {
+            view(false);
+            if (m_isSave)
+            {
+                // Observer:call("SaveMapFile", self:__getMapFile())
+            }
+            else
+            {
+                // Observer:call("LoadMapFile", nil, self:__getMapFile())
+            }
+        }
+
+        void onCancelBtnClick(Widget * sender)
+        {
+            view(false);
+        }
+
+        const std::string & getMapFile()
+        {
+            if (m_fileNameInput)
+            {
+                m_fileNameInput->getText();
+            }
+            return QString::kEmptyString;
+        }
+
+        void onScrollerRowClick(Widget * sender)
+        {
+            if (m_fileNameInput)
+            {
+                Button * btn = dynamic_cast<Button *>(sender);
+                if (btn)
+                {
+                    const std::string & text = btn->getText();
+                    m_fileNameInput->setText(text);
+                }
+            }
+         }
     }; 
 
-    class MapEditorNotificationDialog: public Dialog 
+    class NotificationDialog: public Dialog 
     {
+    private:
+        Label * m_messageLbl;
     public:
-        MapEditorNotificationDialog(const std::string & id = String::kEmpty)
+        NotificationDialog(const std::string & id = String::kEmpty)
             : Dialog(id)
+            , m_messageLbl(nullptr)
+        {
+            const int width = Engine::getScreenWidth();
+            const int height = Engine::getScreenHeight();
+
+            Transform openTransform;
+            openTransform.add(0, 255, 500);
+            openTransform.add(100, 255, 1000);
+            attachTransform("WidgetOpening", openTransform);
+
+            Transform closeTransform;
+            closeTransform.add(255, 0, 500);
+            attachTransform("WidgetClosing", closeTransform);
+
+            Image * img = new Image();
+            img->setRect(0, 0, 300, 100);
+            img->setSprite("dark_img_spr");
+            img->setAlignment("CENTER|MIDDLE", 0, 0);
+            attach(img);
+
+            m_messageLbl = new Label("messageLbl");
+            m_messageLbl->setRect(0, 0, 100, 30);
+            m_messageLbl->setAlignment("CENTER|MIDDLE", 0, 0);
+            m_messageLbl->setText("no text");
+            m_messageLbl->setColour("white");
+            m_messageLbl->setFont("system_15_fnt");
+            m_messageLbl->setTextAlignment("CENTER|MIDDLE");
+            attach(m_messageLbl);
+
+            Button * btn = new Button();
+            btn->setRect(0, 0, width, height);
+            btn->setAlignment("CENTER|MIDDLE", 0, 0);
+            btn->addCallback("MouseUp_Left", this, &NotificationDialog::onCloseBtnClick);
+            attach(btn);
+
+            setRect(0, 0, width, height);
+            setModal(true);
+        }
+
+        virtual ~NotificationDialog()
         {
         }
 
-        virtual ~MapEditorNotificationDialog()
+        void setMessage(const std::string & msg)
         {
+            if (m_messageLbl)
+            {
+                m_messageLbl->setText(msg);
+            }
+        }
+
+        void onCloseBtnClick(Widget * sender)
+        {
+            view(false);
         }
     }; 
 
@@ -1131,7 +1348,7 @@ namespace redrevolt
         std::string m_currentMapFile;
         std::vector<Observer *> m_observers;
         MapEditorBattlefield * m_battlefield;
-        MapEditorNotificationDialog * m_notificationDlg;
+        NotificationDialog * m_notificationDlg;
         MapEditorSaveLoadDialog * m_saveLoadDlg;
         MapEditorEditEntityDialog * m_editEntityDlg;
         MapEditorInventoryDialog * m_inventoryDlg; 
@@ -1148,8 +1365,8 @@ namespace redrevolt
             , m_entitiesPanel(nullptr)
             , m_selectionPanel(nullptr)
         {
-            addCallback("KeyUp_" + HotKeys.Save, this, &MapEditorScreen::quickSaveMap);
-            addCallback("KeyUp_" + HotKeys.Load, this, &MapEditorScreen::quickLoadMap);
+            addCallback("KeyUp_" + HotKeys::Save, this, &MapEditorScreen::quickSaveMap);
+            addCallback("KeyUp_" + HotKeys::Load, this, &MapEditorScreen::quickLoadMap);
 
             SystemTools * systemTools = new SystemTools("systemTools");
             attach(systemTools);
@@ -1205,7 +1422,7 @@ namespace redrevolt
             m_saveLoadDlg = new MapEditorSaveLoadDialog("saveLoadDlg");
             attach(m_saveLoadDlg);
 
-            m_notificationDlg = new MapEditorNotificationDialog("notificationDlg");
+            m_notificationDlg = new NotificationDialog("notificationDlg");
             attach(m_notificationDlg);
 
             m_editEntityDlg = new MapEditorEditEntityDialog("editEntityDlg");
@@ -1224,6 +1441,16 @@ namespace redrevolt
             menuBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
             menuBtn->addCallback("MouseUp_Left", this, &MapEditorScreen::viewMainMenu);
             attach(menuBtn);
+
+            addListener(RRE_ShowEntityPanel this, $MapEditorScreen::showEntityPanel);
+            addListener(RRE_ShowSelectionPanel this, $MapEditorScreen::showSelectionPanel);
+            addListener(RRE_ShowInventoryDialog this, $MapEditorScreen::showInventoryDialog);
+            addListener(RRE_ShowEditDialog this, $MapEditorScreen::showEditDialog);
+            addListener(RRE_ExitScreen this, $MapEditorScreen::exitScreen);
+            addListener(RRE_ShowNotification this, $MapEditorScreen::showNotification);
+            addListener(RRE_StartNewMap this, $MapEditorScreen::startNewMap);
+            addListener(RRE_SaveMap this, $MapEditorScreen::save);
+            addListener(RRE_LoadMap this, $MapEditorScreen::load);
         }
 
         virtual ~MapEditorScreen()
@@ -1295,7 +1522,7 @@ namespace redrevolt
          {
              if (m_saveLoadDlg && !m_saveLoadDlg->isOpened())
              {
-                 m_saveLoadDlg->setFiles(FileSystem::getFilesInFolder(Config.map_folder));
+                 m_saveLoadDlg->setFiles(FileSystem::getFilesInFolder(Config::mapFolder));
                  m_saveLoadDlg->switchToSave();
                  m_saveLoadDlg->view(true);
              }
@@ -1313,7 +1540,7 @@ namespace redrevolt
 
          void quickSaveMap()
          {
-            if (m_currentMapFile.isEmpty())
+            if (m_currentMapFile.empty())
             {
                 openSaveDialog();
             }
@@ -1325,7 +1552,7 @@ namespace redrevolt
 
          void save(const std::string & filename)
          {
-            if (filename.isEmpty())
+            if (filename.empty())
             {
                 m_currentMapFile = filename;
                 saveBattlefieldMap(filename);
@@ -1343,7 +1570,7 @@ namespace redrevolt
 
          void load(const std::string & filename)
          {
-            if (filename.isEmpty())
+            if (filename.empty())
             {
                 openLoadDialog();
             }
