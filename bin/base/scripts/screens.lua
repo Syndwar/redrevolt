@@ -1,10 +1,8 @@
-require("screens/test_atlas_screen")
 require("screens/test_battlefield_screen")
 require("screens/options_screen")
 require("screens/map_editor_screen")
 
 Screens = {
-    ["TestAtlasScreen"] = TestAtlasScreen,
     ["TestBattlefieldScreen"] = TestBattlefieldScreen,
     ["OptionsScreen"] = OptionsScreen,
     ["MapEditorScreen"] = MapEditorScreen,
