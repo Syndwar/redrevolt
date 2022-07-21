@@ -1,16 +1,10 @@
-require("screens/test_primitives_screen")
-require("screens/test_font_screen")
 require("screens/test_atlas_screen")
-require("screens/test_scroll_screen")
 require("screens/test_battlefield_screen")
 require("screens/options_screen")
 require("screens/map_editor_screen")
 
 Screens = {
-    ["TestPrimitivesScreen"] = TestPrimitivesScreen,
-    ["TestFontScreen"] = TestFontScreen,
     ["TestAtlasScreen"] = TestAtlasScreen,
-    ["TestScrollScreen"] = TestScrollScreen,
     ["TestBattlefieldScreen"] = TestBattlefieldScreen,
     ["OptionsScreen"] = OptionsScreen,
     ["MapEditorScreen"] = MapEditorScreen,

@@ -144,9 +144,11 @@ namespace redrevolt
         Widget * m_widget;
         Button * m_expandBtn;
         Button * m_nameBtn;
+        Widget * m_parent;
     public:
-        WidgetTreeBranch(const std::string & id, Widget * widget, const bool hasChildren, const int level)
-            : Container(id)
+        WidgetTreeBranch(Widget * parent, Widget * widget, const bool hasChildren, const int level)
+            : Container(String::kEmpty)
+            , m_parent(parent)
             , m_isExpanded(false)
             , m_hasChildren(hasChildren)
             , m_level(level)
@@ -201,9 +203,7 @@ namespace redrevolt
             }
         }
 
-        void onExpandBranchClick(Widget * sender)
-        {
-        }
+        void onExpandBranchClick(Widget * sender);
 
         void onEnableWidgetClick(Widget * sender)
         {
@@ -272,7 +272,7 @@ namespace redrevolt
                         std::vector<Widget *> children = cnt->debugGetAttached();
                         hasChildren = !children.empty();
                     }
-                    WidgetTreeBranch * branch = new WidgetTreeBranch(String::kEmpty, w, hasChildren, m_level);
+                    WidgetTreeBranch * branch = new WidgetTreeBranch(this, w, hasChildren, m_level);
                     attach(branch);
 
                     m_branches.push_back(branch);
@@ -321,7 +321,20 @@ namespace redrevolt
             setContentRect(0, 0, screenWidth, WidgetTreeBranch::lineHeight * visibleBranchCounter);
         }
     };
-    
+
+    void WidgetTreeBranch::onExpandBranchClick(Widget * sender)
+    {
+        expand();
+        if (m_parent)
+        {
+            WidgetsTree * tree = dynamic_cast<WidgetsTree *>(m_parent);
+            if (tree)
+            {
+                tree->update();
+            }
+        }
+    }
+ 
     class SystemTools : public Container
     {
     private:
@@ -645,6 +658,9 @@ namespace redrevolt
 
         void toTestPrimitiveScreen(Widget * sender)
         {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestPrimitivesScreen");
+            Engine::executeCommand(command);
         }
 
         void toTestFaderScreen(Widget * sender)
@@ -670,11 +686,17 @@ namespace redrevolt
 
         void toTestScrollScreen(Widget * sender)
         {
-        }
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestScrollScreen");
+            Engine::executeCommand(command);
+         }
 
         void toTestFontScreen(Widget * sender)
         {
-        }
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestFontScreen");
+            Engine::executeCommand(command);
+         }
 
         void toAtlasScreen(Widget * sender)
         {
@@ -822,9 +844,387 @@ namespace redrevolt
         }
     };
 
+    class TestPrimitivesScreen : public Screen
+    {
+    public:
+        TestPrimitivesScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+        {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
+
+            Button * btn = new Button("backBtn");
+            btn->setText("Exit");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setAlignment("RIGHT|TOP", 0, 0);
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestPrimitivesScreen::onBackBtnClick);
+            btn->setColour("red");
+            attach(btn);
+
+            Primitive * primitive = new Primitive();
+            primitive->setColour("white");
+            primitive->createCircle(630, 130, 100);
+            attach(primitive);
+
+            primitive = new Primitive();
+            primitive->setColour("green");
+            primitive->createLines({{0, 0}, {1024, 768}});
+            attach(primitive);
+
+            primitive = new Primitive();
+            primitive->setColour("red");
+            primitive->createLines({{0, 0}, {200, 500}, {1024, 768}});
+            attach(primitive);
+
+            primitive = new Primitive();
+            primitive->setColour("yellow");
+            primitive->createPoint({630, 130});
+            attach(primitive);
+
+            primitive = new Primitive();
+            primitive->setColour("red");
+            primitive->createRect({470, 70, 60, 80}, false);
+            attach(primitive);
+
+            primitive = new Primitive();
+            primitive->setColour("green");
+            primitive->createRect({400, 70, 60, 60}, true);
+            attach(primitive);
+
+            primitive = new Primitive();
+            primitive->setColour("green");
+            primitive->createPoints({{500, 101}, {500, 102}, {500, 103}});
+            attach(primitive);
+
+            primitive = new Primitive();
+            primitive->setColour("red");
+            primitive->createRects({{120, 700, 40, 40}, {100, 650, 80, 80}}, true);
+            attach(primitive);
+        }
+
+        virtual ~TestPrimitivesScreen()
+        {
+        }
+
+        void onBackBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestScreen");
+            Engine::executeCommand(command);
+        }
+    };
+
+    class TestFontScreen : public Screen
+    {
+    private:
+        size_t m_index;
+        Image * m_fontImg;
+    public:
+        TestFontScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+            , m_index(0)
+            , m_fontImg(nullptr)
+        {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
+
+            m_fontImg = new Image("fontImg");
+            attach(m_fontImg);
+
+            Button * btn = new Button("backBtn");
+            btn->setText("Exit");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|BOTTOM", 0, 0);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->setColour("red");
+            btn->addCallback("MouseUp_Left", this, &TestFontScreen::onBackBtnClick);
+            attach(btn);
+
+            btn = new Button("changeFontBtn");
+            btn->setText("Show Next Font");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 256, 64);
+            btn->setAlignment("RIGHT|BOTTOM", 0, -70);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestFontScreen::onChangeFontBtnClick);
+            attach(btn);
+        }
+
+        virtual ~TestFontScreen()
+        {
+        }
+
+        void onBackBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestScreen");
+            Engine::executeCommand(command);
+        }
+        
+        void onChangeFontBtnClick(Widget * sender)
+        {
+            if (!m_fontImg) return;
+
+            lua::Table fontsTbl("Fonts");
+            lua::Table spritesTbl("Sprites");
+            m_index += 1;
+            if (m_index > fontsTbl.getSize())
+            {
+                m_index = 1;
+            }
+            lua::Table fontTbl(fontsTbl.get(m_index));
+            const std::string fontId = fontTbl.get("id").getString();
+            log(fontId.c_str());
+            const size_t spritesCount = spritesTbl.getSize();
+            for (size_t i = 1; i <= spritesCount; ++i)
+            {
+                lua::Table spriteTbl(spritesTbl.get(i));
+                const std::string textureId = spriteTbl.get("texture").getString();
+                if (textureId == fontId)
+                {
+                    const std::string id = spriteTbl.get("id").getString();
+                    m_fontImg->setSprite(id);
+                    int width(0);
+                    int height(0);
+                    Engine::debugGetTextureSize(fontId, width, height);
+                    m_fontImg->setRect(0, 0, width, height);
+                    break;
+                }
+            }
+
+        }
+
+        void log(const char * msg)
+        {
+            Widget * widget = findWidget("systemTools");
+            if (widget)
+            {
+                SystemTools * tools = dynamic_cast<SystemTools *>(widget);
+                if (tools)
+                {
+                    tools->log(msg);
+                }
+            }
+        }
+    };
+
+    class TestScrollScreen : public Screen
+    {
+    private:
+        int m_fieldWidth;
+        int m_fieldHeight;
+        int m_tileWidth;
+        int m_tileHeight;
+        std::string m_tileSpr;
+        ScrollContainer * m_scrollCnt;
+    public:
+        TestScrollScreen(const std::string & id = String::kEmpty)
+            : Screen(id)
+            , m_fieldWidth(80)
+            , m_fieldHeight(50)
+            , m_tileWidth(128)
+            , m_tileHeight(64)
+            , m_tileSpr("test_tile_spr")
+            , m_scrollCnt(nullptr)
+        {
+            SystemTools * systemTools = new SystemTools("systemTools");
+            attach(systemTools);
+
+            const int screenWidth = Engine::getScreenWidth();
+            const int screenHeight = Engine::getScreenHeight();
+
+            m_scrollCnt = new ScrollContainer("scrollCnt");
+            m_scrollCnt->setRect(0, 0, screenWidth, screenHeight);
+            m_scrollCnt->setScrollSpeed(1000);
+            attach(m_scrollCnt);
+
+            Area * leftArea = new Area("scrollLeftArea");
+            leftArea->setRect(0, 0, 20, 700);
+            leftArea->setAlignment("LEFT|MIDDLE", 0, 0);
+            leftArea->addCallback("MouseOver", this, &TestScrollScreen::scrollLeftOn);
+            leftArea->addCallback("MouseLeft", this, &TestScrollScreen::scrollLeftOff);
+            attach(leftArea);
+            
+            Area * upArea = new Area("scrollUpArea");
+            upArea->setRect(0, 0, 1000, 20);
+            upArea->setAlignment("CENTER|TOP", 0, 0);
+            upArea->addCallback("MouseOver", this, &TestScrollScreen::scrollUpOn);
+            upArea->addCallback("MouseLeft", this, &TestScrollScreen::scrollUpOff);
+            attach(upArea);
+            
+            Area * downArea = new Area("scrollDownArea");
+            downArea->setRect(0, 0, 1000, 20);
+            downArea->setAlignment("CENTER|BOTTOM", 0, 0);
+            downArea->addCallback("MouseOver", this, &TestScrollScreen::scrollDownOn);
+            downArea->addCallback("MouseLeft", this, &TestScrollScreen::scrollDownOff);
+            attach(downArea);
+            
+            Area * rightArea = new Area("scrollRightArea");
+            rightArea->setRect(0, 0, 20, 700);
+            rightArea->setAlignment("RIGHT|MIDDLE", 0, 0);
+            rightArea->addCallback("MouseOver", this, &TestScrollScreen::scrollRightOn);
+            rightArea->addCallback("MouseLeft", this, &TestScrollScreen::scrollRightOff);
+            attach(rightArea);
+
+            Button * btn = new Button("backBtn");
+            btn->setText("Exit");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 64, 64);
+            btn->setAlignment("RIGHT|BOTTOM", 0, 0);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScrollScreen::onBackBtnClick);
+            btn->setColour("red");
+            attach(btn);
+
+            btn = new Button("jumpBtn");
+            btn->setText("Jump");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 64, 64);
+            btn->setAlignment("RIGHT|BOTTOM", 0, -64);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScrollScreen::onJumpBtnClick);
+            btn->setColour("red");
+            attach(btn);
+
+            btn = new Button("scrollBtn");
+            btn->setText("Scroll");
+            btn->setFont("system_15_fnt");
+            btn->setRect(0, 0, 64, 64);
+            btn->setAlignment("RIGHT|BOTTOM", 0, -128);
+            btn->setTextAlignment("CENTER|MIDDLE");
+            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            btn->addCallback("MouseUp_Left", this, &TestScrollScreen::onScrollBtnClick);
+            btn->setColour("red");
+            attach(btn);
+
+            addScrollContent();
+        }
+
+        virtual ~TestScrollScreen()
+        {
+        }
+
+        void scrollTo(const int direction, const bool value)
+        {
+            if (m_scrollCnt)
+            {
+                m_scrollCnt->scrollTo(direction, value);
+            }
+        }
+
+        void scrollUpOn()
+        {
+            scrollTo(ScrollContainer::Up, true);
+        }
+
+        void scrollUpOff()
+        {
+            scrollTo(ScrollContainer::Up, false);
+        }
+
+        void scrollLeftOn()
+        {
+            scrollTo(ScrollContainer::Left, true);
+        }
+
+        void scrollLeftOff()
+        {
+            scrollTo(ScrollContainer::Left, false);
+        }
+
+        void scrollRightOn()
+        {
+            scrollTo(ScrollContainer::Right, true);
+        }
+
+        void scrollRightOff()
+        {
+            scrollTo(ScrollContainer::Right, false);
+        }
+
+        void scrollDownOn()
+        {
+            scrollTo(ScrollContainer::Down, true);
+        }
+
+        void scrollDownOff()
+        {
+            scrollTo(ScrollContainer::Down, false);
+        }
+
+        void onBackBtnClick(Widget * sender)
+        {
+            EngineCommand command(EngineCommand::Type::SwitchScreen, "LoadingScreen");
+            command.setParam2("TestScreen");
+            Engine::executeCommand(command);
+        }
+
+        void onJumpBtnClick(Widget * sender)
+        {
+            if (m_scrollCnt)
+            {
+                m_scrollCnt->jumpTo(1024, 768);
+            }
+        }
+
+        void onScrollBtnClick(Widget * sender)
+        {
+            if (m_scrollCnt)
+            {
+                if (!m_scrollCnt->isScrolling())
+                {
+                    m_scrollCnt->scrollTo(0, 0);
+                }
+            }
+        }
+
+        void addScrollContent()
+        {
+            if (m_scrollCnt)
+            {
+                int contentWidth(0);
+                int contentHeight(0);
+                for (int i = 0; i < m_fieldWidth; ++i)
+                {
+                    for (int j = 0; j < m_fieldHeight; ++j)
+                    {
+                        const bool isOdd = 1 == (j & 1);
+                        const int offsetX = isOdd ? (m_tileWidth * 0.5) : 0;
+                        const int x = m_tileWidth * (m_fieldWidth - 1 - i) + offsetX;
+                        const int y = m_tileHeight * 0.5 * j;
+
+                        Image * img = new Image();
+                        img->setRect(x, y, m_tileWidth, m_tileHeight);
+                        img->setSprite(m_tileSpr);
+                        m_scrollCnt->attach(img);
+
+                        if (x + m_tileWidth > contentWidth)
+                        {
+                            contentWidth = x + m_tileWidth;
+                        }
+                        if (y + m_tileHeight > contentHeight)
+                        {
+                            contentHeight = y + m_tileHeight;
+                        }
+                    }
+                }
+                m_scrollCnt->setContentRect(0, 0, contentWidth, contentHeight);
+            }
+        }
+    };
+
     class TestWidgetsScreen : public Screen
     {
     private:
+
         int m_resizeValue;
         Dialog * m_testDlg;
         Label * m_exitLbl;
@@ -1005,8 +1405,8 @@ namespace redrevolt
             Area * scrollUpArea = new Area("scrollUpArea");
             scrollUpArea->setRect(0, 0, 100, 20);
             scrollUpArea->setAlignment("RIGHT|TOP", -160, 20);
-            scrollUpArea->addCallback("MouseOver", this, &TestWidgetsScreen::scrollTo); // { "Up", true});
-            scrollUpArea->addCallback("MouseLeft", this, &TestWidgetsScreen::scrollTo); // { "Up", false});
+            scrollUpArea->addCallback("MouseOver", this, &TestWidgetsScreen::scrollUpOn);
+            scrollUpArea->addCallback("MouseLeft", this, &TestWidgetsScreen::scrollUpOff);
             attach(scrollUpArea);
 
             Image * downImg = new Image();
@@ -1018,8 +1418,8 @@ namespace redrevolt
             Area * scrollDownArea = new Area("scrollDownArea");
             scrollDownArea->setRect(0, 0, 100, 20);
             scrollDownArea->setAlignment("RIGHT|TOP", -160, 180);
-            scrollDownArea->addCallback("MouseOver", this, &TestWidgetsScreen::scrollTo); // { "Down", true});
-            scrollDownArea->addCallback("MouseLeft", this, &TestWidgetsScreen::scrollTo); // { "Down", false});
+            scrollDownArea->addCallback("MouseOver", this, &TestWidgetsScreen::scrollDownOn);
+            scrollDownArea->addCallback("MouseLeft", this, &TestWidgetsScreen::scrollDownOff);
             attach(scrollDownArea);
 
             m_testDlg= new TestDialog();
@@ -1050,26 +1450,18 @@ namespace redrevolt
             if (m_pb1)
             {
                 const int value = m_pb1->getCurrentValue();
-                if (100 == value)
+                if (0 == value || 100 == value)
                 {
-                    m_pb1->windTo(0);
-                }
-                else if (0 == value)
-                {
-                    m_pb1->windTo(100);
+                    m_pb1->windTo(0 == value ? 100 : 0);
                 }
             }
 
             if (m_pb2)
             {
                 const int value = m_pb2->getCurrentValue();
-                if (100 == value)
+                if (0 == value || 100 == value)
                 {
-                    m_pb2->windTo(0);
-                }
-                else if (0 == value)
-                {
-                    m_pb2->windTo(100);
+                    m_pb2->windTo(0 == value ? 100 : 0);
                 }
             }
         }
@@ -1112,14 +1504,35 @@ namespace redrevolt
             }
         }
 
-        void scrollTo(Widget * sender)
+        void scrollUpOn(Widget * sender)
         {
-            const int direction = ScrollContainer::Up;
-            // const int direction = ScrollContainer::Down;
-            const bool value(true);
             if (m_scrollCnt)
             {
-                m_scrollCnt->scrollTo(direction, value);
+                m_scrollCnt->scrollTo(ScrollContainer::Up, true);
+            }
+        }
+
+        void scrollUpOff(Widget * sender)
+        {
+            if (m_scrollCnt)
+            {
+                m_scrollCnt->scrollTo(ScrollContainer::Up, false);
+            }
+        }
+
+        void scrollDownOn(Widget * sender)
+        {
+            if (m_scrollCnt)
+            {
+                m_scrollCnt->scrollTo(ScrollContainer::Down, true);
+            }
+        }
+
+        void scrollDownOff(Widget * sender)
+        {
+            if (m_scrollCnt)
+            {
+                m_scrollCnt->scrollTo(ScrollContainer::Down, false);
             }
         }
 
@@ -1479,6 +1892,18 @@ namespace redrevolt
             else if ("TestWidgetsScreen" == id)
             {
                 return new TestWidgetsScreen(id);
+            }
+            else if ("TestScrollScreen" == id)
+            {
+                return new TestScrollScreen(id);
+            }
+            else if ("TestPrimitivesScreen" == id)
+            {
+                return new TestPrimitivesScreen(id);
+            }
+            else if ("TestFontScreen" == id)
+            {
+                return new TestFontScreen(id);
             }
 
             return nullptr;

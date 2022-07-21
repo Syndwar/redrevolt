@@ -1,6 +1,7 @@
 Sprites = 
 {
     {id = "test_system_10_fnt_spr",           texture = "system_10_fnt",    rect = {0, 0, 0, 0}, colour = "white"},
+    {id = "test_system_13_fnt_spr",           texture = "system_13_fnt",    rect = {0, 0, 0, 0}, colour = "white"},
     {id = "test_system_15_fnt_spr",           texture = "system_15_fnt",    rect = {0, 0, 0, 0}, colour = "white"},
     {id = "test_system_24_fnt_spr",           texture = "system_24_fnt",    rect = {0, 0, 0, 0}, colour = "green"},
 
