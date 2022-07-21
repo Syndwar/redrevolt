@@ -33,10 +33,6 @@ end
 
 --[[ Private ]]
 
-function MapEditorScreen:__exitScreen()
-    Screens.load("LoadingScreen", "MainScreen")
-end
-
 function MapEditorScreen:__startNewMap()
     local battlefield = self:getUI("battlefield")
     if (battlefield) then
@@ -85,35 +81,6 @@ function MapEditorScreen:__openLoadDialog()
             save_load_dlg:switchToLoad()
             save_load_dlg:view(true)
         end
-    end
-end
-
-function MapEditorScreen:__quickSaveMap()
-    if (self._current_map_file) then
-        self:__saveBattlefieldMap(self._current_map_file)
-    else
-        self:__openSaveDialog()
-    end
-end
-
-function MapEditorScreen:__save(filename)
-    if (filename) then
-        self._current_map_file = filename
-        self:__saveBattlefieldMap(filename)
-    else
-        self:__openSaveDialog()
-    end
-end
-
-function MapEditorScreen:__quickLoad(sender, filename)
-    self:__load(sender, filename)
-end
-
-function MapEditorScreen:__load(sender, filename)
-    if (filename) then
-        self:__loadBattlefiledMap(filename)
-    else
-        self:__openLoadDialog()
     end
 end
 

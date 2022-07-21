@@ -1201,6 +1201,96 @@ namespace redrevolt
                 panel->instantView(!panel->isOpened());
             }
         }
+
+        void exitScreen()
+        {
+            SwitchScreenCommand command;
+            command.setScreen("LoadingScreen");
+            command.setNextScreen("MainScreen");
+            command.execute();
+         }
+
+         void startNewMap()
+         {
+         }
+
+         void showNotification(const std::string & msg)
+         {
+         }
+
+         void saveBattlefieldMap(const std::string & filename)
+         {
+         }
+
+         void loadBattlefieldMap(const std::string & filename)
+         {
+         }
+
+         void openSaveDialog()
+         {
+         }
+
+         void openLoadDialog()
+         {
+         }
+
+         void quickSaveMap()
+         {
+            if (m_currentMapFile.isEmpty())
+            {
+                openSaveDialog();
+            }
+            else
+            {
+                saveBattlefieldMap(filename);
+            }
+         }
+
+         void save(const std::string & filename)
+         {
+            if (filename.isEmpty())
+            {
+                m_currentMapFile = filename;
+                saveBattlefieldMap(filename);
+            }
+            else
+            {
+                openSaveDialog();
+            }
+         }
+
+         void quickLoad(const std::string & filename)
+         {
+            load(filename);
+         }
+
+         void load(const std::string & filename)
+         {
+            if (filename.isEmpty())
+            {
+                openLoadDialog();
+            }
+            else
+            {
+                loadBattlefieldMap(filename);
+            }
+         }
+
+         void showEditDialog()
+         {
+         }
+
+         void showInventoryDialog()
+         {
+         }
+
+         void showSelectionPanel()
+         {
+         }
+
+         void showEntityPanel()
+         {
+         }
     };
 
     class TestScreen : public Screen
