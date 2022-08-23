@@ -1070,10 +1070,118 @@ namespace redrevolt
         MapEditorFiltersPanel(const std::string & id = String::kEmpty)
             : Container(id)
         {
-        }
+            setRect(0, 0, 448, 64);
+            setAlignment("CENTER|BOTTOM", 0, 0);
+
+            addCallback("KeyUp_" + HotKeys::Panel1, this, &MapEditorScreen::changeFilter);
+            addCallback("KeyUp_" + HotKeys::Panel2, this, &MapEditorScreen::changeFilter);
+            addCallback("KeyUp_" + HotKeys::Panel3, this, &MapEditorScreen::changeFilter);
+            addCallback("KeyUp_" + HotKeys::Panel4, this, &MapEditorScreen::changeFilter);
+
+            addCallback("KeyUp_" + HotKeys::Next, this, &MapEditorScreen::selectNextEntity);
+            addCallback("KeyUp_" + HotKeys::Previous, this, &MapEditorScreen::selectPrevEntity);
+
+            Button * layerBtn = new Button("layerBtn");
+            layerBtn->setRect(0, 0, 64, 64);
+            layerBtn->setText("Layer");
+            layerBtn->setColour("green");
+            layerBtn->setFont("system_15_fnt");
+            layerBtn->setTextAlign("CENTER|MIDDLE");
+            layerBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            layerBtn->addCallback("MouseUp_Left", this, &MapEditorFiltersPanel::switchLayer);
+            attach(layerBtn);
+
+            Button * prevBtn = new Button("prevBtn");
+            prevBtn->setRect(64, 0, 64, 64);
+            prevBtn->setText("Prev");
+            prevBtn->setColour("green");
+            prevBtn->setFont("system_15_fnt");
+            prevBtn->setTextAlign("CENTER|MIDDLE");
+            prevBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            prevBtn->addCallback("MouseUp_Left", this, &MapEditorFiltersPanel::selectPrevEntity);
+            attach(prevBtn);
+             
+            Button * nextBtn = new Button("nextBtn");
+            nextBtn->setRect(128, 0, 64, 64);
+            nextBtn->setText("Prev");
+            nextBtn->setColour("green");
+            nextBtn->setFont("system_15_fnt");
+            nextBtn->setTextAlign("CENTER|MIDDLE");
+            nextBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            nextBtn->addCallback("MouseUp_Left", this, &MapEditorFiltersPanel::selectNextEntity);
+            attach(nextBtn);
+
+            Button * itemsBtn = new Button("itemsBtn");
+            itemsBtn->setRect(192, 0, 64, 64);
+            itemsBtn->setText("Items");
+            itemsBtn->setColour("green");
+            itemsBtn->setFont("system_15_fnt");
+            itemsBtn->setTextAlign("CENTER|MIDDLE");
+            itemsBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            itemsBtn->addCallback("MouseUp_Left", this, &MapEditorFiltersPanel::onFilterBtnClick);
+            attach(itemsBtn);
+
+            Button * unitsBtn = new Button("unitsBtn");
+            unitsBtn->setRect(256, 0, 64, 64);
+            unitsBtn->setText("Units");
+            unitsBtn->setColour("green");
+            unitsBtn->setFont("system_15_fnt");
+            unitsBtn->setTextAlign("CENTER|MIDDLE");
+            unitsBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            unitsBtn->addCallback("MouseUp_Left", this, &MapEditorFiltersPanel::onFilterBtnClick);
+            attach(unitsBtn);
+
+            Button * objectsBtn = new Button("objectsBtn");
+            objectsBtn->setRect(320, 0, 64, 64);
+            objectsBtn->setText("Objects");
+            objectsBtn->setColour("green");
+            objectsBtn->setFont("system_15_fnt");
+            objectsBtn->setTextAlign("CENTER|MIDDLE");
+            objectsBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            objectsBtn->addCallback("MouseUp_Left", this, &MapEditorFiltersPanel::onFilterBtnClick);
+            attach(objectsBtn);
+
+            Button * terrainBtn = new Button("terrainBtn");
+            terrainBtn->setRect(384, 0, 64, 64);
+            terrainBtn->setText("Terrain");
+            terrainBtn->setColour("green");
+            terrainBtn->setFont("system_15_fnt");
+            terrainBtn->setTextAlign("CENTER|MIDDLE");
+            terrainBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
+            terrainBtn->addCallback("MouseUp_Left", this, &MapEditorFiltersPanel::onFilterBtnClick);
+            attach(terrainBtn);
+         }
 
         virtual ~MapEditorFiltersPanel()
         {
+        }
+
+    private:
+        void switchLayer(Widget * sender)
+        {
+            // Observer:call("SwitchLayer")
+        }
+
+        void selectPrevEntity(Widget * sender)
+        {
+            //Observer:call("PrevEntity")
+        }
+
+        void selectNextEntity(Widget * sender)
+        {
+            //Observer:call("NextEntity")
+        }
+
+        void onFilterBtnClick(Widget * sender)
+        {
+            // const int index(1);
+            // changeFilter(index);
+        }
+
+        void changeFilter(Widget * sender)
+        {
+            // Observer:call("ShowEntityPanel")
+            // Observer:call("ChangeFilter", id)
         }
     }; 
 
@@ -1189,7 +1297,7 @@ namespace redrevolt
                         btn->setColour("white");
                         btn->setRect(x, y + i * 30, 400, 30);
                         btn->addCallback("MouseUp_Left", this, &MapEditorSaveLoadDialog::onScrollerRowClick);
-                        attach(btn);
+                        m_folderCnt->attach(btn);
                         ++i;
                     }
                 }
