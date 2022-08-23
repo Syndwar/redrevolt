@@ -49,7 +49,10 @@ namespace redrevolt
         RRE_ShowNotification,
         RRE_ShowInventoryDialog,
         RRE_ShowSelectionPanel,
-        RRE_ShowEntityPanel 
+        RRE_ShowEntityPanel,
+        RRE_EntityChanged,
+        RRE_EntityRotated,
+        RRE_EntityFlipped 
     };
 
     class Console : public Dialog
@@ -1187,14 +1190,169 @@ namespace redrevolt
 
     class MapEditorInfoPanel: public Container 
     {
+    private:
+        std::vector<Label *> m_slotLbls;
+        std::vector<Label *> m_valueLbls;
+        int m_slotsCount;
+        Image * m_selectedImage;
+        Label * m_selectedLbl;
     public:
         MapEditorInfoPanel(const std::string & id = String::kEmpty)
             : Container(id)
+            , m_slotsount(6);
+            , m_selectedImage(nullptr)
+            , m_selectedLbl(nullptr)
         {
+            m_selectedImg = new Image("selectedImg");
+            m_selectedImg->setRect(0, 0, 32, 32);
+            m_selectedImg->setAngle(0);
+            m_selectedImg->setCenter(16, 16);
+            attach(m_selectedImg);
+
+            m_selectedLbl = new Label("selectedLbl");
+            m_selectedLbl->setRect(40, 0, 200, 32);
+            m_selectedLbl->setColour("white");
+            m_selectedLbl->setFont("system_15_fnt");
+            m_selectedLbl->setTextAlignment("LEFT|MIDDLE");
+            attach(m_selectedLbl);
+
+            for (int i = 0; i < m_slotsCount; ++i)
+            {
+                Label * lbl = new Label();
+                lbl->setRect(240 + i * 80, 8, 30, 15);
+                lbl->setColour("white");
+                lbl->setFont("system_15_fnt");
+                lbl->setTextAlignment("LEFT|MIDDLE");
+                attach(lbl);
+                m_slotLbls.push_back(lbl);
+
+                Label * valueLbl = new Label();
+                valueLbl->setRect(270 + i * 80, 8, 50, 15);
+                valueLbl->setColour("white");
+                valueLbl->setFont("system_15_fnt");
+                valueLbl->setTextAlignment("LEFT|MIDDLE");
+                attach(valueLbl);
+                m_valueLbls.push_back(valueLbl);
+            }
+
+            addListener(RRE_EntityChanged this, $MapEditorInfoPanel::onEntityChanged);
+            addListener(RRE_EntityRotated this, $MapEditorInfoPanel::onEntityRotated);
+            addListener(RRE_EntityFlipped this, $MapEditorInfoPanel::onEntityFlipped);
+
+            closeSlots();
         }
 
         virtual ~MapEditorInfoPanel()
         {
+        }
+
+    private:
+        void onEntityChanged(Widget * sender)
+        {
+            closeSlots();
+            Entity * entity(nullptr);
+            update(entity);
+        }
+
+        void update(Entity * entity)
+        {
+            if (m_selectedImg)
+            {
+                m_selectedImg->instantView(nullptr != entity);
+                if (entity)
+                {
+                    m_selectedImg->setSprite(entity->getSprite());
+                    m_selectedImg->setAngle(entity->getAngle());
+                    m_selectedImg->setFlip(entity->getFlipH(), entity.getFlipV());
+                }
+            }
+            if (m_selectedLbl)
+            {
+                m_selectedLbl->instantView(nullptr != entity);
+                if (entity)
+                {
+                    m_selectedLbl->setText(entity->getId());
+                }
+            }
+            if (entity)
+            {
+                std::vector<EntityInfo> info = entity->getInfo();
+                for (size_t i = 0; i < info.size(); ++i)
+                {
+                    const EntityInfo & data = info[i];
+                    viewSlot(i, true);
+                    updateSlot(i, data.slot, data.value);
+                }
+            }
+        }
+
+        void closeSlots()
+        {
+            for (int i = 0; i < m_slotsCount; ++i)
+            {
+                viewSlot(i, false);
+            }
+        }
+
+        void onEntityRotated(Widget * sender)
+        {
+            int angle(0);
+            if (m_selectedImg)
+            {
+                m_selectedImg->setAngle(angle);
+            }
+        }
+
+        void onEntityFlipped(Widget * sender)
+        {
+            bool value_h(false);
+            bool value_v(false);
+            if (m_selectedImg)
+            {
+                m_selectedImg->setFlip(value_h, value_v);
+            }
+        }
+
+        void viewSlot(const int index, const bool view)
+        {
+            if (index < m_slotLbls)
+            {
+                Label * lbl = m_slotLbls[index];
+                if (lbl)
+                {
+                    lbl->instantView(view);
+                }
+            }
+
+            if (index < m_valueLbls)
+            {
+                Label * lbl = m_valueLbls[index];
+                if (lbl)
+                {
+                    lbl->instantView(view);
+                }
+            }
+        }
+
+        void updateSlot(const int index, const std::string & slot, const std::string & value)
+        {
+            if (index < m_slotLbls)
+            {
+                Label * lbl = m_slotLbls[index];
+                if (lbl)
+                {
+                    lbl->setText(slot);
+                }
+            }
+
+            if (index < m_valueLbls)
+            {
+                Label * lbl = m_valueLbls[index];
+                if (lbl)
+                {
+                    lbl->setText(value);
+                }
+            }
         }
     }; 
 
