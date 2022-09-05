@@ -1096,17 +1096,7 @@
             SystemTools * systemTools = new SystemTools("systemTools");
             attach(systemTools);
             
-            Observer * observer = new StartNewMapObserver(this);
-            m_observers.push_back(observer);
-            observer = new LoadMapObserver(this);
-            m_observers.push_back(observer);
-            observer = new SaveMapObserver(this);
-            m_observers.push_back(observer);
-            observer = new SwitchGridMapObserver(this);
-            m_observers.push_back(observer);
-            observer = new ExitScreenMapObserver(this);
-            m_observers.push_back(observer);
-            
+           
             MapEditorSystemPanel * systemPanel = new MapEditorSystemPanel("systemPanel");
             systemPanel->instantView(false);
             systemPanel->setAlignment("LEFT|BOTTOM", 0, -64);
@@ -1176,20 +1166,6 @@
             addListener(RRE_StartNewMap this, $MapEditorScreen::startNewMap);
             addListener(RRE_SaveMap this, $MapEditorScreen::save);
             addListener(RRE_LoadMap this, $MapEditorScreen::load);
-        }
-
-        virtual ~MapEditorScreen()
-        {
-            for (Observer * observer : m_observers)
-            {
-                MapEditorSystemPanel * panel = find<MapEditorSystemPanel *>("systemPanel");
-                if (panel)
-                {
-                    panel->removeObserver(observer);
-                }
-                delete observer;
-            }
-            m_observers.clear();
         }
 
     private:
