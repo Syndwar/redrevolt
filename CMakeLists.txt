@@ -13,7 +13,32 @@ add_subdirectory(libs/stren)
 configure_file(src/config.h.in config.h)
 configure_file(src/version.rc.in version.rc)
 
-add_executable(${PROJECT_NAME} WIN32 src/main.cpp version.rc)
+add_executable(${PROJECT_NAME} WIN32 
+    src/main.cpp
+    src/redrevolt_game.cpp
+
+    src/loading_screen.cpp
+    src/main_screen.cpp
+    src/start_screen.cpp
+    src/options_screen.cpp
+    src/map_editor_screen.cpp
+    src/test_screen.cpp
+    src/test_dialog.cpp
+    src/test_atlas_screen.cpp
+    src/test_font_screen.cpp
+    src/test_sound_screen.cpp
+    src/test_scroll_screen.cpp
+    src/test_fader_screen.cpp
+    src/test_widgets_screen.cpp
+    src/test_primitives_screen.cpp
+    src/test_battlefield_screen.cpp
+
+    src/system_tools.cpp
+    src/console.cpp
+    src/debug_panel.cpp
+    src/widgets_tree.cpp
+    src/widget_tree_branch.cpp
+    version.rc)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX ${RED_CMAKE_DEBUG_POSTFIX})
 
