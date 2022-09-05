@@ -17,12 +17,14 @@ add_executable(${PROJECT_NAME} WIN32
     src/main.cpp
     src/redrevolt_game.cpp
 
+    src/battlefield.cpp
     src/loading_screen.cpp
     src/main_screen.cpp
     src/start_screen.cpp
     src/options_screen.cpp
     src/map_editor_screen.cpp
     src/map_editor_system_panel.cpp
+    src/map_editor_battlefield.cpp
     src/test_screen.cpp
     src/test_dialog.cpp
     src/test_atlas_screen.cpp

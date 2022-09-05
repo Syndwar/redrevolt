@@ -50,35 +50,7 @@
     };
 
 
-    class MapEditorScreen;
-
-   
-    class Battlefield : public ScrollContainer
-    {
-    public:
-        Battlefield(const std::string & id = String::kEmpty)
-            : ScrollContainer(id)
-        {
-        }
-
-        virtual ~Battlefield()
-        {
-        }
-    };
-
-    class MapEditorBattlefield : public Battlefield
-    {
-    public:
-        MapEditorBattlefield(const std::string & id = String::kEmpty)
-            : Battlefield(id)
-        {
-        }
-
-        virtual ~MapEditorBattlefield()
-        {
-        }
-    };
-
+    
     class MapEditorEntitiesPanel : public Container
     {
     public:
@@ -859,20 +831,6 @@
         {
             addCallback("KeyUp_" + HotKeys::Save, this, &MapEditorScreen::quickSaveMap);
             addCallback("KeyUp_" + HotKeys::Load, this, &MapEditorScreen::quickLoadMap);
-
-            SystemTools * systemTools = new SystemTools("systemTools");
-            attach(systemTools);
-            
-           
-            MapEditorSystemPanel * systemPanel = new MapEditorSystemPanel("systemPanel");
-            systemPanel->instantView(false);
-            systemPanel->setAlignment("LEFT|BOTTOM", 0, -64);
-            attach(systemPanel);
-
-            for (Observer * observer : m_observers)
-            {
-                systemPanel->addObserver(observer);
-            }
 
             m_battlefield = new MapEditorBattlefield("battlefield");
             attach(m_battlefield);

@@ -2,6 +2,7 @@
 
 #include "system_tools.h"
 #include "map_editor_system_panel.h"
+#include "map_editor_battlefield.h"
 
 namespace redrevolt
 {
@@ -72,9 +73,14 @@ public:
 };
 
 MapEditorScreen::MapEditorScreen(const std::string & id)
+    : stren::Screen(id)
+    , m_battlefield(nullptr)
 {
     SystemTools * systemTools = new SystemTools("systemTools");
     attach(systemTools);
+
+    m_battlefield = new MapEditorBattlefield("battlefield");
+    attach(m_battlefield);
 
     stren::Observer * observer = new StartNewMapObserver(this);
     m_observers.push_back(observer);
@@ -107,7 +113,6 @@ MapEditorScreen::MapEditorScreen(const std::string & id)
     menuBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
     menuBtn->addCallback("MouseUp_Left", this, &MapEditorScreen::viewMainMenu);
     attach(menuBtn);
-
 }
 
 MapEditorScreen::~MapEditorScreen()
