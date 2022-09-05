@@ -49,241 +49,10 @@
         RRE_EntityFlipped 
     };
 
-    class MapEditorSystemPanel :  public Container
-    {
-    private:
-        bool m_isGridOn;
-        EventListener m_eventListener;
-    public:
-        MapEditorSystemPanel(const std::string & id = String::kEmpty)
-            : Container(id)
-            , m_isGridOn(true)
-        {
-            setRect(0, 0, 64, 320);
-
-            Image * img = new Image();
-            img->setRect(0, 0, 64, 320);
-            img->setSprite("dark_img_spr");
-            attach(img);
-
-            Button * btn = new Button("backBtn");
-            btn->setRect(0, 0, 64, 64);
-            btn->setText("Exit");
-            btn->setColour("red");
-            btn->setFont("system_13_fnt");
-            btn->setTextAlignment("CENTER|MIDDLE");
-            btn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
-            btn->addCallback("MouseUp_Left", this, &MapEditorSystemPanel::onBackBtnClick);
-            attach(btn);
-
-            Button * saveBtn = new Button("saveBtn");
-            saveBtn->setRect(0, 64, 64, 64);
-            saveBtn->setText("Save");
-            saveBtn->setColour("red");
-            saveBtn->setFont("system_13_fnt");
-            saveBtn->setTextAlignment("CENTER|MIDDLE");
-            saveBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
-            saveBtn->addCallback("MouseUp_Left", this, &MapEditorSystemPanel::onSaveBtnClick);
-            attach(saveBtn);
-
-            Button * loadBtn = new Button("loadBtn");
-            loadBtn->setRect(0, 128, 64, 64);
-            loadBtn->setText("Load");
-            loadBtn->setColour("red");
-            loadBtn->setFont("system_13_fnt");
-            loadBtn->setTextAlignment("CENTER|MIDDLE");
-            loadBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
-            loadBtn->addCallback("MouseUp_Left", this, &MapEditorSystemPanel::onLoadBtnClick);
-            attach(loadBtn);
-
-            Button * gridBtn = new Button("gridBtn");
-            gridBtn->setRect(0, 192, 64, 64);
-            gridBtn->setText("Grid");
-            gridBtn->setColour("red");
-            gridBtn->setFont("system_13_fnt");
-            gridBtn->setTextAlignment("CENTER|MIDDLE");
-            gridBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
-            gridBtn->addCallback("MouseUp_Left", this, &MapEditorSystemPanel::onGridBtnClick);
-            attach(gridBtn);
-
-            Button * newMapBtn = new Button("newMapBtn");
-            newMapBtn->setRect(0, 256, 64, 64);
-            newMapBtn->setText("New Map");
-            newMapBtn->setColour("red");
-            newMapBtn->setFont("system_13_fnt");
-            newMapBtn->setTextAlignment("CENTER|MIDDLE");
-            newMapBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
-            newMapBtn->addCallback("MouseUp_Left", this, &MapEditorSystemPanel::onNewMapBtnClick);
-            attach(newMapBtn);
-
-            // Observer::addListener("SwitchGrid", this, $MapEditorSystemPanel::onGridSwitched)
-
-            update();
-        }
-
-        virtual ~MapEditorSystemPanel()
-        {
-        }
-
-        void addObserver(Observer * observer)
-        {
-            if (!observer) return;
-            m_eventListener.add(observer);
-        }
-
-        void removeObserver(Observer * observer)
-        {
-           if (observer)
-           {
-               m_eventListener.remove(observer);
-           }
-        }
-
-    private:
-        void update()
-        {
-            Button * btn = find<Button *>("gridBtn");
-            if (btn)
-            {
-                btn->setText(m_isGridOn ? "Grid On" : "Grid Off");
-                btn->setColour(m_isGridOn ? "green" : "red");
-            }
-        }
-
-        void onGridSwitched()
-        {
-            m_isGridOn = !m_isGridOn;
-            update();
-        }
-
-        void onBackBtnClick(Widget * sender)
-        {
-            m_eventListener.notify(RRE_ExitScreen);
-        }
-
-        void onSaveBtnClick(Widget * sender)
-        {
-            m_eventListener.notify(RRE_SaveMap);
-        }
-
-        void onLoadBtnClick(Widget * sender)
-        {
-            m_eventListener.notify(RRE_LoadMap);
-        }
-
-        void onGridBtnClick(Widget * sender)
-        {
-            m_eventListener.notify(RRE_SwitchGrid);
-        }
-
-        void onNewMapBtnClick(Widget * sender)
-        {
-            m_eventListener.notify(RRE_StartNewMap);
-        }
-    }; // MapEditorSystemPanel
 
     class MapEditorScreen;
 
-    class StartNewMapObserver : public Observer
-    {
-    private:
-        MapEditorScreen * m_screen;
-    public:
-        StartNewMapObserver(MapEditorScreen * screen)
-            : Observer({RRE_StartNewMap})
-            , m_screen(screen)
-        {
-        }
-
-        virtual ~StartNewMapObserver()
-        {
-        }
-        
-        virtual void notify(const Event & event, bool & isEventCaptured) override
-        {
-        }
-    };
-
-    class LoadMapObserver : public Observer
-    {
-    private:
-        MapEditorScreen * m_screen;
-    public:
-        LoadMapObserver(MapEditorScreen * screen)
-            : Observer({RRE_LoadMap})
-            , m_screen(screen)
-        {
-        }
-
-        virtual ~LoadMapObserver()
-        {
-        }
-
-        virtual void notify(const Event & event, bool & isEventCaptured) override
-        {
-        }
-    };
-    
-    class SaveMapObserver : public Observer
-    {
-    private:
-        MapEditorScreen * m_screen;
-    public:
-        SaveMapObserver(MapEditorScreen * screen)
-            : Observer({RRE_SaveMap})
-            , m_screen(screen)
-        {
-        }
-
-        virtual ~SaveMapObserver()
-        {
-        }
-        
-        virtual void notify(const Event & event, bool & isEventCaptured) override
-        {
-        }
-    };
-
-    class SwitchGridMapObserver : public Observer
-    {
-    private:
-        MapEditorScreen * m_screen;
-    public:
-        SwitchGridMapObserver(MapEditorScreen * screen)
-            : Observer({RRE_SwitchGrid})
-            , m_screen(screen)
-        {
-        }
-
-        virtual ~SwitchGridMapObserver()
-        {
-        }
-
-        virtual void notify(const Event & event, bool & isEventCaptured) override
-        {
-        }
-    };
-
-    class ExitScreenMapObserver : public Observer
-    {
-    private:
-        MapEditorScreen * m_screen;
-    public:
-        ExitScreenMapObserver(MapEditorScreen * screen)
-            : Observer({RRE_ExitScreen})
-            , m_screen(screen)
-        {
-        }
-
-        virtual ~ExitScreenMapObserver()
-        {
-        }
-
-        virtual void notify(const Event & event, bool & isEventCaptured) override
-        {
-        }
-    };
-    
+   
     class Battlefield : public ScrollContainer
     {
     public:
@@ -295,9 +64,7 @@
         virtual ~Battlefield()
         {
         }
-
     };
-
 
     class MapEditorBattlefield : public Battlefield
     {
@@ -1146,18 +913,6 @@
             m_inventoryDlg = new MapEditorInventoryDialog("inventoryDlg");
             attach(m_inventoryDlg);
 
-            Button * menuBtn = new Button("menuBtn");
-            menuBtn->setRect(0, 0, 64, 64);
-            menuBtn->setAlignment("LEFT|BOTTOM", 0, 0);
-            menuBtn->setText("Menu");
-            menuBtn->setFont("system_15_fnt");
-            menuBtn->setColour("red");
-            menuBtn->setTextAlignment("CENTER|MIDDLE");
-            menuBtn->setSprites("up_btn_spr", "down_btn_spr", "over_btn_spr");
-            menuBtn->addCallback("MouseUp_Left", this, &MapEditorScreen::viewMainMenu);
-            attach(menuBtn);
-
-            addListener(RRE_ShowEntityPanel this, $MapEditorScreen::showEntityPanel);
             addListener(RRE_ShowSelectionPanel this, $MapEditorScreen::showSelectionPanel);
             addListener(RRE_ShowInventoryDialog this, $MapEditorScreen::showInventoryDialog);
             addListener(RRE_ShowEditDialog this, $MapEditorScreen::showEditDialog);
@@ -1169,23 +924,6 @@
         }
 
     private:
-        void viewMainMenu(Widget * sender)
-        {
-            MapEditorSystemPanel * panel = find<MapEditorSystemPanel *>("systemPanel");
-            if (panel)
-            {
-                panel->instantView(!panel->isOpened());
-            }
-        }
-
-        void exitScreen()
-        {
-            SwitchScreenCommand command;
-            command.setScreen("LoadingScreen");
-            command.setNextScreen("MainScreen");
-            command.execute();
-         }
-
          void startNewMap()
          {
              if (m_battlefield)

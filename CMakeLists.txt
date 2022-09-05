@@ -22,6 +22,7 @@ add_executable(${PROJECT_NAME} WIN32
     src/start_screen.cpp
     src/options_screen.cpp
     src/map_editor_screen.cpp
+    src/map_editor_system_panel.cpp
     src/test_screen.cpp
     src/test_dialog.cpp
     src/test_atlas_screen.cpp

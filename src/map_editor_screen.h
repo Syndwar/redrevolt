@@ -16,6 +16,11 @@ public:
     MapEditorScreen(const std::string & id = stren::String::kEmpty);
 
     virtual ~MapEditorScreen();
+
+private:
+    void viewMainMenu(stren::Widget * sender);
+
+    void exitScreen();
 };
 } // redrevolt
 #endif // MAP_EDITOR_SCREEN_H  
