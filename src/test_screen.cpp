@@ -142,7 +142,7 @@ void TestScreen::toTestWidgetsScreen(stren::Widget * sender)
 {
     stren::SwitchScreenCommand command;
     command.setScreen("LoadingScreen");
-    command.setNextScreen("WidgetsScreen");
+    command.setNextScreen("TestWidgetsScreen");
     command.execute();
  }
 
