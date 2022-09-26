@@ -811,7 +811,6 @@
     private:
         std::string m_currentMapFile;
         std::vector<Observer *> m_observers;
-        MapEditorBattlefield * m_battlefield;
         NotificationDialog * m_notificationDlg;
         MapEditorSaveLoadDialog * m_saveLoadDlg;
         MapEditorEditEntityDialog * m_editEntityDlg;
@@ -831,9 +830,6 @@
         {
             addCallback("KeyUp_" + HotKeys::Save, this, &MapEditorScreen::quickSaveMap);
             addCallback("KeyUp_" + HotKeys::Load, this, &MapEditorScreen::quickLoadMap);
-
-            m_battlefield = new MapEditorBattlefield("battlefield");
-            attach(m_battlefield);
 
             m_entitiesPanel = new MapEditorEntitiesPanel("entitiesPanel");
             m_entitiesPanel->addPage(1, Items);

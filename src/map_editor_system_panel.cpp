@@ -2,9 +2,33 @@
 
 namespace redrevolt
 {
+
+class SwitchGridObserver : public stren::Observer
+{
+private:
+    MapEditorSystemPanel * m_panel;
+public:
+    SwitchGridObserver(MapEditorSystemPanel * panel)
+        : stren::Observer({MapEditorSystemPanel::Event_SwitchGrid})
+        , m_panel(panel)
+    {
+    }
+
+    virtual ~SwitchGridObserver() {}
+
+    virtual void notify(const stren::Event & event, bool & isEventCaptured) override
+    {
+        if (m_panel)
+        {
+            m_panel->onGridSwitched();
+        }
+    }
+};
+    
 MapEditorSystemPanel::MapEditorSystemPanel(const std::string & id)
     : stren::Container(id)
     , m_isGridOn(true)
+    , m_switchGridObserver(nullptr)
 {
     setRect(0, 0, 64, 320);
 
@@ -63,13 +87,20 @@ MapEditorSystemPanel::MapEditorSystemPanel(const std::string & id)
     newMapBtn->addCallback("MouseUp_Left", this, &MapEditorSystemPanel::onNewMapBtnClick);
     attach(newMapBtn);
 
-    // Observer::addListener("SwitchGrid", this, $MapEditorSystemPanel::onGridSwitched)
+    m_switchGridObserver = new SwitchGridObserver(this);
+    addObserver(m_switchGridObserver);
 
     update();
 }
 
 MapEditorSystemPanel::~MapEditorSystemPanel()
 {
+    if (m_switchGridObserver)
+    {
+        m_eventListener.remove(m_switchGridObserver);
+        delete m_switchGridObserver;
+        m_switchGridObserver = nullptr;
+    }
 }
 
 void MapEditorSystemPanel::addObserver(stren::Observer * observer)

@@ -19,6 +19,7 @@ public:
 private:
     bool m_isGridOn;
     stren::EventListener m_eventListener;
+    stren::Observer * m_switchGridObserver;
 public:
     MapEditorSystemPanel(const std::string & id = stren::String::kEmpty);
 
@@ -28,10 +29,9 @@ public:
 
     void removeObserver(stren::Observer * observer);
 
+    void onGridSwitched();
 private:
     void update();
-
-    void onGridSwitched();
 
     void onBackBtnClick(stren::Widget * sender);
 
