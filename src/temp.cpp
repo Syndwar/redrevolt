@@ -32,25 +32,6 @@
         std::string Cancel = "Escape";
     };
 
-    enum RedRevoltEvents
-    {
-        RRE_ExitScreen,
-        RRE_SaveMap,
-        RRE_LoadMap,
-        RRE_SwitchGrid,
-        RRE_StartNewMap,
-        RRE_ShowEditDialog,
-        RRE_ShowNotification,
-        RRE_ShowInventoryDialog,
-        RRE_ShowSelectionPanel,
-        RRE_ShowEntityPanel,
-        RRE_EntityChanged,
-        RRE_EntityRotated,
-        RRE_EntityFlipped 
-    };
-
-
-    
     class MapEditorEntitiesPanel : public Container
     {
     public:

@@ -7,12 +7,13 @@
 
 namespace redrevolt
 {
-class Battlefield;
+
+class MapEditorBattlefield;
 
 class MapEditorScreen : public stren::Screen
 {
 private:
-    Battlefield * m_battlefield;
+    MapEditorBattlefield * m_battlefield;
     std::vector<stren::Observer *> m_observers;
 public:
     MapEditorScreen(const std::string & id = stren::String::kEmpty);
@@ -20,8 +21,12 @@ public:
     virtual ~MapEditorScreen();
 
     void exitScreen();
+
+    void swichGrid();
+
 private:
     void viewMainMenu(stren::Widget * sender);
+
 };
 } // redrevolt
 #endif // MAP_EDITOR_SCREEN_H  

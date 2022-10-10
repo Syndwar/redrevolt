@@ -51,7 +51,13 @@ public:
 
     virtual ~SwitchGridMapObserver() {}
 
-    virtual void notify(const stren::Event & event, bool & isEventCaptured) override {}
+    virtual void notify(const stren::Event & event, bool & isEventCaptured) override
+    {
+        if (m_screen)
+        {
+            m_screen->swichGrid();
+        }
+    }
 };
 
 class ExitScreenMapObserver : public stren::Observer
@@ -135,6 +141,14 @@ void MapEditorScreen::viewMainMenu(stren::Widget * sender)
     if (panel)
     {
         panel->instantView(!panel->isOpened());
+    }
+}
+
+void MapEditorScreen::swichGrid()
+{
+    if (m_battlefield)
+    {
+        m_battlefield->switchGrid();
     }
 }
 

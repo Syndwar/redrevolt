@@ -80,64 +80,7 @@ function MapEditorBattlefield:__createMapContent()
     self:setRect(0, 0, screen_width + self._offset[1], screen_height + self._offset[2])
     self:setContentRect(0, 0, map_width, map_height)
 
-    local grid = Primitive("fieldGrid")
-    grid:setColour("green")
-    grid:setOrder(1000)
-    grid:createLines(self:__createGridLines())
-    self:attach(grid)
-    self:setUI("fieldGrid", grid)
-
-    local cursor = Primitive("cursorRect")
-    cursor:setOrder(1001)
-    cursor:setColour("yellow")
-    cursor:createRects({{0, 0, cell_width, cell_height}}, false)
-    cursor:instantView(false)
-    self:attach(cursor)
-    self:setUI("cursor", cursor)
-
     self:moveBy(unpack(self._pos))
-end
-
-function MapEditorBattlefield:__createGridLines()
-    local grid_lines = {}
-
-    local cells_in_row, cells_in_col = self._map:getSize()
-    local cell_width, cell_height = self._map:getCellSize()
-    local map_width = cells_in_row * cell_width
-    local map_height = cells_in_col * cell_height
-
-    local row = 0
-    local w = 0
-    local down = true
-    while (w <= map_width) do
-        if (down) then
-            table.insert(grid_lines, {w, 0})
-            table.insert(grid_lines, {w, map_height})
-        else
-            table.insert(grid_lines, {w, map_height})
-            table.insert(grid_lines, {w, 0})
-        end
-        row = row + 1
-        w = row * cell_width
-        down = not down
-    end
-
-    local column = 0
-    local h = 0
-    local left = false
-    while (h <= map_height) do
-        if (left) then
-            table.insert(grid_lines, {0, h})
-            table.insert(grid_lines, {map_width, h})
-        else
-            table.insert(grid_lines, {map_width, h})
-            table.insert(grid_lines, {0, h})
-        end
-        column = column + 1
-        h = column * cell_height
-        left = not left
-    end
-    return grid_lines
 end
 
 function MapEditorBattlefield:__calculateCell(x, y)
@@ -145,13 +88,6 @@ function MapEditorBattlefield:__calculateCell(x, y)
     local i = math.floor(x / cell_width) + 1
     local j = math.floor(y / cell_height) + 1
     return i, j
-end
-
-function MapEditorBattlefield:__switchGrid()
-    local grid = self:getUI("fieldGrid")
-    if (grid) then
-        grid:view(not grid:isOpened())
-    end
 end
 
 function MapEditorBattlefield:__calculateFieldPos(i, j)
